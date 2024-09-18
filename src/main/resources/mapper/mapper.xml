@@ -2,6 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="io.github.playlistmanager.mapper.Mapper">
+<mapper namespace="io.github.playlistmanager.mapper.MemberMapper">
+    <insert id="signUp" parameterType="joinDTO">
+        insert into member(username, email, password, role) values(#{username}, #{email}, #{password}, #{role});
+    </insert>
 
+    <select id="selectMemberByUsername" parameterType="string" resultType="joinDTO">
+        select * from member where username = #{username};
+    </select>
 </mapper>
