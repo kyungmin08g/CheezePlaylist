@@ -1,6 +1,20 @@
+server:
+  servlet:
+    encoding:
+      force-response: true
+
 spring:
   application:
     name: PlaylistManager
   profiles:
     include: private
     active: private
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/PlaylistManager
+    username: postgres
+    password: postgres
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  config-location: classpath:mybatis-config.xml

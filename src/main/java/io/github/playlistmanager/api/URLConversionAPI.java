@@ -8,7 +8,7 @@ import java.io.InputStreamReader;
 public class URLConversionAPI {
 
     // URL를 mp3로 변환하는 메소드(yt-dlp라는 파이썬 스크립트 사용함)
-    public static String mp3(String youtubeURL) {
+    public static void mp3(String youtubeURL) {
         String downloadPath = System.getProperty("user.dir") + "/src/main/resources/static/audio";
 
         try {
@@ -43,8 +43,6 @@ public class URLConversionAPI {
         } catch (IOException | InterruptedException e) {
             e.fillInStackTrace();
         }
-
-        return "됨";
     }
 
 }
