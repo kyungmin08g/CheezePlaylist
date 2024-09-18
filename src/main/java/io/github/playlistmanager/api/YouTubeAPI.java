@@ -9,10 +9,10 @@ import reactor.core.publisher.Mono;
 public class YouTubeAPI {
 
     @Value("${youtube.api-key}")
-    public String youtubeApiKey;
+    private static String youtubeApiKey;
 
     // 쿼리를 받고 동영상의 URL를 만들어주는 메소드
-    public String videoUrl(String query) {
+    public static String videoUrl(String query) {
         String searchVideoResultJson = searchVideo(query);
 
         try {
@@ -36,7 +36,7 @@ public class YouTubeAPI {
     }
 
     // 쿼리를 받으면 YouTube Data API를 통해 동영상을 검색하는 메소드
-    public String searchVideo(String query) {
+    public static String searchVideo(String query) {
         Mono<String> response = WebClient.builder().baseUrl("https://www.googleapis.com").build().get()
                 .uri(uriBuilder -> uriBuilder.path("/youtube/v3/search")
                         .queryParam("part", "snippet")
