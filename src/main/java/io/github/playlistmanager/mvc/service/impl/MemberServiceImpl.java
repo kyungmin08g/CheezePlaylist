@@ -1,8 +1,8 @@
-package io.github.playlistmanager.service.impl;
+package io.github.playlistmanager.mvc.service.impl;
 
-import io.github.playlistmanager.mapper.MemberMapper;
-import io.github.playlistmanager.service.MemberService;
-import io.github.playlistmanager.dto.JoinMemberDTO;
+import io.github.playlistmanager.mvc.mapper.MemberMapper;
+import io.github.playlistmanager.mvc.service.MemberService;
+import io.github.playlistmanager.mvc.dto.JoinMemberDTO;
 import org.springframework.stereotype.Service;
 
 @Service

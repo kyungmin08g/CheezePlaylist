@@ -1,6 +1,6 @@
-package io.github.playlistmanager.config;
+package io.github.playlistmanager.security.config;
 
-import io.github.playlistmanager.filter.LoginAuthenticationFilter;
+import io.github.playlistmanager.security.filter.LoginAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,16 +35,13 @@ public class SecurityConfig {
         http.formLogin(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);
 
-        http.authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
+        http.authorizeHttpRequests(auth -> auth
                     .requestMatchers("/login").authenticated()
                     .anyRequest().permitAll()
         );
 
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.addFilterAt(new LoginAuthenticationFilter(authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class);
-
-        http.sessionManagement(httpSecuritySessionManagementConfigurer -> {
-           httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        });
 
         return http.build();
     }

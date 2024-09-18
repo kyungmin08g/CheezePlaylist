@@ -1,4 +1,4 @@
-package io.github.playlistmanager.dto;
+package io.github.playlistmanager.mvc.dto;
 
 import lombok.*;
 

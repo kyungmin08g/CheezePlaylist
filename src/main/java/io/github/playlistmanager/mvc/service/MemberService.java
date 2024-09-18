@@ -1,6 +1,6 @@
-package io.github.playlistmanager.service;
+package io.github.playlistmanager.mvc.service;
 
-import io.github.playlistmanager.dto.JoinMemberDTO;
+import io.github.playlistmanager.mvc.dto.JoinMemberDTO;
 
 public interface MemberService {
     void signUp(JoinMemberDTO joinMemberDTO);

@@ -1,4 +1,4 @@
-package io.github.playlistmanager.filter;
+package io.github.playlistmanager.security.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

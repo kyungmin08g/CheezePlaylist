@@ -1,6 +1,6 @@
-package io.github.playlistmanager.mapper;
+package io.github.playlistmanager.mvc.mapper;
 
-import io.github.playlistmanager.dto.JoinMemberDTO;
+import io.github.playlistmanager.mvc.dto.JoinMemberDTO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
