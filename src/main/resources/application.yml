@@ -1,1 +1,6 @@
-spring.application.name=PlaylistManager
+spring:
+  application:
+    name: PlaylistManager
+  profiles:
+    include: private
+    active: private
