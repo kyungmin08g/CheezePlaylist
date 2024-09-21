@@ -126,19 +126,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private String extractFileName(String output) {
-        String[] lines = output.split("\n");
-        for (String line : lines) {
-            if (line.contains("has already been downloaded")) {
-                // "has already been downloaded" 라인에서 파일 이름 추출
-                String[] parts = line.split(" ");
-                // 마지막 두 번째 요소가 파일 이름일 가능성이 높음
-                return parts[parts.length - 5]; // 파일 이름
-            }
-        }
-        throw new RuntimeException("다운로드된 파일 이름을 찾을 수 없습니다.");
-    }
-
     public void downloadMusicFile(String youtubeURL, String title) throws IOException, InterruptedException {
         // DB에서 Title을 통해 조회하게 되는데 결과가 null인 경우에는 로그만 찍고 아래 로직을 실행하도록하는 검사 작업 -> 데이터가 존재하지 않으면 추가하는게 맞으니까
         String musicFileDTO1 = Optional.ofNullable(findByTitle(title)).map(MusicFileDTO::getName).orElse("Untitled");

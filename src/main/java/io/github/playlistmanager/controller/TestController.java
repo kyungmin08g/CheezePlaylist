@@ -78,7 +78,6 @@ public class TestController {
         byte[] byteData = musicBytes.getData();
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"MIA.mp3\"")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(byteData);
     }

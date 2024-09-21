@@ -7,44 +7,20 @@
     <title>Document</title>
 </head>
 <body>
+    <audio id="audioPlayer" controls></audio>
+    <button onclick="playAudio()">Play</button>
 
-    <audio controls>
-        <source src="/play" type="audio/mpeg">
-        Your browser does not support the audio tag.
-    </audio>
+    <script>
+        async function playAudio() {
+            const response = await fetch('/play');
+            const audioData = await response.arrayBuffer();
+            const blob = new Blob([audioData], { type: 'audio/mpeg' }); // mime type에 맞게 수정
+            const url = URL.createObjectURL(blob);
 
-<!--    <button id="playButton">Play Music</button>-->
-<!--    <script>-->
-<!--        document.getElementById('playButton').addEventListener('click', async () => {-->
-<!--            try {-->
-<!--                const response = await fetch('/play'); // Java Controller에서 제공하는 엔드포인트-->
-<!--                const audioData = await response.arrayBuffer();-->
-<!--                const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });-->
-<!--                const audioUrl = URL.createObjectURL(audioBlob);-->
-
-<!--                const audioElement = new Audio(audioUrl);-->
-<!--                audioElement.play();-->
-<!--            } catch (error) {-->
-<!--                console.error('Error playing audio:', error);-->
-<!--            }-->
-<!--        });-->
-<!--    </script>-->
-<!--    <script>-->
-<!--        fetch('http://localhost:8080/select')-->
-<!--            .then(response => {-->
-<!--                if (!response.ok) {-->
-<!--                    throw new Error('Network response was not ok');-->
-<!--                }-->
-<!--                return response.blob();-->
-<!--            })-->
-<!--            .then(blob => {-->
-<!--                const url = URL.createObjectURL(blob);-->
-<!--                const audio = new Audio(url);-->
-<!--                audio.play();-->
-<!--            })-->
-<!--            .catch(error => {-->
-<!--                console.error('Error fetching audio:', error);-->
-<!--            });-->
-<!--    </script>-->
+            const audioPlayer = document.getElementById('audioPlayer');
+            audioPlayer.src = url;
+            audioPlayer.play();
+        }
+    </script>
 </body>
 </html>
