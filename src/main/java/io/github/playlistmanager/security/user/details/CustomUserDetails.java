@@ -1,6 +1,6 @@
-package io.github.playlistmanager.security.user.dto;
+package io.github.playlistmanager.security.user.details;
 
-import io.github.playlistmanager.mvc.dto.JoinMemberDTO;
+import io.github.playlistmanager.dto.JoinMemberDTO;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

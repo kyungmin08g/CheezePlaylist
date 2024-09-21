@@ -1,4 +1,4 @@
-package io.github.playlistmanager.mvc.dto;
+package io.github.playlistmanager.dto;
 
 import lombok.*;
 
@@ -13,5 +13,5 @@ public class JoinMemberDTO {
     private String username;
     private String email;
     private String password;
-    private String role = "USER_ROLE";
+    private String role = "ROLE_USER";
 }

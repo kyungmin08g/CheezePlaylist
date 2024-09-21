@@ -1,0 +1,50 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+
+    <audio controls>
+        <source src="/play" type="audio/mpeg">
+        Your browser does not support the audio tag.
+    </audio>
+
+<!--    <button id="playButton">Play Music</button>-->
+<!--    <script>-->
+<!--        document.getElementById('playButton').addEventListener('click', async () => {-->
+<!--            try {-->
+<!--                const response = await fetch('/play'); // Java Controller에서 제공하는 엔드포인트-->
+<!--                const audioData = await response.arrayBuffer();-->
+<!--                const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });-->
+<!--                const audioUrl = URL.createObjectURL(audioBlob);-->
+
+<!--                const audioElement = new Audio(audioUrl);-->
+<!--                audioElement.play();-->
+<!--            } catch (error) {-->
+<!--                console.error('Error playing audio:', error);-->
+<!--            }-->
+<!--        });-->
+<!--    </script>-->
+<!--    <script>-->
+<!--        fetch('http://localhost:8080/select')-->
+<!--            .then(response => {-->
+<!--                if (!response.ok) {-->
+<!--                    throw new Error('Network response was not ok');-->
+<!--                }-->
+<!--                return response.blob();-->
+<!--            })-->
+<!--            .then(blob => {-->
+<!--                const url = URL.createObjectURL(blob);-->
+<!--                const audio = new Audio(url);-->
+<!--                audio.play();-->
+<!--            })-->
+<!--            .catch(error => {-->
+<!--                console.error('Error fetching audio:', error);-->
+<!--            });-->
+<!--    </script>-->
+</body>
+</html>

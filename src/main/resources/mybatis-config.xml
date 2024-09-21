@@ -3,6 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
     <typeAliases>
-        <typeAlias type="io.github.playlistmanager.mvc.dto.JoinMemberDTO" alias="joinDTO"></typeAlias>
+        <typeAlias type="io.github.playlistmanager.dto.JoinMemberDTO" alias="joinDTO"></typeAlias>
+        <typeAlias type="io.github.playlistmanager.dto.MusicFileDTO" alias="mp3DTO"></typeAlias>
     </typeAliases>
 </configuration>

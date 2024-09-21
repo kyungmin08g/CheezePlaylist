@@ -51,7 +51,8 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'io.netty:netty-resolver-dns-native-macos:4.1.66.Final:osx-x86_64'
 
-    implementation 'javazoom:jlayer:1.0.1'
+    // Hex
+    implementation 'commons-codec:commons-codec:1.15'
 }
 
 tasks.named('test') {
