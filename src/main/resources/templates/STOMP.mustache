@@ -1,0 +1,45 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+</head>
+<body>
+    <button id="send">클릭</button>
+
+    <script>
+        var stompClient = null;
+
+        $(document).ready(function() {
+            console.log("Index page is ready");
+            connect();
+
+            $("#send").click(function() {
+                sendMessage();
+            });
+        });
+
+        function connect() {
+            var socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+
+                stompClient.subscribe(`/sub/message`, function(message) {
+                    console.log("도착: " + message)
+                });
+            });
+        }
+
+        function sendMessage() {
+            console.log("sending message");
+            stompClient.send("/app/message", {}, JSON.stringify({ messageContent: '음ㅋㅋ' }));
+        }
+    </script>
+</body>
+</html>

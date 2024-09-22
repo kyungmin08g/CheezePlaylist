@@ -7,7 +7,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -46,8 +48,9 @@ public class TestController {
         return ResponseEntity.ok().body("다운로드 됨");
     }
 
-    @GetMapping("/")
-    public String index() {
+    @GetMapping("/{id}")
+    public String index(@PathVariable("id") String id, Model model) {
+        model.addAttribute("id", id);
         return "Test";
     }
 
@@ -55,19 +58,18 @@ public class TestController {
     @ResponseBody
     public ResponseEntity<List<Map<String, String>>> list() {
         List<Map<String, String>> musicDatas = new ArrayList<>();
-
         List<MusicFileDTO> listData = service.selectMusicFiles();
+
         for (MusicFileDTO dto : listData) {
             Map<String, String> musicData = new HashMap<>();
+
             String customTitle = dto.getName().replace("_", " ");
             musicData.put("name", customTitle);
             musicData.put("data", Base64.getEncoder().encodeToString(dto.getData())); // byte[]을 Base64로 인코딩
             musicDatas.add(musicData);
         }
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(musicDatas);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(musicDatas);
     }
 
 }

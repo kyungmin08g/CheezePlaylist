@@ -139,21 +139,17 @@ public class UserServiceImpl implements UserService {
     public void downloadMusicFile(String youtubeURL, String customTitle) throws IOException, InterruptedException {
         // DB에서 Title을 통해 조회하게 되는데 결과가 null인 경우에는 로그만 찍고 아래 로직을 실행하도록하는 검사 작업 -> 데이터가 존재하지 않으면 추가하는게 맞으니까
         byte[] mp3Data = mp3Conversion(youtubeURL);
-        String musicFileDTO1 = Optional.ofNullable(findByTitle(customTitle)).map(MusicFileDTO::getName).orElse("Untitled");
-        if (musicFileDTO1.equals("Untitled")) {
-            if (mp3Data == null) {
-                log.info("URL에 대한 데이터가 없음");
-            } else {
-                MusicFileDTO musicFileDTO = MusicFileDTO.builder()
-                        .name(customTitle)
-                        .data(mp3Data)
-                        .build();
 
-                mp3FileSave(musicFileDTO);
-                log.info("DB에 저장 성공!");
-            }
+        if (mp3Data == null) {
+            log.info("URL에 대한 데이터가 없음");
         } else {
-            log.info("이미 해당 파일이 있음");
+            MusicFileDTO musicFileDTO = MusicFileDTO.builder()
+                    .name(customTitle)
+                    .data(mp3Data)
+                    .build();
+
+            mp3FileSave(musicFileDTO);
+            log.info("DB에 저장 성공!");
         }
     }
 
