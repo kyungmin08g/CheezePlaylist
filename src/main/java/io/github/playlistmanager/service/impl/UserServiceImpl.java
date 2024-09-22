@@ -13,7 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.*;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -30,6 +30,16 @@ public class UserServiceImpl implements UserService {
 
     public void musicDownload(String artist, String title) {
         String query = artist + " - " + title; // 하나의 문자열로 만듬
+        String customTitle = title.replace(" ", "_");
+
+        String optionalMusicFileDTO = Optional.ofNullable(findByTitle(customTitle)).map(MusicFileDTO::getName).orElse("Untitled");
+
+        // 검색 API 호출 전에 해당 음악이 있는지 체크
+        if (!optionalMusicFileDTO.equals("Untitled")) {
+            log.info("해당 음악이 이미 있음");
+            return;
+        }
+
         String searchVideoResultJson = searchVideo(query); // 만든 문자열을 담아 유튜브 동영상을 검색함
 
         try {
@@ -45,7 +55,7 @@ public class UserServiceImpl implements UserService {
             }
 
             String url = "https://www.youtube.com/watch?v=" + videoIdValue; // 유튜브 영상의 주소를 만듬
-            downloadMusicFile(url, title); // URL과 해당 음악의 제목을 넣으면 음악 byte[]를 DB에 저장함
+            downloadMusicFile(url, customTitle); // URL과 해당 음악의 제목을 넣으면 음악 byte[]를 DB에 저장함
 
             log.info("해당 음악을 다운로드하고 DB에 저장하는 로직이 정상적으로 처리되었습니다.");
         } catch (Exception e) {
@@ -53,7 +63,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    // 쿼리를 받으면 YouTube Data API를 통해 동영상을 검색하는 메소드
+    // 쿼리를 받으면 YouTube Data API를 통해 동영상을 검색하는 메소드임
     public String searchVideo(String query) {
         Mono<String> response = WebClient.builder().baseUrl("https://www.googleapis.com").build().get()
                 .uri(uriBuilder -> uriBuilder.path("/youtube/v3/search")
@@ -70,17 +80,17 @@ public class UserServiceImpl implements UserService {
     }
 
     public byte[] mp3Conversion(String youtubeUrl) throws IOException, InterruptedException {
-        System.out.println("Starting download from URL: " + youtubeUrl);
+        log.info("유튜브 영상의 주소: {}", youtubeUrl);
 
         // yt-dlp 프로세스 생성
         ProcessBuilder ytDlpBuilder = new ProcessBuilder("yt-dlp", "-f", "bestaudio", "-o", "-", youtubeUrl);
         Process ytDlpProcess = ytDlpBuilder.start();
-        System.out.println("yt-dlp process started.");
+        log.info("yt-dlp 프로세스가 시작되었음");
 
         // ffmpeg 프로세스 생성
         ProcessBuilder ffmpegBuilder = new ProcessBuilder("ffmpeg", "-i", "pipe:0", "-f", "mp3", "pipe:1");
         Process ffmpegProcess = ffmpegBuilder.start();
-        System.out.println("ffmpeg process started.");
+        log.info("ffmpeg 프로세스가 시작되었음");
 
         // yt-dlp의 출력을 ffmpeg의 입력으로 연결
         try (InputStream ytDlpOutput = ytDlpProcess.getInputStream();
@@ -96,9 +106,9 @@ public class UserServiceImpl implements UserService {
                         ffmpegProcess.getOutputStream().write(buffer, 0, bytesRead);
                     }
                     ffmpegProcess.getOutputStream().close();
-                    System.out.println("yt-dlp output sent to ffmpeg.");
+                    log.info("yt-dlp 출력이 ffmpeg로 전송됨");
                 } catch (IOException e) {
-                    System.err.println("Error in yt-dlp to ffmpeg thread: " + e.getMessage());
+                    log.error("ffmpeg 스레드에 대한 yt-dlp 오류: {}", e.getMessage());
                 }
             });
 
@@ -110,40 +120,38 @@ public class UserServiceImpl implements UserService {
             while ((bytesRead = ffmpegInput.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);
             }
-            System.out.println("ffmpeg output read successfully.");
+            log.info("ffmpeg 출력을 성공적으로 읽음");
 
             ytDlpToFfmpeg.join(); // yt-dlp 쓰레드가 끝날 때까지 기다리기
-            System.out.println("yt-dlp thread finished.");
+            log.info("yt-dlp 스레드가 완료됨");
 
             return outputStream.toByteArray();
         } catch (IOException e) {
-            System.err.println("Error during audio processing: " + e.getMessage());
+            log.error("오디오 처리 중 오류 발생: {}", e.getMessage());
             throw e; // 다시 예외를 던져서 컨트롤러에서 처리할 수 있도록 함
         } finally {
             ytDlpProcess.waitFor();
             ffmpegProcess.waitFor();
-            System.out.println("yt-dlp and ffmpeg processes finished.");
+            log.info("yt-dlp 및 ffmpeg 프로세스가 완료됨");
         }
     }
 
-    public void downloadMusicFile(String youtubeURL, String title) throws IOException, InterruptedException {
+    public void downloadMusicFile(String youtubeURL, String customTitle) throws IOException, InterruptedException {
         // DB에서 Title을 통해 조회하게 되는데 결과가 null인 경우에는 로그만 찍고 아래 로직을 실행하도록하는 검사 작업 -> 데이터가 존재하지 않으면 추가하는게 맞으니까
-        String musicFileDTO1 = Optional.ofNullable(findByTitle(title)).map(MusicFileDTO::getName).orElse("Untitled");
+        byte[] mp3Data = mp3Conversion(youtubeURL);
+        String musicFileDTO1 = Optional.ofNullable(findByTitle(customTitle)).map(MusicFileDTO::getName).orElse("Untitled");
         if (musicFileDTO1.equals("Untitled")) {
-            if (mp3Conversion(youtubeURL) == null) {
+            if (mp3Data == null) {
                 log.info("URL에 대한 데이터가 없음");
-                return;
+            } else {
+                MusicFileDTO musicFileDTO = MusicFileDTO.builder()
+                        .name(customTitle)
+                        .data(mp3Data)
+                        .build();
+
+                mp3FileSave(musicFileDTO);
+                log.info("DB에 저장 성공!");
             }
-
-            byte[] data = mp3Conversion(youtubeURL);
-            System.out.println(Arrays.toString(data));
-            MusicFileDTO musicFileDTO = MusicFileDTO.builder()
-                    .name(title + ".mp3")
-                    .data(data)
-                    .build();
-
-            mp3FileSave(musicFileDTO);
-            log.info("DB에 저장 성공!");
         } else {
             log.info("이미 해당 파일이 있음");
         }
@@ -157,6 +165,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public MusicFileDTO findByTitle(String title) {
         return userMapper.findByTitle(title);
+    }
+
+    @Override
+    public List<MusicFileDTO> selectMusicFiles() {
+        return userMapper.selectMusicFiles();
     }
 
     @Override

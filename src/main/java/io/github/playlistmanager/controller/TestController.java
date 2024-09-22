@@ -3,27 +3,15 @@ package io.github.playlistmanager.controller;
 import io.github.playlistmanager.dto.JoinMemberDTO;
 import io.github.playlistmanager.dto.MusicFileDTO;
 import io.github.playlistmanager.service.impl.UserServiceImpl;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.*;
 
 @Controller
 public class TestController {
@@ -50,21 +38,12 @@ public class TestController {
         return "회원가입 성공!";
     }
 
-//    @GetMapping("/")
-//    @ResponseBody
-//    public ResponseEntity<String> sdaf(@RequestParam String artist, @RequestParam String title) {
-//        String music = artist + title;
-//        String s = service.searchVideo(music);
-//
-//        return ResponseEntity.ok().body(s);
-//    }
-
     @GetMapping("/mp3")
     @ResponseBody
     public ResponseEntity<String> index(@RequestParam String artist, @RequestParam String title) {
         service.musicDownload(artist, title);
 
-        return ResponseEntity.ok().body("됨");
+        return ResponseEntity.ok().body("다운로드 됨");
     }
 
     @GetMapping("/")
@@ -72,14 +51,23 @@ public class TestController {
         return "Test";
     }
 
-    @GetMapping("/play")
-    public ResponseEntity<byte[]> playMusic() {
-        MusicFileDTO musicBytes = service.findByTitle("MIA.mp3");
-        byte[] byteData = musicBytes.getData();
+    @GetMapping("/list")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, String>>> list() {
+        List<Map<String, String>> musicDatas = new ArrayList<>();
+
+        List<MusicFileDTO> listData = service.selectMusicFiles();
+        for (MusicFileDTO dto : listData) {
+            Map<String, String> musicData = new HashMap<>();
+            String customTitle = dto.getName().replace("_", " ");
+            musicData.put("name", customTitle);
+            musicData.put("data", Base64.getEncoder().encodeToString(dto.getData())); // byte[]을 Base64로 인코딩
+            musicDatas.add(musicData);
+        }
 
         return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(byteData);
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(musicDatas);
     }
 
 }

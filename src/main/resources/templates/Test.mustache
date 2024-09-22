@@ -1,26 +1,128 @@
-<html>
+<!DOCTYPE html>
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음악 리스트</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        button {
+            padding: 5px 10px;
+        }
+
+        /* 재생 중인 음악 제목 스타일 */
+        .playing {
+            background-color: yellow;
+        }
+    </style>
 </head>
 <body>
+    <h1>음악 리스트</h1>
+    <table id="musicTable">
+        <thead>
+            <tr>
+                <th>제목</th>
+                <th>재생</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
     <audio id="audioPlayer" controls></audio>
-    <button onclick="playAudio()">Play</button>
 
     <script>
-        async function playAudio() {
-            const response = await fetch('/play');
-            const audioData = await response.arrayBuffer();
-            const blob = new Blob([audioData], { type: 'audio/mpeg' }); // mime type에 맞게 수정
-            const url = URL.createObjectURL(blob);
+        let musicList = [];
+        let currentIndex = 0;
+        let currentRow = null; // 현재 재생 중인 곡의 행을 저장할 변수
 
-            const audioPlayer = document.getElementById('audioPlayer');
-            audioPlayer.src = url;
-            audioPlayer.play();
+        function list() {
+            fetch("/list")
+                .then(response => response.json())
+                .then(data => {
+                    musicList = data;
+                    const tbody = document.getElementById('musicTable').querySelector('tbody');
+                    tbody.innerHTML = ''; // 기존 내용을 초기화
+
+                    musicList.forEach((musicData, index) => {
+                        const row = document.createElement('tr');
+                        const titleCell = document.createElement('td');
+                        const buttonCell = document.createElement('td');
+
+                        titleCell.textContent = musicData.name; // 음악 제목
+
+                        const playButton = document.createElement('button');
+                        playButton.textContent = '재생';
+                        playButton.onclick = () => playAudio(index); // 클릭 시 해당 곡 재생
+
+                        buttonCell.appendChild(playButton);
+                        row.appendChild(titleCell);
+                        row.appendChild(buttonCell);
+                        tbody.appendChild(row);
+                    });
+                });
         }
+
+        function playAudio(index) {
+            currentIndex = index;
+            playCurrentAudio();
+        }
+
+        function playCurrentAudio() {
+            if (currentIndex < musicList.length) {
+                const musicData = musicList[currentIndex];
+                const byteCharacters = atob(musicData.data); // Base64 문자열 디코딩
+                const byteNumbers = new Uint8Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const blob = new Blob([byteNumbers], { type: 'audio/mpeg' });
+                const url = URL.createObjectURL(blob);
+
+                const audioPlayer = document.getElementById('audioPlayer');
+                audioPlayer.src = url;
+                audioPlayer.play();
+
+                highlightCurrentRow(); // 재생 중인 음악 제목 강조
+
+                // 오디오가 끝났을 때 다음 곡 재생
+                audioPlayer.onended = () => {
+                    currentIndex++;
+                    if (currentIndex >= musicList.length) {
+                        currentIndex = 0; // 마지막 곡이 끝나면 처음으로 돌아감
+                    }
+                    playCurrentAudio(); // 다음 음악 재생
+                };
+            }
+        }
+
+        function highlightCurrentRow() {
+            const tbody = document.getElementById('musicTable').querySelector('tbody');
+            const rows = tbody.querySelectorAll('tr');
+
+            // 이전에 강조된 행이 있다면 클래스 제거
+            if (currentRow) {
+                currentRow.classList.remove('playing');
+            }
+
+            // 현재 재생 중인 행에 강조 클래스 추가
+            currentRow = rows[currentIndex];
+            currentRow.classList.add('playing');
+        }
+
+        list(); // 음악 리스트 가져오기
     </script>
 </body>
 </html>

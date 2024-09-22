@@ -5,6 +5,8 @@ import io.github.playlistmanager.dto.MusicFileDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Mapper
 @Repository
 public interface UserMapper {
@@ -13,4 +15,5 @@ public interface UserMapper {
 
     void mp3FileSave(MusicFileDTO musicFileDTO);
     MusicFileDTO findByTitle(String title);
+    List<MusicFileDTO> selectMusicFiles();
 }

@@ -18,4 +18,8 @@
     <select id="findByTitle" parameterType="string" resultType="mp3DTO">
         select * from music where name = #{title};
     </select>
+
+    <select id="selectMusicFiles" resultType="mp3DTO">
+        select * from music;
+    </select>
 </mapper>
