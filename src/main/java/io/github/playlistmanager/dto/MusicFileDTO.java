@@ -10,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class MusicFileDTO {
-    private String name;
-    private byte[] data;
+    private int roomId;
+    private String title;
+    private byte[] musicFileBytes;
 }

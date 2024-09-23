@@ -14,6 +14,6 @@ public interface UserMapper {
     JoinMemberDTO selectMemberByUsername(String username);
 
     void mp3FileSave(MusicFileDTO musicFileDTO);
-    MusicFileDTO findByTitle(String title);
-    List<MusicFileDTO> selectMusicFiles();
+    MusicFileDTO findByTitle(int roomId, String title);
+    List<MusicFileDTO> selectMusicFiles(int roomId);
 }

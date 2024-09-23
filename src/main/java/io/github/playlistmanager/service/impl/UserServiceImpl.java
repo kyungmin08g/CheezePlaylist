@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.playlistmanager.dto.JoinMemberDTO;
 import io.github.playlistmanager.dto.MusicFileDTO;
 import io.github.playlistmanager.mapper.UserMapper;
+import io.github.playlistmanager.provider.RedisProvider;
 import io.github.playlistmanager.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,8 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.*;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -22,17 +22,19 @@ public class UserServiceImpl implements UserService {
 
     private final String youtubeApiKey;
     private final UserMapper userMapper;
+    private final RedisProvider redisProvider;
 
-    public UserServiceImpl(@Value("${youtube.api-key}") String youtubeApiKey, UserMapper userMapper) {
+    public UserServiceImpl(@Value("${youtube.api-key}") String youtubeApiKey, UserMapper userMapper, RedisProvider redisProvider) {
         this.youtubeApiKey = youtubeApiKey;
         this.userMapper = userMapper;
+        this.redisProvider = redisProvider;
     }
 
-    public void musicDownload(String artist, String title) {
+    public void musicDownload(int roomId, String artist, String title) {
         String query = artist + " - " + title; // 하나의 문자열로 만듬
         String customTitle = title.replace(" ", "_");
 
-        String optionalMusicFileDTO = Optional.ofNullable(findByTitle(customTitle)).map(MusicFileDTO::getName).orElse("Untitled");
+        String optionalMusicFileDTO = Optional.ofNullable(findByTitle(roomId, customTitle)).map(MusicFileDTO::getTitle).orElse("Untitled");
 
         // 검색 API 호출 전에 해당 음악이 있는지 체크
         if (!optionalMusicFileDTO.equals("Untitled")) {
@@ -55,11 +57,11 @@ public class UserServiceImpl implements UserService {
             }
 
             String url = "https://www.youtube.com/watch?v=" + videoIdValue; // 유튜브 영상의 주소를 만듬
-            downloadMusicFile(url, customTitle); // URL과 해당 음악의 제목을 넣으면 음악 byte[]를 DB에 저장함
+            downloadMusicFile(roomId, url, customTitle); // URL과 해당 음악의 제목을 넣으면 음악 byte[]를 DB에 저장함
 
             log.info("해당 음악을 다운로드하고 DB에 저장하는 로직이 정상적으로 처리되었습니다.");
         } catch (Exception e) {
-            e.fillInStackTrace();
+            e.printStackTrace();
         }
     }
 
@@ -136,16 +138,18 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public void downloadMusicFile(String youtubeURL, String customTitle) throws IOException, InterruptedException {
-        // DB에서 Title을 통해 조회하게 되는데 결과가 null인 경우에는 로그만 찍고 아래 로직을 실행하도록하는 검사 작업 -> 데이터가 존재하지 않으면 추가하는게 맞으니까
+    public void downloadMusicFile(int roomId, String youtubeURL, String customTitle) throws IOException, InterruptedException {
         byte[] mp3Data = mp3Conversion(youtubeURL);
 
+        // DB에서 Title을 통해 조회하게 되는데 결과가 null인 경우에는 로그만 찍고 아래 로직을 실행하도록하는 검사 작업 -> 데이터가 존재하지 않으면 추가하는게 맞으니까
         if (mp3Data == null) {
             log.info("URL에 대한 데이터가 없음");
         } else {
+            // MusicFileDTO 객체 생성
             MusicFileDTO musicFileDTO = MusicFileDTO.builder()
-                    .name(customTitle)
-                    .data(mp3Data)
+                    .roomId(roomId)
+                    .title(customTitle)
+                    .musicFileBytes(mp3Data)
                     .build();
 
             mp3FileSave(musicFileDTO);
@@ -159,13 +163,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public MusicFileDTO findByTitle(String title) {
-        return userMapper.findByTitle(title);
+    public MusicFileDTO findByTitle(int roomId, String title) {
+        return userMapper.findByTitle(roomId, title);
     }
 
     @Override
-    public List<MusicFileDTO> selectMusicFiles() {
-        return userMapper.selectMusicFiles();
+    public List<MusicFileDTO> selectMusicFiles(int roomId) {
+        return userMapper.selectMusicFiles(roomId);
     }
 
     @Override
