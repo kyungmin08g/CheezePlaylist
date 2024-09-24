@@ -1,10 +1,9 @@
 package io.github.playlistmanager.controller;
 
-import io.github.playlistmanager.dto.JoinMemberDTO;
-import io.github.playlistmanager.dto.MessageRequestDTO;
-import io.github.playlistmanager.dto.MusicFileDTO;
+import io.github.playlistmanager.dto.*;
 import io.github.playlistmanager.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -12,8 +11,17 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import xyz.r2turntrue.chzzk4j.Chzzk;
+import xyz.r2turntrue.chzzk4j.ChzzkBuilder;
+import xyz.r2turntrue.chzzk4j.chat.*;
+import xyz.r2turntrue.chzzk4j.types.channel.ChzzkChannel;
+import xyz.r2turntrue.chzzk4j.types.channel.ChzzkChannelRules;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @Slf4j
@@ -86,6 +94,144 @@ public class APIController {
                 .musicFileBytes(dto.getMusicFileBytes()).build();
 
         messagingTemplate.convertAndSend("/sub/message/" + roomId, musicFileDTO);
+    }
+
+    // 방 생성
+    @GetMapping("/create")
+    public ResponseEntity<?> createRoom(@RequestParam String roomId, @RequestParam String roomName) {
+        int id = Integer.parseInt(roomId);
+
+        RoomDTO room = service.selectRoomById(id);
+        if (room != null) {
+            log.error("해당 아이디가 이미 있습니다.");
+            return ResponseEntity.status(404).build();
+        }
+
+        RoomDTO roomDTO = RoomDTO.builder()
+                .roomId(id)
+                .roomName(roomName)
+                .build();
+
+        service.roomSave(roomDTO);
+
+        return ResponseEntity.status(201).body("방 생성 성공!");
+    }
+
+    // 방 조회
+    @GetMapping("/room/list")
+    public ResponseEntity<List<RoomDTO>> roomList() {
+        List<RoomDTO> allRoom = service.selectAllRooms();
+
+        return ResponseEntity.ok().body(allRoom);
+    }
+
+    // 방 아이디를 통한 조회
+    @GetMapping("/room/{roomId}")
+    public ResponseEntity<RoomDTO> getRoom(@PathVariable("roomId") int roomId) {
+        RoomDTO room = service.selectRoomById(roomId);
+        if (room == null) {
+            return ResponseEntity.status(404).build();
+        }
+
+        return ResponseEntity.status(200).body(room);
+    }
+
+    // 플레이리스트 생성
+    @GetMapping("/playlist/create/{roomId}")
+    public ResponseEntity<?> createPlaylist(@PathVariable("roomId") String roomId, @RequestParam String playlistName) {
+        int id = Integer.parseInt(roomId);
+        System.out.println("roomId: " + id + ", playlistName: " + playlistName);
+
+        PlaylistDTO playlistDTO = PlaylistDTO.builder()
+                .roomId(id)
+                .playlistName(playlistName)
+                .build();
+
+        service.playlistSave(playlistDTO);
+
+        return ResponseEntity.status(201).body("해당 방에 플레이리스트 생성 성공!");
+    }
+
+    // 모든 플레이리스트 조회
+    @GetMapping("/playlist/list")
+    public ResponseEntity<?> getPlaylist() {
+
+
+        return ResponseEntity.status(200).body("해당 요청을 처리했습니다.");
+    }
+
+    // 치지직
+    @GetMapping("/")
+    public ResponseEntity<?> Chzzk(@RequestParam String channelId) throws IOException, InterruptedException {
+        Chzzk chzzk = new ChzzkBuilder().build();
+
+        ChzzkChannel channel = chzzk.getChannel(channelId);
+        System.out.println(channel.getChannelName());
+
+        ChzzkChat chat = chzzk.chat(channelId).withChatListener(new ChatEventListener() {
+            @Override
+            public void onConnect(ChzzkChat chat, boolean isReconnecting) {
+                System.out.println("채팅창과 연결됨.");
+            }
+
+            @Override
+            public void onConnectionClosed(int code, String reason, boolean remote, boolean tryingToReconnect) {
+
+            }
+
+            @Override
+            public void onError(Exception ex) {
+
+            }
+
+            @Override
+            public void onChat(ChatMessage msg) {
+//                System.out.println(msg);
+//
+                if (msg.getProfile() == null) {
+                    System.out.println("[Chat] 익명: " + msg.getContent());
+                    return;
+                }
+
+                if (msg.getContent().matches("^[^ -]+ - [^ -]+$")) {
+                    System.out.println("노래 형식입니다.");
+                }
+//
+                System.out.println("[Chat] " + msg.getProfile().getNickname() + ": " + msg.getContent());
+            }
+
+            @Override
+            public void onDonationChat(DonationMessage msg) {
+                if (msg.getProfile() == null) {
+
+                    System.out.println("[Donation] 익명: " + msg.getContent() + " [" + msg.getPayAmount() + "원]");
+                    return;
+                }
+
+                System.out.println("[Donation] " + msg.getProfile().getNickname() + ": " + msg.getContent() + " [" + msg.getPayAmount() + "원]");
+            }
+
+            @Override
+            public void onSubscriptionChat(SubscriptionMessage msg) {
+
+            }
+        }).build();
+
+        chat.connectBlocking();
+//        Thread.sleep(100);
+//        chat.closeBlocking();
+
+        return ResponseEntity.status(200).build();
+    }
+
+    @GetMapping("/web")
+    public ResponseEntity<?> web() {
+        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com")
+                .build().get().uri("service/v1/channels/a7e175625fdea5a7d98428302b7aa57f").retrieve().bodyToMono(String.class);
+
+        System.out.println(response.block());
+
+        return ResponseEntity.status(200).build();
     }
 
 }

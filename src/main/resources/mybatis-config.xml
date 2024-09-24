@@ -5,5 +5,7 @@
     <typeAliases>
         <typeAlias type="io.github.playlistmanager.dto.JoinMemberDTO" alias="joinDTO"></typeAlias>
         <typeAlias type="io.github.playlistmanager.dto.MusicFileDTO" alias="mp3DTO"></typeAlias>
+        <typeAlias type="io.github.playlistmanager.dto.RoomDTO" alias="roomDTO"></typeAlias>
+        <typeAlias type="io.github.playlistmanager.dto.PlaylistDTO" alias="playlistDTO"></typeAlias>
     </typeAliases>
 </configuration>

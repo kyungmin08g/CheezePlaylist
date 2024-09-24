@@ -30,4 +30,20 @@
     <delete id="deleteMusicFile">
         delete from music where roomid = #{roomId} and title ilike #{title};
     </delete>
+
+    <insert id="roomSave" parameterType="roomDTO">
+        insert into room(roomid, roomname) values(#{roomId}, #{roomName});
+    </insert>
+
+    <select id="selectAllRooms">
+        select * from room;
+    </select>
+
+    <select id="selectRoomById" parameterType="int" resultType="roomDTO">
+        select * from room where roomid = #{roomId};
+    </select>
+
+    <insert id="playlistSave" parameterType="playlistDTO">
+        insert into playlist(roomid, playlistname) values(#{roomId}, #{playlistName});
+    </insert>
 </mapper>

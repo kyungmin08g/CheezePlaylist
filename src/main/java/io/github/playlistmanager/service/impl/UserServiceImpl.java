@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.playlistmanager.dto.JoinMemberDTO;
 import io.github.playlistmanager.dto.MusicFileDTO;
+import io.github.playlistmanager.dto.PlaylistDTO;
+import io.github.playlistmanager.dto.RoomDTO;
 import io.github.playlistmanager.mapper.UserMapper;
 import io.github.playlistmanager.provider.RedisProvider;
 import io.github.playlistmanager.service.UserService;
@@ -204,6 +206,26 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteMusicFile(int roomId, String title) {
         userMapper.deleteMusicFile(roomId, title);
+    }
+
+    @Override
+    public void roomSave(RoomDTO roomDTO) {
+        userMapper.roomSave(roomDTO);
+    }
+
+    @Override
+    public List<RoomDTO> selectAllRooms() {
+        return userMapper.selectAllRooms();
+    }
+
+    @Override
+    public RoomDTO selectRoomById(int roomId) {
+        return userMapper.selectRoomById(roomId);
+    }
+
+    @Override
+    public void playlistSave(PlaylistDTO playlistDTO) {
+        userMapper.playlistSave(playlistDTO);
     }
 
 }

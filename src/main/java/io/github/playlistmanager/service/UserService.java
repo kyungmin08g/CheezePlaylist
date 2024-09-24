@@ -2,6 +2,8 @@ package io.github.playlistmanager.service;
 
 import io.github.playlistmanager.dto.JoinMemberDTO;
 import io.github.playlistmanager.dto.MusicFileDTO;
+import io.github.playlistmanager.dto.PlaylistDTO;
+import io.github.playlistmanager.dto.RoomDTO;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,4 +22,9 @@ public interface UserService {
     List<MusicFileDTO> selectMusicFiles(int roomId);
     MusicFileDTO selectMusicFilesByTitle(String title);
     void deleteMusicFile(int roomId, String title);
+
+    void roomSave(RoomDTO roomDTO);
+    List<RoomDTO> selectAllRooms();
+    RoomDTO selectRoomById(int roomId);
+    void playlistSave(PlaylistDTO playlistDTO);
 }
