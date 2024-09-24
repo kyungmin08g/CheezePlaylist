@@ -18,4 +18,6 @@ public interface UserService {
     void mp3FileSave(MusicFileDTO musicFileDTO);
     MusicFileDTO findByTitle(int roomId, String title);
     List<MusicFileDTO> selectMusicFiles(int roomId);
+    MusicFileDTO selectMusicFilesByTitle(String title);
+    void deleteMusicFile(int roomId, String title);
 }

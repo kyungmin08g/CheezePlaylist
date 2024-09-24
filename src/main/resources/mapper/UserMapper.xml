@@ -22,4 +22,12 @@
     <select id="selectMusicFiles" parameterType="int" resultType="mp3DTO">
         select * from music where roomid = #{roomId};
     </select>
+
+    <select id="selectMusicFilesByTitle" parameterType="string" resultType="mp3DTO">
+        select * from music where title ilike #{title};
+    </select>
+
+    <delete id="deleteMusicFile">
+        delete from music where roomid = #{roomId} and title ilike #{title};
+    </delete>
 </mapper>

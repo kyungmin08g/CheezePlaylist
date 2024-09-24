@@ -42,6 +42,20 @@ public class UserServiceImpl implements UserService {
             return;
         }
 
+        MusicFileDTO optionalTitleDTO = selectMusicFilesByTitle(customTitle);
+
+        if (optionalTitleDTO != null) {
+            MusicFileDTO musicFileDTO = MusicFileDTO.builder()
+                    .roomId(roomId)
+                    .title(customTitle)
+                    .musicFileBytes(optionalTitleDTO.getMusicFileBytes())
+                    .build();
+
+            mp3FileSave(musicFileDTO);
+            log.info("DB에 음악이 있으므로 검색하지 않고 저장함.");
+            return;
+        }
+
         String searchVideoResultJson = searchVideo(query); // 만든 문자열을 담아 유튜브 동영상을 검색함
 
         try {
@@ -180,6 +194,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public JoinMemberDTO selectMemberByUsername(String username) {
         return userMapper.selectMemberByUsername(username);
+    }
+
+    @Override
+    public MusicFileDTO selectMusicFilesByTitle(String title) {
+        return userMapper.selectMusicFilesByTitle(title);
+    }
+
+    @Override
+    public void deleteMusicFile(int roomId, String title) {
+        userMapper.deleteMusicFile(roomId, title);
     }
 
 }

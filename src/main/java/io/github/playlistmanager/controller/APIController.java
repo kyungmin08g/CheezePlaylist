@@ -11,10 +11,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -45,12 +42,16 @@ public class APIController {
         return "회원가입 성공!";
     }
 
-//    @GetMapping("/mp3")
-//    public ResponseEntity<String> index(@RequestParam String artist, @RequestParam String title) {
-//        service.musicDownload(artist, title);
-//
-//        return ResponseEntity.ok().body("다운로드 됨");
-//    }
+    @DeleteMapping("/delete/{roomId}/{title}")
+    public ResponseEntity<?> delete(@PathVariable("roomId") int roomId, @PathVariable("title") String title) {
+        String customTitle = title.replace(" ", "_");
+
+        service.deleteMusicFile(roomId, customTitle);
+        System.out.println("roomId: " + roomId + ", title: " + title);
+        log.info("해당 음악이 제거되었습니다.");
+
+        return ResponseEntity.ok().build();
+    }
 
     @GetMapping("/list/{id}")
     public ResponseEntity<List<Map<String, String>>> list(@PathVariable("id") int id) {
