@@ -1,29 +1,24 @@
 package io.github.playlistmanager.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.playlistmanager.dto.*;
 import io.github.playlistmanager.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.servlet.ModelAndView;
 import reactor.core.publisher.Mono;
-import xyz.r2turntrue.chzzk4j.Chzzk;
-import xyz.r2turntrue.chzzk4j.ChzzkBuilder;
-import xyz.r2turntrue.chzzk4j.chat.*;
-import xyz.r2turntrue.chzzk4j.types.channel.ChzzkChannel;
-import xyz.r2turntrue.chzzk4j.types.channel.ChzzkChannelRules;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @Slf4j
@@ -161,96 +156,91 @@ public class APIController {
         return ResponseEntity.status(200).body("해당 요청을 처리했습니다.");
     }
 
-    // 치지직
     @GetMapping("/")
-    public ResponseEntity<?> Chzzk(@RequestParam String channelId, @RequestParam String roomId) throws IOException {
-        Chzzk chzzk = new ChzzkBuilder().build(); // 치지직 초기화 코드
-        ChzzkChannel channel = chzzk.getChannel(channelId); // 채널에 대한 정보를 얻기 위한 코드
-        System.out.println("해당 채널 이름: " + channel.getChannelName());
-
-        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
+    public ModelAndView index(@RequestParam String channelId, Model model) throws JsonProcessingException {
+        // 채팅 아이디 얻기
+        Mono<String> response1 = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
                 .get()
-                .uri("service/v1/channels/channelId=" + channelId)
-                .retrieve()
-                .bodyToMono(String.class);
+                .uri("polling/v3/channels/" + channelId + "/live-status")
+                .retrieve().bodyToMono(String.class);
 
-        System.out.println(response.block());
+        ObjectMapper liveStatusObjectMapper = new ObjectMapper();
+        JsonNode liveStatusJson = liveStatusObjectMapper.readTree(response1.block());
+        JsonNode liveStatusContentJson = liveStatusJson.get("content");
+        String chatChannelId = liveStatusContentJson.get("chatChannelId").asText();
 
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode json = objectMapper.readTree(response.block());
-            JsonNode content = json.get("content");
-            JsonNode openLive = content.get("openLive");
+        // 액세스 토큰 얻기
+        Mono<String> response2 = WebClient.builder().baseUrl("https://comm-api.game.naver.com").build()
+                .get()
+                .uri("nng_main/v1/chats/access-token?channelId=" + chatChannelId + "&chatType=STREAMING")
+                .retrieve().bodyToMono(String.class);
 
-            System.out.println("채널이 활동 중: " + openLive);
+        ObjectMapper accessTokenObjectMapper = new ObjectMapper();
+        JsonNode accessTokenJson = accessTokenObjectMapper.readTree(response2.block());
+        JsonNode accessTokenContentJson = accessTokenJson.get("content");
+        String accessToken = accessTokenContentJson.get("accessToken").asText();
 
-            if (openLive.asBoolean()) {
-                // 채팅 관련
-                ChzzkChat chat = chzzk.chat(channelId).withChatListener(new ChatEventListener() {
-                    // 연결
-                    @Override
-                    public void onConnect(ChzzkChat chat, boolean isReconnecting) {
-                        log.info("해당 채팅이 정상적으로 연결되었습니다.");
-                    }
+        // ServerId 만들기
+        int serverId = 0;
+        for (char i : channelId.toCharArray()) {
+            serverId += Character.getNumericValue(i);
+        }
+        serverId = Math.abs(serverId) % 9 + 1;
 
-                    // 채팅
-                    @Override
-                    public void onChat(ChatMessage msg) {
-                        if (msg.getProfile() == null) {
-                            System.out.println("[채팅] 익명: " + msg.getContent());
-                            return;
-                        }
+        // 모델에 넘겨주기
+        model.addAttribute("chatChannelId", chatChannelId);
+        model.addAttribute("serverId", serverId);
+        model.addAttribute("accessToken", accessToken);
 
-                        System.out.println("[채팅] " + msg.getProfile().getNickname() + ": " + msg.getContent());
-                    }
+        return new ModelAndView("socketTest");
+    }
 
-                    // 도네이션
-                    @Override
-                    public void onDonationChat(DonationMessage msg) {
-                        donationMusicSave(
-                                msg.getProfile(),
-                                msg.getContent(),
-                                String.valueOf(msg.getPayAmount()),
-                                Integer.parseInt(roomId)
-                        );
-                    }
+    @GetMapping("/chat")
+    public ResponseEntity<?> chat(@RequestParam String chatMessage) throws JsonProcessingException {
+        if (Objects.equals(chatMessage, "undefined")) { return ResponseEntity.status(404).build(); }
 
-                    // 구독
-                    @Override
-                    public void onSubscriptionChat(SubscriptionMessage msg) {
-                        if (msg.getProfile() == null) {
-                            System.out.println("[구독] 익명: " + msg.getContent() + ": [" + msg.getSubscriptionMonth() + "개월 " + msg.getSubscriptionTierName() + "]");
-                            return;
-                        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode chatMessageJsonTree = objectMapper.readTree(chatMessage);
 
-                        System.out.println("[구독] " + msg.getProfile().getNickname() + ": [" + msg.getSubscriptionMonth() + "개월 " + msg.getSubscriptionTierName() + "]");
-                    }
-                }).build();
-                chat.connectBlocking();
-            } else { log.error("해당 채널이 조용합니다."); }
-        } catch (IOException e) {
-            e.fillInStackTrace();
-            return ResponseEntity.status(500).build();
+        for (JsonNode jsonNode : chatMessageJsonTree) {
+            String profile = jsonNode.get("profile").asText();
+            JsonNode profileJson = objectMapper.readTree(profile);
+
+            JsonNode nickName = profileJson.get("nickname");
+            JsonNode msg = jsonNode.get("msg");
+
+            JsonNode msgTypeCode = jsonNode.get("msgTypeCode");
+
+            if (msgTypeCode.asInt() == 10) { // msgTypeCode 이 10이면 후원 1이면 채팅
+                String extras = jsonNode.get("extras").asText();
+                JsonNode extrasJson = objectMapper.readTree(extras);
+
+                JsonNode payAmount = extrasJson.get("payAmount");
+                if (nickName == null) {
+                    System.out.println("[후원] 익명: " + msg.asText() + ", 가격: " + payAmount.asText());
+
+                    return ResponseEntity.status(201).build();
+                }
+                System.out.println("[후원] " + nickName.asText() + ": " + msg.asText() + ", 가격: " + payAmount.asText());
+            }
+
+            if (msgTypeCode.asInt() == 1) {
+                if (nickName == null) {
+                    System.out.println("[채팅] 익명: " + msg.asText());
+
+                    return ResponseEntity.status(201).build();
+                }
+                System.out.println("[채팅] " + nickName.asText() + ": " + msg.asText());
+            }
+
         }
 
         return ResponseEntity.status(200).build();
     }
 
-    private void donationMusicSave(ChatMessage.Profile profile, String content, String playAmount, int roomId) {
-        if (content.matches("^[^ -]+ - [^ -]+$")) {
-            int dash = content.indexOf("-");
-            String artist = content.substring(0, dash);
-            String title = content.substring(dash, content.length() - 1);
+    private String chatMessageLog(String nickName, String chatMessage) throws JsonProcessingException {
 
-            if (profile == null) {
-                System.out.println("\u001B[33m" + "[후원] 익명: " + content + " [" + playAmount + "원]" + "\u001B[0m");
-                service.musicDownload(roomId, artist, title);
-                return;
-            }
-
-            service.musicDownload(roomId, artist, title);
-            System.out.println("\u001B[33m[후원] " + profile.getNickname() + ": " + content + " [" + playAmount + "원]\u001B[0m");
-        }
+        return "";
     }
 
 }

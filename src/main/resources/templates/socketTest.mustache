@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Example</title>
+</head>
+<body>
+
+    <div id="chat"></div>
+
+    <script>
+        let socket = new WebSocket('https://kr-ss{{serverId}}.chat.naver.com/chat');
+        let pingInterval;
+
+        socket.onopen = function() {
+            console.log('WebSocket connection established');
+            sendInitialRequest(); // 초기 요청 전송
+            // startPing(); // ping-pong 메시지 시작
+        };
+
+        function sendInitialRequest() {
+            const initialRequest = {
+                "ver": "2",
+                "cmd": 100,
+                "svcid": "game",
+                "cid": "{{chatChannelId}}",
+                "bdy": {
+                    "uid": null,
+                    "devType": 2001,
+                    "accTkn": "{{accessToken}}",
+                    "auth": "READ"
+                },
+                "tid": 1
+            };
+
+            socket.send(JSON.stringify(initialRequest));
+        }
+
+        socket.onmessage = function(event) {
+            const message = JSON.parse(event.data);
+
+            // 서버에서 연결 체크 메시지 받기
+            if (message.cmd === 0) {
+                const response = {
+                    "ver": "2",
+                    "cmd": 10000
+                };
+                socket.send(JSON.stringify(response)); // 응답 전송
+            }
+
+            const json = JSON.parse(event.data)
+            fetch(`/chat?chatMessage=${encodeURIComponent(JSON.stringify(json.bdy))}`, {
+                method: 'GET',
+            }).then(response => {
+                console.log(response)
+            })
+
+            document.getElementById('chat').innerHTML += '<div>' + event.data + '</div>';
+        };
+
+        // function startPing() {
+        //     pingInterval = setInterval(() => {
+        //         const pingMessage = {
+        //             "ver": "2",
+        //             "cmd": 0
+        //         };
+        //         socket.send(JSON.stringify(pingMessage)); // ping 메시지 전송
+        //     }, 30000); // 30초마다 ping 메시지 전송
+        // }
+
+        socket.onclose = function(event) {
+            console.log('WebSocket connection closed: ' + event.reason);
+            // clearInterval(pingInterval); // 연결이 닫히면 ping 타이머 정지
+        };
+
+        // function sendMessage() {
+        //     var message = document.getElementById('message').value;
+        //     if (socket.readyState === WebSocket.OPEN) {
+        //         socket.send(message);
+        //     } else {
+        //         console.error('WebSocket is not open. Current state: ' + socket.readyState);
+        //     }
+        // }
+    </script>
+</body>
+</html>
+

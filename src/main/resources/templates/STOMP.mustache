@@ -25,7 +25,7 @@
         });
 
         function connect() {
-            var socket = new SockJS('/wss');
+            const socket = new SockJS('https://kr-ss{{serverId}}.chat.naver.com/chat');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 console.log('Connected: ' + frame);

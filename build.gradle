@@ -62,10 +62,8 @@ dependencies {
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-    // 치지직 비공식 API
-    implementation "io.github.R2turnTrue:chzzk4j:0.0.9"
-    implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    implementation 'org.apache.httpcomponents:httpcore:4.4.13'
 }
 
 tasks.named('test') {
