@@ -29,11 +29,11 @@ public class ChzzkAPI {
     private static String accessToken = null;
     private static int serverId = 0;
     private static WebSocketSession webSocketSession;
-    private static String on = "on";
 
     private static final ReactorNettyWebSocketClient webSocketClient = new ReactorNettyWebSocketClient();
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    // 비동기로 웹소켓 클라이언트에 연결하는 메소드
     public static void chat(String channelId, ChatListener listener) {
         String chatChannelId = getChatChannelId(channelId);
         String accessToken = getAccessToken(chatChannelId);
@@ -44,27 +44,27 @@ public class ChzzkAPI {
         }
         serverId = Math.abs(serverId) % 9 + 1;
 
+        // 초기 세팅? -> 웹소켓 서버에 먼저 보내줘야하는 값
+        Map<String, Object> bdyJson = new HashMap<>();
+        bdyJson.put("uid", null);
+        bdyJson.put("devType", 2001);
+        bdyJson.put("accTkn", accessToken);
+        bdyJson.put("auth", "READ");
+
+        Map<String, Object> initialJson = new HashMap<>();
+        initialJson.put("ver", "2");
+        initialJson.put("cmd", 100);
+        initialJson.put("svcid", "game");
+        initialJson.put("cid", chatChannelId);
+        initialJson.put("bdy", bdyJson);
+        initialJson.put("tid", 1);
+
         CompletableFuture.runAsync(() -> { // 비동기 처리
             // 웹소켓 클라이언트 연결
             webSocketClient.execute(URI.create("wss://kr-ss" + serverId + ".chat.naver.com/chat"), new WebSocketHandler() {
                 @Override
                 public Mono<Void> handle(@Nullable WebSocketSession session) {
                     webSocketSession = session;
-
-                    Map<String, Object> bdyJson = new HashMap<>();
-                    bdyJson.put("uid", null);
-                    bdyJson.put("devType", 2001);
-                    bdyJson.put("accTkn", accessToken);
-                    bdyJson.put("auth", "READ");
-
-                    Map<String, Object> initialJson = new HashMap<>();
-                    initialJson.put("ver", "2");
-                    initialJson.put("cmd", 100);
-                    initialJson.put("svcid", "game");
-                    initialJson.put("cid", chatChannelId);
-                    initialJson.put("bdy", bdyJson);
-                    initialJson.put("tid", 1);
-
                     try {
                         String json = objectMapper.writeValueAsString(initialJson);
 
@@ -72,12 +72,9 @@ public class ChzzkAPI {
                                 .map(tick ->
                                         session.textMessage(json)
                                 )).and(session.receive().doOnNext(msg -> {
-                                    /*
-                                        여기서는 메소드 호출 안시키는게 가장 좋을 듯. 확실히 데이터가 빠르게 넘어오고 끊기지고 않고 좋네 :)
-                                    */
-                                    getConnect(msg, listener);
-                                    getChat(msg, listener);
-                                    getDonation(msg, listener);
+                                        getConnect(msg, listener);
+                                        getChat(msg, listener);
+                                        getDonation(msg, listener);
                         })).then();
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
@@ -89,8 +86,109 @@ public class ChzzkAPI {
         });
     }
 
+    // 웹소켓과 연결 해제하는 메소드
     public static void onDisconnect() {
         if (webSocketSession.isOpen()) webSocketSession.close().subscribe();
+    }
+
+    // 채널 이름 구하는 메소드
+    public static String getChannelName(String channelId) {
+        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
+                .get()
+                .uri("service/v1/channels/" + channelId)
+                .retrieve()
+                .bodyToMono(String.class);
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(response.block());
+            JsonNode content = jsonNode.get("content");
+
+            return content.get("channelName").asText();
+        } catch (JsonProcessingException e) {
+            e.fillInStackTrace();
+        }
+
+        return null;
+    }
+
+    // 채널 설명 구하는 메소드
+    public static String getChannelDescription(String channelId) {
+        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
+                .get()
+                .uri("service/v1/channels/" + channelId)
+                .retrieve()
+                .bodyToMono(String.class);
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(response.block());
+            JsonNode content = jsonNode.get("content");
+
+            return content.get("channelDescription").asText();
+        } catch (JsonProcessingException e) {
+            e.fillInStackTrace();
+        }
+
+        return null;
+    }
+
+    // 채널 팔로워 상태 구하는 메소드
+    public static String getFollowCount(String channelId) {
+        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
+                .get()
+                .uri("service/v1/channels/" + channelId)
+                .retrieve()
+                .bodyToMono(String.class);
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(response.block());
+            JsonNode content = jsonNode.get("content");
+
+            return content.get("followerCount").asText();
+        } catch (JsonProcessingException e) {
+            e.fillInStackTrace();
+        }
+
+        return null;
+    }
+
+    // 채널 채팅 규칙 받는 메소드
+    public static String getChannelChatRule(String channelId) {
+        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
+                .get()
+                .uri("service/v1/channels/" + channelId + "/chat-rules")
+                .retrieve()
+                .bodyToMono(String.class);
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(response.block());
+            JsonNode content = jsonNode.get("content");
+
+            return content.get("rule").asText();
+        } catch (JsonProcessingException e) {
+            e.fillInStackTrace();
+        }
+
+        return null;
+    }
+
+    // 채널 라이브 상태 구하는 메소드
+    public static boolean isLive(String channelId) {
+        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
+                .get()
+                .uri("service/v1/channels/" + channelId)
+                .retrieve()
+                .bodyToMono(String.class);
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(response.block());
+            JsonNode content = jsonNode.get("content");
+
+            return content.get("openLive").asBoolean();
+        } catch (JsonProcessingException e) {
+            e.fillInStackTrace();
+        }
+
+        return false;
     }
 
     // 채팅 아이디 받기 메소드
@@ -145,6 +243,7 @@ public class ChzzkAPI {
         }
     }
 
+    // 채팅 처리 메소드
     private static void getChat(WebSocketMessage msg, ChatListener listener) {
         try {
             JsonNode jsonNode = objectMapper.readTree(msg.getPayloadAsText());
@@ -157,18 +256,29 @@ public class ChzzkAPI {
             for (JsonNode bdyNode : bdy) {
                 int msgTypeCode = bdyNode.get("msgTypeCode").asInt();
 
-                if (msgTypeCode == 1) { // 후원 타입이면..
+                if (msgTypeCode == 1) { // 채팅 타입이면..
                     String profile = bdyNode.get("profile").asText();
                     JsonNode message = bdyNode.get("msg");
 
                     if (profile.equals("null")) { // 프로필이 없을 떄
-                        listener.onChat(new ChatMessage("익명", message.asText()));
+                        listener.onChat(new ChatMessage("익명", message.asText(), null));
                         return;
                     }
 
                     JsonNode profileNode = objectMapper.readTree(profile);
                     JsonNode nickname = profileNode.get("nickname");
-                    listener.onChat(new ChatMessage(nickname.asText(), message.asText()));
+
+                    // 구독
+                    JsonNode streamingProperty = profileNode.get("streamingProperty");
+                    JsonNode subscriptionNode = streamingProperty.get("subscription");
+
+                    if (subscriptionNode == null) {
+                        listener.onChat(new ChatMessage(nickname.asText(), message.asText(), null));
+                        return;
+                    }
+
+                    JsonNode subscriptionMonth = subscriptionNode.get("accumulativeMonth");
+                    listener.onChat(new ChatMessage(nickname.asText(), message.asText(), subscriptionMonth.asText()));
                 }
             }
         } catch (JsonProcessingException e) {
@@ -176,6 +286,7 @@ public class ChzzkAPI {
         }
     }
 
+    // 도네이션 처리 메소드
     private static void getDonation(WebSocketMessage msg, ChatListener listener) {
         try {
             JsonNode jsonNode = objectMapper.readTree(msg.getPayloadAsText());
@@ -194,18 +305,31 @@ public class ChzzkAPI {
                     JsonNode message = bdyNode.get("msg");
 
                     if (profile.equals("null")) { // 프로필이 없을 떄
-                        listener.onDonation(new DonationMessage("익명", message.asText(), payAmount));
+                        listener.onDonation(new DonationMessage("익명", message.asText(), payAmount, null));
                         return;
                     }
 
                     JsonNode profileNode = objectMapper.readTree(profile);
                     JsonNode nickname = profileNode.get("nickname");
-                    listener.onDonation(new DonationMessage(nickname.asText(), message.asText(), payAmount));
+
+                    // 구독
+                    JsonNode streamingProperty = profileNode.get("streamingProperty");
+                    JsonNode subscriptionNode = streamingProperty.get("subscription");
+
+                    if (subscriptionNode == null) {
+                        listener.onDonation(new DonationMessage(nickname.asText(), message.asText(), payAmount, null));
+                        return;
+                    }
+
+                    JsonNode subscriptionMonth = subscriptionNode.get("accumulativeMonth");
+                    listener.onDonation(new DonationMessage(nickname.asText(), message.asText(), payAmount, subscriptionMonth.asText()));
                 }
             }
         } catch (JsonProcessingException e) {
             e.fillInStackTrace();
         }
     }
+
+
 
 }

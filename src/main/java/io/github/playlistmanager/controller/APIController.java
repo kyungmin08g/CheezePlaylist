@@ -149,26 +149,41 @@ public class APIController {
     // 모든 플레이리스트 조회
     @GetMapping("/playlist/list")
     public ResponseEntity<?> getPlaylist() {
-        // TODO 나중에 구현해야함!
+        // TODO 나중에 구현해야함
         return ResponseEntity.status(200).body("해당 요청을 처리했습니다.");
     }
 
     @GetMapping("/")
-    public ResponseEntity<?> getChzzkChatAndDonation(@RequestParam String channelId) {
+    public ResponseEntity<?> getChzzk(@RequestParam String channelId) {
+        String channelName = ChzzkAPI.getChannelName(channelId);
+        System.out.println(ChzzkAPI.getChannelDescription(channelId));
+        System.out.println(ChzzkAPI.getFollowCount(channelId));
+        System.out.println(ChzzkAPI.getChannelChatRule(channelId));
+        System.out.println("방송 여부: " + ChzzkAPI.isLive(channelId));
+
         ChzzkAPI.chat(channelId, new ChatListener() {
             @Override
             public void onConnect() {
-                System.out.println("해당 채널에 연결되었습니다.");
+                System.out.println(channelName + "님 채널에 연결되었습니다.");
             }
 
             @Override
             public void onChat(ChatMessage message) {
-                System.out.println("[채팅] " + message.getNickName() + ": " + message.getContent());
+                if (message.getSubscriptionMonth() == null) {
+                    System.out.println("[채팅] " + message.getNickName() + ": " + message.getContent());
+                    return;
+                }
+                System.out.println("[채팅] " + message.getNickName() + ": " + message.getContent() + " [" + message.getSubscriptionMonth() + "개월 구독 중]");
             }
 
             @Override
             public void onDonation(DonationMessage message) {
-                System.out.println("\u001B[33m[후원] " + message.getNickName() + ": " + message.getContent() + " [" + message.getPayAmount() + "원]\u001B[0m");
+                if (message.getSubscriptionMonth() == null) {
+                    System.out.println("\u001B[33m[후원] " + message.getNickName() + ": " + message.getContent() + " [" + message.getPayAmount() + "원]\u001B[0m");
+                    return;
+                }
+
+                System.out.println("\u001B[33m[후원] " + message.getNickName() + ": " + message.getContent() + " [" + message.getPayAmount() + "원] [" + message.getSubscriptionMonth() + "개월 구독 중]\u001B[0m");
             }
         });
 
