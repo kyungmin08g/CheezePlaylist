@@ -44,7 +44,7 @@ public class ChzzkAPI {
         serverId = Math.abs(serverId) % 9 + 1;
 
         CompletableFuture.runAsync(() -> { // 비동기 처리
-            // 웹소켓 틀라이언트 연결
+            // 웹소켓 클라이언트 연결
             webSocketClient.execute(URI.create("wss://kr-ss" + serverId + ".chat.naver.com/chat"), new WebSocketHandler() {
                 @Override
                 public Mono<Void> handle(@Nullable WebSocketSession session) {

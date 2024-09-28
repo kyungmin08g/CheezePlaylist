@@ -17,6 +17,16 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
+# Gradle
+.gradle/
+!gradle-wrapper.jar
+.gradle/cache/
+.gradle/daemon/
+.gradle/workspace/
+.gradle/buildOutputCleanup/
+!gradlew
+!gradlew.bat
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
