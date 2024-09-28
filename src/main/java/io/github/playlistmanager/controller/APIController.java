@@ -169,21 +169,12 @@ public class APIController {
 
             @Override
             public void onChat(ChatMessage message) {
-                if (message.getSubscriptionMonth() == null) {
-                    System.out.println("[채팅] " + message.getNickName() + ": " + message.getContent());
-                    return;
-                }
-                System.out.println("[채팅] " + message.getNickName() + ": " + message.getContent() + " [" + message.getSubscriptionMonth() + " 구독 중]");
+                System.out.println("[채팅] " + message.getNickName() + ": " + message.getContent());
             }
 
             @Override
             public void onDonation(DonationMessage message) {
-                if (message.getSubscriptionMonth() == null) {
-                    System.out.println("\u001B[33m[후원] " + message.getNickName() + ": " + message.getContent() + " [" + message.getPayAmount() + "원]\u001B[0m");
-                    return;
-                }
-
-                System.out.println("\u001B[33m[후원] " + message.getNickName() + ": " + message.getContent() + " [" + message.getPayAmount() + "원] [" + message.getSubscriptionMonth() + " 구독 중]\u001B[0m");
+                System.out.println("\u001B[33m[후원] " + message.getNickName() + ": " + message.getContent() + " [" + message.getPayAmount() + "원]\u001B[0m");
             }
         });
 

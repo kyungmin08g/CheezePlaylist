@@ -81,7 +81,7 @@ public class ChzzkAPI {
                         throw new RuntimeException(e);
                     }
                 }
-            }).retryWhen(Retry.fixedDelay(10, Duration.ofSeconds(1)).doBeforeRetry(
+            }).retryWhen(Retry.fixedDelay(30, Duration.ofSeconds(1)).doBeforeRetry(
                     retrySignal -> System.out.println("연결 재시도 중..")
             )).block();
         });
@@ -262,24 +262,13 @@ public class ChzzkAPI {
                     JsonNode message = bdyNode.get("msg");
 
                     if (profile.equals("null")) { // 프로필이 없을 떄
-                        listener.onChat(new ChatMessage("익명", message.asText(), null));
+                        listener.onChat(new ChatMessage("익명", message.asText()));
                         return;
                     }
 
                     JsonNode profileNode = objectMapper.readTree(profile);
                     JsonNode nickname = profileNode.get("nickname");
-
-                    // 구독
-                    JsonNode streamingProperty = profileNode.get("streamingProperty");
-                    JsonNode subscriptionNode = streamingProperty.get("subscription");
-
-                    if (subscriptionNode == null) {
-                        listener.onChat(new ChatMessage(nickname.asText(), message.asText(), null));
-                        return;
-                    }
-
-                    JsonNode subscriptionMonth = subscriptionNode.get("accumulativeMonth");
-                    listener.onChat(new ChatMessage(nickname.asText(), message.asText(), monthsCalculation(subscriptionMonth.asInt())));
+                    listener.onChat(new ChatMessage(nickname.asText(), message.asText()));
                 }
             }
         } catch (JsonProcessingException e) {
@@ -306,24 +295,13 @@ public class ChzzkAPI {
                     JsonNode message = bdyNode.get("msg");
 
                     if (profile.equals("null")) { // 프로필이 없을 떄
-                        listener.onDonation(new DonationMessage("익명", message.asText(), payAmount, null));
+                        listener.onDonation(new DonationMessage("익명", message.asText(), payAmount));
                         return;
                     }
 
                     JsonNode profileNode = objectMapper.readTree(profile);
                     JsonNode nickname = profileNode.get("nickname");
-
-                    // 구독
-                    JsonNode streamingProperty = profileNode.get("streamingProperty");
-                    JsonNode subscriptionNode = streamingProperty.get("subscription");
-
-                    if (subscriptionNode == null) {
-                        listener.onDonation(new DonationMessage(nickname.asText(), message.asText(), payAmount, null));
-                        return;
-                    }
-
-                    JsonNode subscriptionMonth = subscriptionNode.get("accumulativeMonth");
-                    listener.onDonation(new DonationMessage(nickname.asText(), message.asText(), payAmount, monthsCalculation(subscriptionMonth.asInt())));
+                    listener.onDonation(new DonationMessage(nickname.asText(), message.asText(), payAmount));
                 }
             }
         } catch (JsonProcessingException e) {
