@@ -41,6 +41,9 @@ out/
 gradle/wrapper/gradle-wrapper.jar
 gradle/wrapper/gradle-wrapper.properties
 
+chzzk-api/gradle/wrapper/gradle-wrapper.jar
+chzzk-api/gradle/wrapper/gradle-wrapper.properties
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/

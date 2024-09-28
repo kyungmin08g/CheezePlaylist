@@ -29,6 +29,7 @@ public class ChzzkAPI {
     private static String accessToken = null;
     private static int serverId = 0;
     private static WebSocketSession webSocketSession;
+    private static String on = "on";
 
     private static final ReactorNettyWebSocketClient webSocketClient = new ReactorNettyWebSocketClient();
     private static final ObjectMapper objectMapper = new ObjectMapper();
