@@ -173,7 +173,7 @@ public class APIController {
                     System.out.println("[채팅] " + message.getNickName() + ": " + message.getContent());
                     return;
                 }
-                System.out.println("[채팅] " + message.getNickName() + ": " + message.getContent() + " [" + message.getSubscriptionMonth() + "개월 구독 중]");
+                System.out.println("[채팅] " + message.getNickName() + ": " + message.getContent() + " [" + message.getSubscriptionMonth() + " 구독 중]");
             }
 
             @Override
@@ -183,7 +183,7 @@ public class APIController {
                     return;
                 }
 
-                System.out.println("\u001B[33m[후원] " + message.getNickName() + ": " + message.getContent() + " [" + message.getPayAmount() + "원] [" + message.getSubscriptionMonth() + "개월 구독 중]\u001B[0m");
+                System.out.println("\u001B[33m[후원] " + message.getNickName() + ": " + message.getContent() + " [" + message.getPayAmount() + "원] [" + message.getSubscriptionMonth() + " 구독 중]\u001B[0m");
             }
         });
 

@@ -29,6 +29,7 @@ public class ChzzkAPI {
     private static String accessToken = null;
     private static int serverId = 0;
     private static WebSocketSession webSocketSession;
+    private static final int oneYear = 12;
 
     private static final ReactorNettyWebSocketClient webSocketClient = new ReactorNettyWebSocketClient();
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -75,12 +76,12 @@ public class ChzzkAPI {
                                         getConnect(msg, listener);
                                         getChat(msg, listener);
                                         getDonation(msg, listener);
-                        })).then();
+                                })).then();
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
                 }
-            }).retryWhen(Retry.fixedDelay(5, Duration.ofSeconds(5)).doBeforeRetry(
+            }).retryWhen(Retry.fixedDelay(10, Duration.ofSeconds(1)).doBeforeRetry(
                     retrySignal -> System.out.println("연결 재시도 중..")
             )).block();
         });
@@ -278,7 +279,7 @@ public class ChzzkAPI {
                     }
 
                     JsonNode subscriptionMonth = subscriptionNode.get("accumulativeMonth");
-                    listener.onChat(new ChatMessage(nickname.asText(), message.asText(), subscriptionMonth.asText()));
+                    listener.onChat(new ChatMessage(nickname.asText(), message.asText(), monthsCalculation(subscriptionMonth.asInt())));
                 }
             }
         } catch (JsonProcessingException e) {
@@ -322,7 +323,7 @@ public class ChzzkAPI {
                     }
 
                     JsonNode subscriptionMonth = subscriptionNode.get("accumulativeMonth");
-                    listener.onDonation(new DonationMessage(nickname.asText(), message.asText(), payAmount, subscriptionMonth.asText()));
+                    listener.onDonation(new DonationMessage(nickname.asText(), message.asText(), payAmount, monthsCalculation(subscriptionMonth.asInt())));
                 }
             }
         } catch (JsonProcessingException e) {
@@ -330,6 +331,20 @@ public class ChzzkAPI {
         }
     }
 
+    // 구독 년 및 개월 구하는 메소드
+    private static String monthsCalculation(int subscriptionMonth) {
+        int year = 0;
+        int month = 0;
 
+        for (int i = oneYear; i <= subscriptionMonth; i += oneYear) {
+            year += 1;
+            month = i;
+        }
+
+        if (year == 0) return subscriptionMonth + "개월";
+        if ((subscriptionMonth - month) == 0) return year + "년";
+
+        return year + "년 " + (subscriptionMonth - month) + "개월";
+    }
 
 }
