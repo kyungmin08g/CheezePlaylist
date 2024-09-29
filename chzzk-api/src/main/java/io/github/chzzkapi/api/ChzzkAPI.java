@@ -73,6 +73,7 @@ public class ChzzkAPI {
                                 .map(tick ->
                                         session.textMessage(json)
                                 )).and(session.receive().doOnNext(msg -> {
+//                                        System.out.println(msg.getPayloadAsText());
                                         getConnect(msg, listener);
                                         getChat(msg, listener);
                                         getDonation(msg, listener);
@@ -254,6 +255,9 @@ public class ChzzkAPI {
             JsonNode auth = bdy.get("auth"); // 처음에 연결할떄 생기는 JSON
             if (auth != null) return;
 
+            JsonNode cmd = jsonNode.get("cmd");
+            if (cmd.asInt() == 94008) return; // 클린봇 때문에..
+
             for (JsonNode bdyNode : bdy) {
                 int msgTypeCode = bdyNode.get("msgTypeCode").asInt();
 
@@ -262,13 +266,14 @@ public class ChzzkAPI {
                     JsonNode message = bdyNode.get("msg");
 
                     if (profile.equals("null")) { // 프로필이 없을 떄
-                        listener.onChat(new ChatMessage("익명", message.asText()));
+                        listener.onChat(new ChatMessage("익명", message.asText(), null));
                         return;
                     }
 
                     JsonNode profileNode = objectMapper.readTree(profile);
                     JsonNode nickname = profileNode.get("nickname");
-                    listener.onChat(new ChatMessage(nickname.asText(), message.asText()));
+                    JsonNode streamingProperty = profileNode.get("streamingProperty");
+                    listener.onChat(new ChatMessage(nickname.asText(), message.asText(), monthsCalculation(streamingProperty)));
                 }
             }
         } catch (JsonProcessingException e) {
@@ -286,6 +291,9 @@ public class ChzzkAPI {
             JsonNode auth = bdy.get("auth"); // 처음에 연결할떄 생기는 JSON
             if (auth != null) return;
 
+            JsonNode cmd = jsonNode.get("cmd");
+            if (cmd.asInt() == 94008) return; // 클린봇 때문에..
+
             for (JsonNode bdyNode : bdy) {
                 int msgTypeCode = bdyNode.get("msgTypeCode").asInt();
 
@@ -295,13 +303,14 @@ public class ChzzkAPI {
                     JsonNode message = bdyNode.get("msg");
 
                     if (profile.equals("null")) { // 프로필이 없을 떄
-                        listener.onDonation(new DonationMessage("익명", message.asText(), payAmount));
+                        listener.onDonation(new DonationMessage("익명", message.asText(), payAmount, null));
                         return;
                     }
 
                     JsonNode profileNode = objectMapper.readTree(profile);
                     JsonNode nickname = profileNode.get("nickname");
-                    listener.onDonation(new DonationMessage(nickname.asText(), message.asText(), payAmount));
+                    JsonNode streamingProperty = profileNode.get("streamingProperty");
+                    listener.onDonation(new DonationMessage(nickname.asText(), message.asText(), payAmount, monthsCalculation(streamingProperty)));
                 }
             }
         } catch (JsonProcessingException e) {
@@ -310,19 +319,23 @@ public class ChzzkAPI {
     }
 
     // 구독 년 및 개월 구하는 메소드
-    private static String monthsCalculation(int subscriptionMonth) {
+    private static String monthsCalculation(JsonNode streamingPropertyNode) {
+        JsonNode subscription = streamingPropertyNode.get("subscription");
+        if (subscription == null) return null;
+
+        JsonNode accumulativeMonth = subscription.get("accumulativeMonth");
+
         int year = 0;
         int month = 0;
-
-        for (int i = oneYear; i <= subscriptionMonth; i += oneYear) {
+        for (int i = oneYear; i <= accumulativeMonth.asInt(); i += oneYear) {
             year += 1;
             month = i;
         }
 
-        if (year == 0) return subscriptionMonth + "개월";
-        if ((subscriptionMonth - month) == 0) return year + "년";
+        if (year == 0) return accumulativeMonth.asInt() + "개월";
+        if ((accumulativeMonth.asInt() - month) == 0) return year + "년";
 
-        return year + "년 " + (subscriptionMonth - month) + "개월";
+        return year + "년 " + (accumulativeMonth.asInt() - month) + "개월";
     }
 
 }
