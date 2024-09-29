@@ -29,6 +29,7 @@ public class ChzzkAPI {
     private static String accessToken = null;
     private static int serverId = 0;
     private static WebSocketSession webSocketSession;
+    private static boolean isOpen = true;
     private static final int oneYear = 12;
 
     private static final ReactorNettyWebSocketClient webSocketClient = new ReactorNettyWebSocketClient();
@@ -73,10 +74,13 @@ public class ChzzkAPI {
                                 .map(tick ->
                                         session.textMessage(json)
                                 )).and(session.receive().doOnNext(msg -> {
-//                                        System.out.println(msg.getPayloadAsText());
                                         getConnect(msg, listener);
                                         getChat(msg, listener);
                                         getDonation(msg, listener);
+
+                                        if (!isOpen) {
+                                            onDisconnect(listener);
+                                        }
                                 })).then();
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
@@ -89,8 +93,15 @@ public class ChzzkAPI {
     }
 
     // 웹소켓과 연결 해제하는 메소드
-    public static void onDisconnect() {
-        if (webSocketSession.isOpen()) webSocketSession.close().subscribe();
+    private static void onDisconnect(ChatListener listener) {
+        if (webSocketSession.isOpen()) {
+            webSocketSession.close().subscribe();
+            listener.onDisconnect(isOpen);
+        }
+    }
+
+    public static void disConnect() {
+        isOpen = false;
     }
 
     // 채널 이름 구하는 메소드
@@ -272,7 +283,7 @@ public class ChzzkAPI {
 
                     JsonNode profileNode = objectMapper.readTree(profile);
                     JsonNode nickname = profileNode.get("nickname");
-                    JsonNode streamingProperty = profileNode.get("streamingProperty");
+                    JsonNode streamingProperty = profileNode.get("streamingProperty"); // 구독
                     listener.onChat(new ChatMessage(nickname.asText(), message.asText(), monthsCalculation(streamingProperty)));
                 }
             }
@@ -309,7 +320,7 @@ public class ChzzkAPI {
 
                     JsonNode profileNode = objectMapper.readTree(profile);
                     JsonNode nickname = profileNode.get("nickname");
-                    JsonNode streamingProperty = profileNode.get("streamingProperty");
+                    JsonNode streamingProperty = profileNode.get("streamingProperty"); // 구독
                     listener.onDonation(new DonationMessage(nickname.asText(), message.asText(), payAmount, monthsCalculation(streamingProperty)));
                 }
             }

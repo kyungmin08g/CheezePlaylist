@@ -14,6 +14,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.socket.WebSocketSession;
 
 import java.util.*;
 
@@ -154,7 +155,7 @@ public class APIController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<?> getChzzk(@RequestParam String channelId) {
+    public ResponseEntity<?> getChzzk(@RequestParam String channelId) throws InterruptedException {
         String channelName = ChzzkAPI.getChannelName(channelId);
         System.out.println(ChzzkAPI.getChannelDescription(channelId));
         System.out.println(ChzzkAPI.getFollowCount(channelId));
@@ -184,7 +185,14 @@ public class APIController {
                 }
                 System.out.println("\u001B[33m[후원] " + message.getNickName() + ": " + message.getContent() + " [" + message.getPayAmount() + "원] [" + message.getSubscriptionMonth() + " 구독 중]\u001B[0m");
             }
+
+            @Override
+            public void onDisconnect(boolean open) {
+                if (!open) System.out.println("연결이 닫혔습니다.");
+            }
         });
+//        Thread.sleep(7000);
+//        ChzzkAPI.disConnect();
 
         return ResponseEntity.status(200).build();
     }
