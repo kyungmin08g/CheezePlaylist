@@ -14,7 +14,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.socket.WebSocketSession;
 
 import java.util.*;
 
@@ -45,17 +44,6 @@ public class APIController {
         return "회원가입 성공!";
     }
 
-    @DeleteMapping("/delete/{roomId}/{title}")
-    public ResponseEntity<?> delete(@PathVariable("roomId") int roomId, @PathVariable("title") String title) {
-        String customTitle = title.replace(" ", "_");
-
-        service.deleteMusicFile(roomId, customTitle);
-        System.out.println("roomId: " + roomId + ", title: " + title);
-        log.info("해당 음악이 제거되었습니다.");
-
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/list/{id}")
     public ResponseEntity<List<Map<String, String>>> list(@PathVariable("id") int id) {
         List<Map<String, String>> musicDatas = new ArrayList<>();
@@ -66,6 +54,7 @@ public class APIController {
 
             String customTitle = dto.getTitle().replace("_", " ");
             String roomId = String.valueOf(dto.getRoomId());
+            musicData.put("artist", dto.getArtist());
             musicData.put("roomId", roomId);
             musicData.put("title", customTitle);
             musicData.put("musicFileBytes", Base64.getEncoder().encodeToString(dto.getMusicFileBytes())); // byte[]을 Base64로 인코딩
@@ -80,10 +69,11 @@ public class APIController {
         service.musicDownload(roomId, messageRequestDTO.getArtist(), messageRequestDTO.getTitle());
 
         String customTitle = messageRequestDTO.getTitle().replace(" ", "_");
-        MusicFileDTO dto = service.findByTitle(roomId, customTitle);
+        MusicFileDTO dto = service.findByMusic(roomId, messageRequestDTO.getArtist(), customTitle);
         String changeTitle = dto.getTitle().replace("_", " ");
 
         MusicFileDTO musicFileDTO = MusicFileDTO.builder()
+                .artist(messageRequestDTO.getArtist())
                 .roomId(roomId)
                 .title(changeTitle)
                 .musicFileBytes(dto.getMusicFileBytes()).build();
@@ -91,71 +81,20 @@ public class APIController {
         messagingTemplate.convertAndSend("/sub/message/" + roomId, musicFileDTO);
     }
 
-    // 방 생성
-    @GetMapping("/create")
-    public ResponseEntity<?> createRoom(@RequestParam String roomId, @RequestParam String roomName) {
-        int id = Integer.parseInt(roomId);
+    @DeleteMapping("/delete/{roomId}/{artist}/{title}")
+    public ResponseEntity<?> delete(@PathVariable("roomId") int roomId, @PathVariable("artist") String artist, @PathVariable("title") String title) {
+        String customTitle = title.replace(" ", "_");
 
-        RoomDTO room = service.selectRoomById(id);
-        if (room != null) {
-            log.error("해당 아이디가 이미 있습니다.");
-            return ResponseEntity.status(404).build();
-        }
+        System.out.println(artist);
+        service.deleteMusicFile(roomId, artist, customTitle);
+        System.out.println("roomId: " + roomId + ", artist: " + artist + ", title: " + title);
+        log.info("해당 음악이 제거되었습니다.");
 
-        RoomDTO roomDTO = RoomDTO.builder()
-                .roomId(id)
-                .roomName(roomName)
-                .build();
-
-        service.roomSave(roomDTO);
-
-        return ResponseEntity.status(201).body("방 생성 성공!");
+        return ResponseEntity.ok().build();
     }
 
-    // 방 조회
-    @GetMapping("/room/list")
-    public ResponseEntity<List<RoomDTO>> roomList() {
-        List<RoomDTO> allRoom = service.selectAllRooms();
-
-        return ResponseEntity.ok().body(allRoom);
-    }
-
-    // 방 아이디를 통한 조회
-    @GetMapping("/room/{roomId}")
-    public ResponseEntity<RoomDTO> getRoom(@PathVariable("roomId") int roomId) {
-        RoomDTO room = service.selectRoomById(roomId);
-        if (room == null) {
-            return ResponseEntity.status(404).build();
-        }
-
-        return ResponseEntity.status(200).body(room);
-    }
-
-    // 플레이리스트 생성
-    @GetMapping("/playlist/create/{roomId}")
-    public ResponseEntity<?> createPlaylist(@PathVariable("roomId") String roomId, @RequestParam String playlistName) {
-        int id = Integer.parseInt(roomId);
-        System.out.println("roomId: " + id + ", playlistName: " + playlistName);
-
-        PlaylistDTO playlistDTO = PlaylistDTO.builder()
-                .roomId(id)
-                .playlistName(playlistName)
-                .build();
-
-        service.playlistSave(playlistDTO);
-
-        return ResponseEntity.status(201).body("해당 방에 플레이리스트 생성 성공!");
-    }
-
-    // 모든 플레이리스트 조회
-    @GetMapping("/playlist/list")
-    public ResponseEntity<?> getPlaylist() {
-        // TODO 나중에 구현해야함
-        return ResponseEntity.status(200).body("해당 요청을 처리했습니다.");
-    }
-
-    @GetMapping("/")
-    public ResponseEntity<?> getChzzk(@RequestParam String channelId) throws InterruptedException {
+    @GetMapping("/chzzk")
+    public ResponseEntity<?> getChzzk(@RequestParam String channelId) {
         String channelName = ChzzkAPI.getChannelName(channelId);
         System.out.println(ChzzkAPI.getChannelDescription(channelId));
         System.out.println(ChzzkAPI.getFollowCount(channelId));
@@ -191,8 +130,6 @@ public class APIController {
                 if (!open) System.out.println("연결이 닫혔습니다.");
             }
         });
-//        Thread.sleep(7000);
-//        ChzzkAPI.disConnect();
 
         return ResponseEntity.status(200).build();
     }

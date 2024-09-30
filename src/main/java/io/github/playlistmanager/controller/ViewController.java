@@ -14,9 +14,4 @@ public class ViewController {
         return "Test";
     }
 
-    @GetMapping("/stomp")
-    public String me() {
-        return "STOMP";
-    }
-
 }

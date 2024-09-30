@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.playlistmanager.dto.JoinMemberDTO;
 import io.github.playlistmanager.dto.MusicFileDTO;
-import io.github.playlistmanager.dto.PlaylistDTO;
-import io.github.playlistmanager.dto.RoomDTO;
 import io.github.playlistmanager.mapper.UserMapper;
 import io.github.playlistmanager.provider.RedisProvider;
 import io.github.playlistmanager.service.UserService;
@@ -36,7 +34,7 @@ public class UserServiceImpl implements UserService {
         String query = artist + " - " + title; // 하나의 문자열로 만듬
         String customTitle = title.replace(" ", "_");
 
-        String optionalMusicFileDTO = Optional.ofNullable(findByTitle(roomId, customTitle)).map(MusicFileDTO::getTitle).orElse("Untitled");
+        String optionalMusicFileDTO = Optional.ofNullable(findByMusic(roomId, artist, customTitle)).map(MusicFileDTO::getTitle).orElse("Untitled");
 
         // 검색 API 호출 전에 해당 음악이 있는지 체크
         if (!optionalMusicFileDTO.equals("Untitled")) {
@@ -44,10 +42,11 @@ public class UserServiceImpl implements UserService {
             return;
         }
 
-        MusicFileDTO optionalTitleDTO = selectMusicFilesByTitle(customTitle);
+        MusicFileDTO optionalTitleDTO = selectMusicFilesByMusic(artist, customTitle);
 
         if (optionalTitleDTO != null) {
             MusicFileDTO musicFileDTO = MusicFileDTO.builder()
+                    .artist(artist)
                     .roomId(roomId)
                     .title(customTitle)
                     .musicFileBytes(optionalTitleDTO.getMusicFileBytes())
@@ -73,11 +72,11 @@ public class UserServiceImpl implements UserService {
             }
 
             String url = "https://www.youtube.com/watch?v=" + videoIdValue; // 유튜브 영상의 주소를 만듬
-            downloadMusicFile(roomId, url, customTitle); // URL과 해당 음악의 제목을 넣으면 음악 byte[]를 DB에 저장함
+            downloadMusicFile(roomId, url, artist, customTitle); // URL과 해당 음악의 제목을 넣으면 음악 byte[]를 DB에 저장함
 
             log.info("해당 음악을 다운로드하고 DB에 저장하는 로직이 정상적으로 처리되었습니다.");
         } catch (Exception e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
     }
 
@@ -154,7 +153,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public void downloadMusicFile(int roomId, String youtubeURL, String customTitle) throws IOException, InterruptedException {
+    public void downloadMusicFile(int roomId, String youtubeURL, String artist, String customTitle) throws IOException, InterruptedException {
         byte[] mp3Data = mp3Conversion(youtubeURL);
 
         // DB에서 Title을 통해 조회하게 되는데 결과가 null인 경우에는 로그만 찍고 아래 로직을 실행하도록하는 검사 작업 -> 데이터가 존재하지 않으면 추가하는게 맞으니까
@@ -164,6 +163,7 @@ public class UserServiceImpl implements UserService {
             // MusicFileDTO 객체 생성
             MusicFileDTO musicFileDTO = MusicFileDTO.builder()
                     .roomId(roomId)
+                    .artist(artist)
                     .title(customTitle)
                     .musicFileBytes(mp3Data)
                     .build();
@@ -179,8 +179,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public MusicFileDTO findByTitle(int roomId, String title) {
-        return userMapper.findByTitle(roomId, title);
+    public MusicFileDTO findByMusic(int roomId, String artist, String title) {
+        return userMapper.findByMusic(roomId, artist, title);
     }
 
     @Override
@@ -199,33 +199,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public MusicFileDTO selectMusicFilesByTitle(String title) {
-        return userMapper.selectMusicFilesByTitle(title);
+    public MusicFileDTO selectMusicFilesByMusic(String artist, String title) {
+        return userMapper.selectMusicFilesByMusic(artist, title);
     }
 
     @Override
-    public void deleteMusicFile(int roomId, String title) {
-        userMapper.deleteMusicFile(roomId, title);
+    public void deleteMusicFile(int roomId, String artist, String title) {
+        userMapper.deleteMusicFile(roomId, artist, title);
     }
-
-    @Override
-    public void roomSave(RoomDTO roomDTO) {
-        userMapper.roomSave(roomDTO);
-    }
-
-    @Override
-    public List<RoomDTO> selectAllRooms() {
-        return userMapper.selectAllRooms();
-    }
-
-    @Override
-    public RoomDTO selectRoomById(int roomId) {
-        return userMapper.selectRoomById(roomId);
-    }
-
-    @Override
-    public void playlistSave(PlaylistDTO playlistDTO) {
-        userMapper.playlistSave(playlistDTO);
-    }
-
 }

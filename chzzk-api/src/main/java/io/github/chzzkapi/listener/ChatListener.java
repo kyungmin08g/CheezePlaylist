@@ -2,7 +2,6 @@ package io.github.chzzkapi.listener;
 
 import io.github.chzzkapi.message.ChatMessage;
 import io.github.chzzkapi.message.DonationMessage;
-import org.springframework.web.reactive.socket.WebSocketSession;
 
 public interface ChatListener {
     void onConnect();

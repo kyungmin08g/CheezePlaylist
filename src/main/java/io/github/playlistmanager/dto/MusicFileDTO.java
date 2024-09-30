@@ -11,6 +11,7 @@ import lombok.*;
 @Builder
 public class MusicFileDTO {
     private int roomId;
+    private String artist;
     private String title;
     private byte[] musicFileBytes;
 }

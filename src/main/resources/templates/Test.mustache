@@ -17,7 +17,7 @@
 
         h1 {
             text-align: center;
-            color: #4CAF50;
+            color: #566ca9;
             margin-bottom: 20px;
         }
 
@@ -35,7 +35,7 @@
         }
 
         th {
-            background-color: #4CAF50;
+            background-color: #566ca9;
             color: white;
             text-transform: uppercase;
             letter-spacing: 0.1em;
@@ -46,7 +46,7 @@
         }
 
         button {
-            background-color: #4CAF50;
+            background-color: #566ca9;
             color: white;
             border: none;
             padding: 10px 15px;
@@ -57,12 +57,12 @@
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #566ca9;
             transform: scale(1.05);
         }
 
         .playing {
-            background-color: rgba(176, 204, 176, 0.8);
+            background-color: #aec0ec;
         }
 
         #controls {
@@ -82,7 +82,7 @@
         }
 
         input[type="text"]:focus {
-            border-color: #4CAF50;
+            border-color: #566ca9;
             outline: none;
         }
 
@@ -117,6 +117,7 @@
     <table id="musicTable">
         <thead>
         <tr>
+            <th>아티스트</th>
             <th>제목</th>
             <th>재생</th>
             <th>삭제</th>
@@ -132,7 +133,7 @@
         <div id="timeDisplay">00:00 / 00:00</div>
         <label for="volumeControl">볼륨</label><input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1">
         <div>
-            <input type="checkbox" id="repeatCheckbox">
+            <input type="checkbox" id="repeatCheckbox" checked>
             <label for="repeatCheckbox">반복 재생</label>
         </div>
     </div>
@@ -152,25 +153,26 @@
         let savedTime = 0;
         let audioPlayer = document.getElementById('audioPlayer');
         let stompClient = null;
-        let repeatEnabled = false;
+        let repeatEnabled = document.getElementById("repeatCheckbox").checked;
 
-        connect();
+        connect(); // 웹소켓 연결
 
+        // 재생 및 일시정지 버튼 클릭 이벤트 리스너
         document.getElementById("playPause").addEventListener("click", function() {
             if (musicList.length > 0) {
                 if (!isPlaying) {
                     if (currentIndex === -1) {
-                        currentIndex = 0;
+                        currentIndex = 0; // 첫 곡 재생
                         playCurrentAudio();
                     } else {
-                        audioPlayer.currentTime = savedTime;
+                        audioPlayer.currentTime = savedTime; // 저장된 시간에서 재생
                         audioPlayer.play();
                     }
                     isPlaying = true;
                     this.textContent = '일시정지';
                 } else {
-                    audioPlayer.pause();
-                    savedTime = audioPlayer.currentTime;
+                    audioPlayer.pause(); // 음악 일시정지
+                    savedTime = audioPlayer.currentTime; // 현재 시간을 저장
                     isPlaying = false;
                     this.textContent = '재생';
                 }
@@ -192,9 +194,24 @@
 
         audioPlayer.addEventListener("ended", function() {
             if (repeatEnabled) {
-                playCurrentAudio(); // 반복 재생
+                // 반복 재생이 활성화된 경우
+                if (currentIndex === musicList.length - 1) {
+                    // 현재 곡이 마지막 곡인 경우
+                    currentIndex = 0; // 첫 곡으로 돌아감
+                } else {
+                    currentIndex++; // 다음 곡으로 이동
+                }
+                playCurrentAudio(); // 현재 곡 재생
             } else {
-                playNextAudio(); // 다음 곡 재생
+                // 반복 재생이 비활성화된 경우
+                if (currentIndex < musicList.length - 1) {
+                    currentIndex++;
+                    playCurrentAudio();
+                } else {
+                    isPlaying = false;
+                    currentIndex = -1;
+                    document.getElementById("playPause").textContent = '재생';
+                }
             }
         });
 
@@ -219,7 +236,7 @@
                 console.log('웹소켓에 연결되었습니다: ' + frame);
                 stompClient.subscribe('/sub/message/{{id}}', function(message) {
                     const musicData = JSON.parse(message.body);
-                    const exists = musicList.some(music => music.title === musicData.title);
+                    const exists = musicList.some(music => music.title === musicData.title && music.artist === musicData.artist);
                     if (!exists) {
                         addMusicToList(musicData);
                     }
@@ -227,6 +244,7 @@
             });
         }
 
+        // 음악 추가 메시지 전송 함수
         function sendMessage() {
             stompClient.send("/app/message/{{id}}", {}, JSON.stringify({
                 artist: document.getElementById("artist").value,
@@ -234,48 +252,59 @@
             }));
         }
 
+        // 음악 목록에 음악 추가 함수
         function addMusicToList(musicData) {
             musicList.push(musicData);
-            updateMusicTable();
-            if (musicList.length === 1) {
-                playCurrentAudio();
+            updateMusicTable(musicData);
+
+            // 만약 마지막 곡이 끝난 후 새로운 곡이 추가되었을 때
+            if (currentIndex === -1 || (currentIndex === musicList.length - 1 && !isPlaying)) {
+                // 현재 곡이 끝났거나, 음악이 재생 중이지 않으면 현재 음악 재생
+                currentIndex = musicList.length - 1; // 마지막으로 추가된 곡 인덱스 설정
+                playCurrentAudio(); // 마지막 곡 재생
                 document.getElementById("playPause").textContent = '일시정지';
             }
         }
 
+        // 음악 테이블 업데이트 함수
         function updateMusicTable() {
             const tbody = document.getElementById('musicTable').querySelector('tbody');
-            tbody.innerHTML = '';
+            tbody.innerHTML = ''; // 기존 내용을 초기화
 
             musicList.forEach((musicData, index) => {
                 const row = document.createElement('tr');
+                const artistCell = document.createElement('td');
                 const titleCell = document.createElement('td');
                 const buttonCell = document.createElement('td');
                 const deleteCell = document.createElement('td');
 
-                titleCell.textContent = musicData.title;
+                artistCell.textContent = musicData.artist; // 아티스트 표시
+                titleCell.textContent = musicData.title; // 제목 표시
 
+                // 재생 버튼 추가
                 const playButton = document.createElement('button');
                 playButton.textContent = '재생';
-                playButton.onclick = () => playAudio(index);
+                playButton.onclick = () => playAudio(index); // 클릭 시 해당 곡 재생
 
+                // 삭제 버튼 추가
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = '삭제';
                 deleteButton.onclick = () => {
-                    fetch(`/delete/{{id}}/${musicData.title}`, { method: 'DELETE' }).then(response => {
+                    fetch(`/delete/{{id}}/${musicData.artist}/${musicData.title}`, { method: 'DELETE' }).then(response => {
                         if (response.ok) {
                             console.log("삭제되었습니다.");
-                            handleMusicDelete(index);
+                            handleMusicDelete(index); // 음악 삭제 처리
                         }
                     });
                 };
 
-                buttonCell.appendChild(playButton);
-                deleteCell.appendChild(deleteButton);
-                row.appendChild(titleCell);
-                row.appendChild(buttonCell);
-                row.appendChild(deleteCell);
-                tbody.appendChild(row);
+                buttonCell.appendChild(playButton); // 재생 버튼 추가
+                deleteCell.appendChild(deleteButton); // 삭제 버튼 추가
+                row.appendChild(artistCell); // 아티스트 셀 추가
+                row.appendChild(titleCell); // 제목 셀 추가
+                row.appendChild(buttonCell); // 버튼 셀 추가
+                row.appendChild(deleteCell); // 삭제 셀 추가
+                tbody.appendChild(row); // 테이블에 행 추가
             });
             highlightCurrentRow(); // 현재 곡 강조 유지
         }
@@ -292,14 +321,30 @@
                     if (musicList.length === 0) {
                         audioPlayer.pause(); // 모든 곡이 삭제되면 음악 멈춤
                         isPlaying = false;
-                        document.getElementById("playPause").textContent = '재생';
+                        document.getElementById("playPause").textContent = '재생'; // 버튼 텍스트 변경
                         currentIndex = -1; // 인덱스 초기화
                     } else {
-                        // 삭제한 곡이 마지막 곡인 경우
-                        if (currentIndex === musicList.length) {
-                            currentIndex = 0; // 처음 곡으로 돌아감
+                        // 현재 곡 삭제 후 마지막 곡일 때
+                        if (musicList.length === 1) {
+                            audioPlayer.pause(); // 음악 멈춤
+                            isPlaying = false;
+                            document.getElementById("playPause").textContent = '재생'; // 버튼 텍스트 변경
+                            currentIndex = -1; // 인덱스 초기화
+                        } else {
+                            // 체크박스가 체크되지 않은 상태에서 마지막 곡이 삭제될 때
+                            if (!document.getElementById("repeatCheckbox").checked && currentIndex === musicList.length) {
+                                audioPlayer.pause(); // 음악을 일시 정지
+                                isPlaying = false;
+                                document.getElementById("playPause").textContent = '재생'; // 버튼 텍스트 변경
+                                currentIndex = -1; // 인덱스 초기화
+                            } else {
+                                // 삭제한 곡이 마지막 곡이 아닌 경우
+                                if (currentIndex === musicList.length) {
+                                    currentIndex = 0; // 첫 곡으로 돌아감 (이 부분은 필요 시 제거)
+                                }
+                                playCurrentAudio(); // 다음 곡 재생
+                            }
                         }
-                        playCurrentAudio(); // 다음 곡 재생
                     }
                 } else {
                     musicList.splice(index, 1); // 리스트에서 곡 삭제
@@ -311,11 +356,13 @@
             updateMusicTable();
         }
 
+        // 특정 인덱스의 음악 재생 함수
         function playAudio(index) {
-            currentIndex = index;
-            playCurrentAudio();
+            currentIndex = index; // 현재 인덱스 설정
+            playCurrentAudio(); // 음악 재생
         }
 
+        // 현재 곡 재생 함수
         function playCurrentAudio() {
             if (currentIndex >= 0 && currentIndex < musicList.length) {
                 const musicData = musicList[currentIndex];
@@ -330,7 +377,7 @@
                 audioPlayer.play();
                 isPlaying = true;
                 document.getElementById("playPause").textContent = '일시정지';
-                highlightCurrentRow(); // 현재 곡 강조
+                highlightCurrentRow(); // Highlight the current row
             }
         }
 
@@ -344,25 +391,16 @@
             }
         }
 
+        // 현재 곡 강조 함수
         function highlightCurrentRow() {
             const rows = document.querySelectorAll('#musicTable tbody tr');
             rows.forEach((row, index) => {
                 if (index === currentIndex) {
-                    row.classList.add('playing');
+                    row.style.backgroundColor = '#e0e0e0'; // 현재 곡 강조 색상
                 } else {
-                    row.classList.remove('playing');
+                    row.style.backgroundColor = ''; // 기본 색상으로 복구
                 }
             });
-        }
-
-        // 음악 리스트 초기화 및 갱신
-        function list() {
-            fetch("/list/{{id}}")
-                .then(response => response.json())
-                .then(data => {
-                    musicList = data;
-                    updateMusicTable();
-                });
         }
 
         // Seek 슬라이더 업데이트
@@ -387,6 +425,16 @@
             const minutes = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
             return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // 음악 리스트 초기화 및 갱신
+        function list() {
+            fetch("/list/{{id}}")
+                .then(response => response.json())
+                .then(data => {
+                    musicList = data;
+                    updateMusicTable();
+                });
         }
 
         list();

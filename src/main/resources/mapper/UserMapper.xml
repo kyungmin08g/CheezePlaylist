@@ -12,38 +12,22 @@
     </select>
 
     <insert id="mp3FileSave" parameterType="mp3DTO">
-        insert into music(roomid, title, musicFileBytes) values(#{roomId}, #{title}, #{musicFileBytes});
+        insert into music(roomid, artist, title, musicFileBytes) values(#{roomId}, #{artist}, #{title}, #{musicFileBytes});
     </insert>
 
-    <select id="findByTitle" resultType="mp3DTO">
-        SELECT * FROM music WHERE roomid = #{roomId} and title ILIKE #{title}
+    <select id="findByMusic" resultType="mp3DTO">
+        SELECT * FROM music WHERE roomid = #{roomId} and title ilike #{title} and artist ilike #{artist}
     </select>
 
     <select id="selectMusicFiles" parameterType="int" resultType="mp3DTO">
         select * from music where roomid = #{roomId};
     </select>
 
-    <select id="selectMusicFilesByTitle" parameterType="string" resultType="mp3DTO">
-        select * from music where title ilike #{title};
+    <select id="selectMusicFilesByMusic" resultType="mp3DTO">
+        select * from music where title ilike #{title} and artist ilike #{artist};
     </select>
 
     <delete id="deleteMusicFile">
-        delete from music where roomid = #{roomId} and title ilike #{title};
+        delete from music where roomid = #{roomId} and title ilike #{title} and artist ilike #{artist};
     </delete>
-
-    <insert id="roomSave" parameterType="roomDTO">
-        insert into room(roomid, roomname) values(#{roomId}, #{roomName});
-    </insert>
-
-    <select id="selectAllRooms">
-        select * from room;
-    </select>
-
-    <select id="selectRoomById" parameterType="int" resultType="roomDTO">
-        select * from room where roomid = #{roomId};
-    </select>
-
-    <insert id="playlistSave" parameterType="playlistDTO">
-        insert into playlist(roomid, playlistname) values(#{roomId}, #{playlistName});
-    </insert>
 </mapper>
