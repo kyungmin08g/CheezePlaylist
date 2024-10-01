@@ -3,31 +3,11 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="io.github.playlistmanager.mapper.UserMapper">
-    <insert id="signUp" parameterType="joinDTO">
+    <insert id="save" parameterType="MemberDto">
         insert into member(username, email, password, role) values(#{username}, #{email}, #{password}, #{role});
     </insert>
 
-    <select id="selectMemberByUsername" parameterType="string" resultType="joinDTO">
+    <select id="selectMemberByUsername" parameterType="string" resultType="MemberDto">
         select * from member where username = #{username};
     </select>
-
-    <insert id="mp3FileSave" parameterType="mp3DTO">
-        insert into music(roomid, artist, title, musicFileBytes) values(#{roomId}, #{artist}, #{title}, #{musicFileBytes});
-    </insert>
-
-    <select id="findByMusic" resultType="mp3DTO">
-        SELECT * FROM music WHERE roomid = #{roomId} and title ilike #{title} and artist ilike #{artist}
-    </select>
-
-    <select id="selectMusicFiles" parameterType="int" resultType="mp3DTO">
-        select * from music where roomid = #{roomId};
-    </select>
-
-    <select id="selectMusicFilesByMusic" resultType="mp3DTO">
-        select * from music where title ilike #{title} and artist ilike #{artist};
-    </select>
-
-    <delete id="deleteMusicFile">
-        delete from music where roomid = #{roomId} and title ilike #{title} and artist ilike #{artist};
-    </delete>
 </mapper>
