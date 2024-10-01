@@ -17,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
+import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.*;
@@ -205,10 +206,10 @@ public class ChzzkAPI {
     }
 
     // 채팅 아이디 받기 메소드
-    private static String getChatChannelId(String channelId) {
-        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
+    public static String getChatChannelId(String channelId) {
+        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com/").build()
                 .get()
-                .uri("polling/v3/channels/" + channelId + "/live-status")
+                .uri("polling/v3/channels/" + "1161eb13d304f943542d0c8640928544" + "/live-status")
                 .retrieve().bodyToMono(String.class);
 
         try {
@@ -224,7 +225,7 @@ public class ChzzkAPI {
     }
 
     // 액세스 토큰 받기 메소드
-    private static String getAccessToken(String chatChannelId) {
+    public static String getAccessToken(String chatChannelId) {
         Mono<String> response = WebClient.builder().baseUrl("https://comm-api.game.naver.com").build()
                 .get()
                 .uri("nng_main/v1/chats/access-token?channelId=" + chatChannelId + "&chatType=STREAMING")
@@ -284,7 +285,9 @@ public class ChzzkAPI {
                     JsonNode profileNode = objectMapper.readTree(profile);
                     JsonNode nickname = profileNode.get("nickname");
                     JsonNode streamingProperty = profileNode.get("streamingProperty"); // 구독
+
                     listener.onChat(new ChatMessage(nickname.asText(), message.asText(), monthsCalculation(streamingProperty)));
+
                 }
             }
         } catch (JsonProcessingException e) {
