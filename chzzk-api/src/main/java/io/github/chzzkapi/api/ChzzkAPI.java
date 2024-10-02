@@ -17,7 +17,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
-import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.*;
@@ -26,18 +25,17 @@ import java.util.concurrent.CompletableFuture;
 @Component
 public class ChzzkAPI {
 
-    private static String chatChannelId = null;
-    private static String accessToken = null;
-    private static int serverId = 0;
-    private static WebSocketSession webSocketSession;
-    private static boolean isOpen = true;
-    private static final int oneYear = 12;
+    private String chatChannelId = null;
+    private String accessToken = null;
+    private int serverId = 0;
+    private WebSocketSession webSocketSession;
+    private boolean isOpen = true;
 
-    private static final ReactorNettyWebSocketClient webSocketClient = new ReactorNettyWebSocketClient();
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final ReactorNettyWebSocketClient webSocketClient = new ReactorNettyWebSocketClient();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     // 비동기로 웹소켓 클라이언트에 연결하는 메소드
-    public static void chat(String channelId, ChatListener listener) {
+    public void chat(String channelId, ChatListener listener) {
         String chatChannelId = getChatChannelId(channelId);
         String accessToken = getAccessToken(chatChannelId);
 
@@ -94,19 +92,19 @@ public class ChzzkAPI {
     }
 
     // 웹소켓과 연결 해제하는 메소드
-    private static void onDisconnect(ChatListener listener) {
+    private void onDisconnect(ChatListener listener) {
         if (webSocketSession.isOpen()) {
             webSocketSession.close().subscribe();
             listener.onDisconnect(isOpen);
         }
     }
 
-    public static void disConnect() {
+    public void disConnect() {
         isOpen = false;
     }
 
     // 채널 이름 구하는 메소드
-    public static String getChannelName(String channelId) {
+    public String getChannelName(String channelId) {
         Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
                 .get()
                 .uri("service/v1/channels/" + channelId)
@@ -126,7 +124,7 @@ public class ChzzkAPI {
     }
 
     // 채널 설명 구하는 메소드
-    public static String getChannelDescription(String channelId) {
+    public String getChannelDescription(String channelId) {
         Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
                 .get()
                 .uri("service/v1/channels/" + channelId)
@@ -146,7 +144,7 @@ public class ChzzkAPI {
     }
 
     // 채널 팔로워 상태 구하는 메소드
-    public static String getFollowCount(String channelId) {
+    public String getFollowCount(String channelId) {
         Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
                 .get()
                 .uri("service/v1/channels/" + channelId)
@@ -166,7 +164,7 @@ public class ChzzkAPI {
     }
 
     // 채널 채팅 규칙 받는 메소드
-    public static String getChannelChatRule(String channelId) {
+    public String getChannelChatRule(String channelId) {
         Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
                 .get()
                 .uri("service/v1/channels/" + channelId + "/chat-rules")
@@ -186,7 +184,7 @@ public class ChzzkAPI {
     }
 
     // 채널 라이브 상태 구하는 메소드
-    public static boolean isLive(String channelId) {
+    public boolean isLive(String channelId) {
         Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
                 .get()
                 .uri("service/v1/channels/" + channelId)
@@ -206,10 +204,10 @@ public class ChzzkAPI {
     }
 
     // 채팅 아이디 받기 메소드
-    public static String getChatChannelId(String channelId) {
-        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com/").build()
+    public String getChatChannelId(String channelId) {
+        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
                 .get()
-                .uri("polling/v3/channels/" + "1161eb13d304f943542d0c8640928544" + "/live-status")
+                .uri("/polling/v3/channels/" + channelId + "/live-status")
                 .retrieve().bodyToMono(String.class);
 
         try {
@@ -225,7 +223,7 @@ public class ChzzkAPI {
     }
 
     // 액세스 토큰 받기 메소드
-    public static String getAccessToken(String chatChannelId) {
+    public String getAccessToken(String chatChannelId) {
         Mono<String> response = WebClient.builder().baseUrl("https://comm-api.game.naver.com").build()
                 .get()
                 .uri("nng_main/v1/chats/access-token?channelId=" + chatChannelId + "&chatType=STREAMING")
@@ -243,7 +241,7 @@ public class ChzzkAPI {
         return accessToken;
     }
 
-    private static void getConnect(WebSocketMessage msg, ChatListener listener) {
+    private void getConnect(WebSocketMessage msg, ChatListener listener) {
         try {
             JsonNode jsonNode = objectMapper.readTree(msg.getPayloadAsText());
             JsonNode bdy = jsonNode.get("bdy");
@@ -258,7 +256,7 @@ public class ChzzkAPI {
     }
 
     // 채팅 처리 메소드
-    private static void getChat(WebSocketMessage msg, ChatListener listener) {
+    private void getChat(WebSocketMessage msg, ChatListener listener) {
         try {
             JsonNode jsonNode = objectMapper.readTree(msg.getPayloadAsText());
             JsonNode bdy = jsonNode.get("bdy");
@@ -296,7 +294,7 @@ public class ChzzkAPI {
     }
 
     // 도네이션 처리 메소드
-    private static void getDonation(WebSocketMessage msg, ChatListener listener) {
+    private void getDonation(WebSocketMessage msg, ChatListener listener) {
         try {
             JsonNode jsonNode = objectMapper.readTree(msg.getPayloadAsText());
             JsonNode bdy = jsonNode.get("bdy");
@@ -333,7 +331,7 @@ public class ChzzkAPI {
     }
 
     // 구독 년 및 개월 구하는 메소드
-    private static String monthsCalculation(JsonNode streamingPropertyNode) {
+    private String monthsCalculation(JsonNode streamingPropertyNode) {
         JsonNode subscription = streamingPropertyNode.get("subscription");
         if (subscription == null) return null;
 
@@ -341,6 +339,7 @@ public class ChzzkAPI {
 
         int year = 0;
         int month = 0;
+        int oneYear = 12;
         for (int i = oneYear; i <= accumulativeMonth.asInt(); i += oneYear) {
             year += 1;
             month = i;

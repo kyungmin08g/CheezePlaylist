@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>음악 리스트</title>
-    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
-    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -155,6 +155,9 @@
         let stompClient = null;
         let repeatEnabled = document.getElementById("repeatCheckbox").checked;
 
+        fetch("/api/v1/{{playlistId}}/{{name}}").then(response => {
+            console.log(response)
+        });
         connect(); // 웹소켓 연결
 
         const socket = new WebSocket("wss://kr-ss{{serverId}}.chat.naver.com/chat");
@@ -181,9 +184,7 @@
             // 서버 메시지를 대기
             socket.onmessage = function (event) {
                 let data = JSON.parse(event.data); // -> String 타입임
-                console.log(data);
-
-                stompClient.send("/app/chat/{{id}}", {}, JSON.stringify(data))
+                stompClient.send("/app/api/v1/chat/{{playlistId}}", {}, JSON.stringify(data));
 
                 // 연결 체크 메시지 응답 처리
                 if (data.ver === "2" && data.cmd === 0) {
@@ -202,7 +203,7 @@
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 console.log('웹소켓에 연결되었습니다: ' + frame);
-                stompClient.subscribe('/sub/message/{{id}}', function(message) {
+                stompClient.subscribe('/sub/message/{{playlistId}}', function(message) {
                     const musicData = JSON.parse(message.body);
                     const exists = musicList.some(music => music.title === musicData.title && music.artist === musicData.artist);
                     if (!exists) {
@@ -214,7 +215,7 @@
 
         // 음악 추가 메시지 전송 함수
         function sendMessage() {
-            stompClient.send("/app/message/{{id}}", {}, JSON.stringify({
+            stompClient.send("/app/api/v1/message/{{playlistId}}", {}, JSON.stringify({
                 artist: document.getElementById("artist").value,
                 title: document.getElementById("title").value
             }));
@@ -330,9 +331,8 @@
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = '삭제';
                 deleteButton.onclick = () => {
-                    fetch(`/delete/{{id}}/${musicData.artist}/${musicData.title}`, { method: 'DELETE' }).then(response => {
+                    fetch(`/api/v1/delete/{{playlistId}}/${musicData.artist}/${musicData.title}`, { method: 'DELETE' }).then(response => {
                         if (response.ok) {
-                            console.log("삭제되었습니다.");
                             handleMusicDelete(index); // 음악 삭제 처리
                         }
                     });
@@ -469,7 +469,7 @@
 
         // 음악 리스트 초기화 및 갱신
         function list() {
-            fetch("/list/{{id}}")
+            fetch("/api/v1/list/{{playlistId}}")
                 .then(response => response.json())
                 .then(data => {
                     musicList = data;

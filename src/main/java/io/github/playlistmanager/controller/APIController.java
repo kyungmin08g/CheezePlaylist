@@ -1,9 +1,5 @@
 package io.github.playlistmanager.controller;
 
-import io.github.chzzkapi.api.ChzzkAPI;
-import io.github.chzzkapi.listener.ChatListener;
-import io.github.chzzkapi.message.ChatMessage;
-import io.github.chzzkapi.message.DonationMessage;
 import io.github.playlistmanager.dto.*;
 import io.github.playlistmanager.service.impl.MusicServiceImpl;
 import io.github.playlistmanager.service.impl.UserServiceImpl;
@@ -18,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
+@RequestMapping("/api/v1")
 @Slf4j
 public class APIController {
 
@@ -36,7 +33,7 @@ public class APIController {
     }
 
     @GetMapping("/signup")
-    public String signUp(@RequestParam("username") String username, @RequestParam("email") String email, @RequestParam("password") String password) {
+    public ResponseEntity<?> signUp(@RequestParam("username") String username, @RequestParam("email") String email, @RequestParam("password") String password) {
         JoinMemberDTO memberDto = JoinMemberDTO.builder()
                 .username(username)
                 .email(email)
@@ -44,13 +41,21 @@ public class APIController {
                 .role("ROLE_USER").build();
 
         userService.save(memberDto);
-        return "회원가입 성공!";
+        return ResponseEntity.status(200).build();
     }
 
-    @GetMapping("/list/{id}")
-    public ResponseEntity<List<Map<String, String>>> list(@PathVariable("id") int roomId) {
+    @GetMapping("/{playlistId}/{name}/{chzzkChannelId}/on")
+    public ResponseEntity<?> chzzk(@PathVariable("playlistId") String playlistId, @PathVariable("name") String name, @PathVariable("chzzkChannelId") String chzzkChannelId) {
+        PlaylistDto dto = new PlaylistDto(playlistId, name, chzzkChannelId);
+        musicService.saveChannelId(dto);
+
+        return ResponseEntity.status(200).build();
+    }
+
+    @GetMapping("/list/{playlistId}")
+    public ResponseEntity<List<Map<String, String>>> list(@PathVariable("playlistId") int playlistId) {
         List<Map<String, String>> musicDatas = new ArrayList<>();
-        List<MusicFileDTO> listData = musicService.findById(roomId);
+        List<MusicFileDTO> listData = musicService.findById(playlistId);
 
         for (MusicFileDTO dto : listData) {
             Map<String, String> musicData = new HashMap<>();
@@ -67,61 +72,24 @@ public class APIController {
         return ResponseEntity.status(200).contentType(MediaType.APPLICATION_JSON).body(musicDatas);
     }
 
-    @DeleteMapping("/delete/{roomId}/{artist}/{title}")
-    public ResponseEntity<?> delete(@PathVariable("roomId") int roomId, @PathVariable("artist") String artist, @PathVariable("title") String title) {
+    @DeleteMapping("/delete/{playlistId}/{artist}/{title}")
+    public ResponseEntity<?> delete(@PathVariable("playlistId") int playlistId, @PathVariable("artist") String artist, @PathVariable("title") String title) {
         String customTitle = title.replace(" ", "_");
-        musicService.delete(roomId, artist, customTitle);
+        musicService.delete(playlistId, artist, customTitle);
         log.info("해당 음악이 제거되었습니다.");
 
         return ResponseEntity.ok().build();
     }
 
-    @MessageMapping("/message/{roomId}")
-    public void message(@DestinationVariable("roomId") int roomId, MessageRequestDTO messageRequestDTO) {
-        musicService.memberMusicDownload(roomId, messageRequestDTO.getArtist(), messageRequestDTO.getTitle());
+    @MessageMapping("/api/v1/message/{playlistId}")
+    public ResponseEntity<?> message(@DestinationVariable("playlistId") int playlistId, MessageRequestDTO messageRequestDTO) {
+        musicService.memberMusicDownload(playlistId, messageRequestDTO.getArtist(), messageRequestDTO.getTitle());
+        return ResponseEntity.status(200).build();
     }
 
-    @MessageMapping("/chat/{roomId}")
-    public void chzzkChatMessage(@DestinationVariable("roomId") int roomId, String chatJson) {
-        musicService.donationChat(roomId, chatJson);
-    }
-
-    @GetMapping("/chzzk")
-    public ResponseEntity<?> getChzzk(@RequestParam String channelId) {
-        String channelName = ChzzkAPI.getChannelName(channelId);
-
-        if (ChzzkAPI.isLive(channelId)) {
-            ChzzkAPI.chat(channelId, new ChatListener() {
-                @Override
-                public void onConnect() {
-                    System.out.println(channelName + "님 채널에 연결되었습니다.");
-                }
-
-                @Override
-                public void onChat(ChatMessage message) {
-                    if (message.getSubscriptionMonth() == null) {
-                        System.out.println("[채팅] " + message.getNickName() + ": " + message.getContent());
-                        return;
-                    }
-                    System.out.println("[채팅] " + message.getNickName() + ": " + message.getContent() + " [" + message.getSubscriptionMonth() + " 구독 중]");
-                }
-
-                @Override
-                public void onDonation(DonationMessage message) {
-                    if (message.getSubscriptionMonth() == null) {
-                        System.out.println("\u001B[33m[후원] " + message.getNickName() + ": " + message.getContent() + " [" + message.getPayAmount() + "원]\u001B[0m");
-                        return;
-                    }
-                    System.out.println("\u001B[33m[후원] " + message.getNickName() + ": " + message.getContent() + " [" + message.getPayAmount() + "원] [" + message.getSubscriptionMonth() + " 구독 중]\u001B[0m");
-                }
-
-                @Override
-                public void onDisconnect(boolean open) {
-                    if (!open) System.out.println("연결이 닫혔습니다.");
-                }
-            });
-        }
-
+    @MessageMapping("/api/v1/chat/{playlistId}")
+    public ResponseEntity<?> chzzkChatMessage(@DestinationVariable("playlistId") int playlistId, String chatJson) {
+        musicService.donationChat(playlistId, chatJson);
         return ResponseEntity.status(200).build();
     }
 }

@@ -3,7 +3,10 @@ package io.github.playlistmanager.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.chzzkapi.api.ChzzkAPI;
+import io.github.playlistmanager.dto.ChzzkChannelConnectDto;
 import io.github.playlistmanager.dto.MusicFileDTO;
+import io.github.playlistmanager.dto.PlaylistDto;
 import io.github.playlistmanager.mapper.MusicMapper;
 import io.github.playlistmanager.service.MusicService;
 import lombok.extern.slf4j.Slf4j;
@@ -27,16 +30,19 @@ public class MusicServiceImpl implements MusicService {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final MusicMapper musicMapper;
     private final ObjectMapper objectMapper;
+    private final ChzzkAPI chzzkAPI;
 
     public MusicServiceImpl(
             @Value("${youtube.api-key}") String key,
             SimpMessagingTemplate simpMessagingTemplate,
-            MusicMapper musicMapper
+            MusicMapper musicMapper,
+            ChzzkAPI chzzkAPI
     ) {
         this.key = key;
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.musicMapper = musicMapper;
         this.objectMapper = new ObjectMapper();
+        this.chzzkAPI = chzzkAPI;
     }
 
     @Override
@@ -127,14 +133,17 @@ public class MusicServiceImpl implements MusicService {
 
                         String subscriptionMonth = calculateMonthsSubscribed(streamingProperty);
                         if (subscriptionMonth != null) {
-                            System.out.println(nickname.asText() + ": " + message.asText() + "[" + payAmount + "원]" + " [" + subscriptionMonth + " 구독 중]");
+                            System.out.println("\u001B[33m" + nickname.asText() + ": " + message.asText() + "[" + payAmount + "원]" + " [" + subscriptionMonth + " 구독 중]" + "\u001B[0m");
                             donationMusicDownload(roomId, message.asText());
                         } else {
-                            System.out.println(nickname.asText() + ": " + message.asText() + " [" + payAmount + "원]");
+                            System.out.println("\u001B[33m" + nickname.asText() + ": " + message.asText() + " [" + payAmount + "원]" + "\u001B[0m");
                             donationMusicDownload(roomId, message.asText());
                         }
                     }
 
+                } else {
+                    JsonNode message = bdyNode.get("msg");
+                    System.out.println("[채팅] " + message.asText());
                 }
             }
         } catch (JsonProcessingException e) {
@@ -288,6 +297,30 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
+    public ChzzkChannelConnectDto chzzkChannelConnect(PlaylistDto playlistDto) {
+        String channelId = playlistDto.getChzzkId();
+        String channelName = chzzkAPI.getChannelName(channelId);
+        String chatChannelId = chzzkAPI.getChatChannelId(channelId);
+        String accessToken = chzzkAPI.getAccessToken(chatChannelId);
+
+        int serverId = 0;
+        for (char i : chatChannelId.toCharArray()) {
+            serverId += Character.getNumericValue(i);
+        }
+        serverId = Math.abs(serverId) % 9 + 1;
+
+        ChzzkChannelConnectDto connectDto = ChzzkChannelConnectDto.builder()
+                .playlistId(playlistDto.getId())
+                .chatChannelId(chatChannelId)
+                .accessToken(accessToken)
+                .serverId(String.valueOf(serverId))
+                .build();
+
+        log.info("\u001B[32m" + channelName + "님 채널에 연결하는 로직이 정상적으로 처리되었습니다.\u001B[0m");
+        return connectDto;
+    }
+
+    @Override
     public void save(MusicFileDTO musicFileDTO) {
         musicMapper.save(musicFileDTO);
     }
@@ -310,5 +343,15 @@ public class MusicServiceImpl implements MusicService {
     @Override
     public void delete(int roomId, String artist, String title) {
         musicMapper.delete(roomId, artist, title);
+    }
+
+    @Override
+    public void saveChannelId(PlaylistDto dto) {
+        musicMapper.saveChannelId(dto);
+    }
+
+    @Override
+    public PlaylistDto findByIdAndPlaylistName(String playlistId, String playlistName) {
+        return musicMapper.findByIdAndPlaylistName(playlistId, playlistName);
     }
 }

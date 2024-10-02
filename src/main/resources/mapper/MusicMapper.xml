@@ -22,4 +22,12 @@
     <delete id="delete">
         delete from music where roomid = #{roomId} and artist ilike #{artist} and title ilike #{title};
     </delete>
+
+    <insert id="saveChannelId" parameterType="PlaylistDto">
+        insert into chzzk(id, name, chzzkid) values(#{id}, #{name}, #{chzzkId});
+    </insert>
+
+    <select id="findByIdAndPlaylistName" resultType="PlaylistDto">
+        select * from chzzk where id = #{id} and name = #{name};
+    </select>
 </mapper>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text" id="name" placeholder="방 이름을 입력해주세요.">
+    <input type="text" id="playlistId" placeholder="아이디를 입력하세요.">
+    <input type="text" id="chzzkId" placeholder="치지직 아이디를 입력하세요.">
+    <button onclick="add()">플레이리스트 추가</button>
+
+    <script>
+        function add() {
+            let name = document.getElementById("name").value;
+            let playlistId = document.getElementById("playlistId").value;
+            let chzzkChannelId = document.getElementById("chzzkId").value;
+
+            document.getElementById("name").value = '';
+            document.getElementById("playlistId").value = '';
+            document.getElementById("chzzkChannelId").value = '';
+
+            fetch(`/${playlistId}/${name}/${chzzkChannelId}/on`).then(response => {
+                console.log(response);
+            })
+        }
+    </script>
+</body>
+</html>

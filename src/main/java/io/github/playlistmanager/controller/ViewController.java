@@ -1,6 +1,7 @@
 package io.github.playlistmanager.controller;
 
-import io.github.chzzkapi.api.ChzzkAPI;
+import io.github.playlistmanager.dto.ChzzkChannelConnectDto;
+import io.github.playlistmanager.service.impl.MusicServiceImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,22 +10,27 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class ViewController {
 
-    @GetMapping("/{id}")
-    public String index(@PathVariable("id") String id,  Model model) {
-        model.addAttribute("id", id);
+    private final MusicServiceImpl musicService;
 
-        String chatId = ChzzkAPI.getChatChannelId("");
-        String accessToken = ChzzkAPI.getAccessToken(chatId);
+    public ViewController(
+            MusicServiceImpl musicService
+    ) {
+        this.musicService = musicService;
+    }
 
-        int serverId = 0;
-        for (char i : chatId.toCharArray()) {
-            serverId += Character.getNumericValue(i);
-        }
-        serverId = Math.abs(serverId) % 9 + 1;
+    @GetMapping("/")
+    public String index() {
+        return "Test2";
+    }
 
-        model.addAttribute("chatChannelId", chatId);
-        model.addAttribute("accessToken", accessToken);
-        model.addAttribute("serverId", serverId);
+    @GetMapping("/{id}/{name}/on")
+    public String view(@PathVariable("id") String id, @PathVariable("name") String name, Model model) {
+        ChzzkChannelConnectDto connectDto = musicService.chzzkChannelConnect(musicService.findByIdAndPlaylistName(id, name));
+
+        model.addAttribute("playlistId", connectDto.getPlaylistId());
+        model.addAttribute("chatChannelId", connectDto.getChatChannelId());
+        model.addAttribute("accessToken", connectDto.getAccessToken());
+        model.addAttribute("serverId", connectDto.getServerId());
 
         return "Test";
     }

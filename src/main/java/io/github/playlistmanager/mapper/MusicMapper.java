@@ -1,6 +1,7 @@
 package io.github.playlistmanager.mapper;
 
 import io.github.playlistmanager.dto.MusicFileDTO;
+import io.github.playlistmanager.dto.PlaylistDto;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -12,4 +13,6 @@ public interface MusicMapper {
     List<MusicFileDTO> findById(int roomId);
     MusicFileDTO findByArtistAndTitle(String artist, String title);
     void delete(int roomId, String artist, String title);
+    void saveChannelId(PlaylistDto dto);
+    PlaylistDto findByIdAndPlaylistName(String id, String name);
 }
