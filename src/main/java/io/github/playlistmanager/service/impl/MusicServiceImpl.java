@@ -64,7 +64,14 @@ public class MusicServiceImpl implements MusicService {
 
     @Override
     public void donationMusicDownload(String roomId, String donationContent) {
-        if (donationContent.matches("^(.*) - (.*)$")) {
+        if (donationContent.matches("^(.*) - (.*)$") ||
+                donationContent.matches("^(.*) -(.*)$") ||
+                donationContent.matches("^(.*)- (.*)$") ||
+                donationContent.matches("^(.*)-(.*)$") ||
+                donationContent.matches("^(.*) - {2}(.*)$") ||
+                donationContent.matches("^(.*) {2}- (.*)$") ||
+                donationContent.matches("^(.*) {2}- {2}(.*)$")
+        ) {
             String artist = donationContent.substring(0, donationContent.indexOf("-") - 1);
             String title = donationContent.substring(donationContent.indexOf("-") + 1);
 
@@ -124,7 +131,7 @@ public class MusicServiceImpl implements MusicService {
                     JsonNode message = bdyNode.get("msg");
 
                     if (profile.equals("null")) { // 프로필이 없을 떄
-                        System.out.println("익명: " + message.asText() + " [" + payAmount + "원]");
+                        System.out.println("\u001B[33m[후원] 익명: " + message.asText() + " [" + payAmount + "원]\u001B[0m");
                         donationMusicDownload(roomId, message.asText());
                     } else {
                         JsonNode profileNode = objectMapper.readTree(profile);
@@ -133,17 +140,14 @@ public class MusicServiceImpl implements MusicService {
 
                         String subscriptionMonth = calculateMonthsSubscribed(streamingProperty);
                         if (subscriptionMonth != null) {
-                            System.out.println("\u001B[33m" + nickname.asText() + ": " + message.asText() + "[" + payAmount + "원]" + " [" + subscriptionMonth + " 구독 중]" + "\u001B[0m");
+                            System.out.println("\u001B[33m[후원] " + nickname.asText() + ": " + message.asText() + " [" + payAmount + "원]" + " [" + subscriptionMonth + " 구독 중]" + "\u001B[0m");
                             donationMusicDownload(roomId, message.asText());
                         } else {
-                            System.out.println("\u001B[33m" + nickname.asText() + ": " + message.asText() + " [" + payAmount + "원]" + "\u001B[0m");
+                            System.out.println("\u001B[33m[후원] " + nickname.asText() + ": " + message.asText() + " [" + payAmount + "원]" + "\u001B[0m");
                             donationMusicDownload(roomId, message.asText());
                         }
                     }
 
-                } else {
-                    JsonNode message = bdyNode.get("msg");
-                    System.out.println("[채팅] " + message.asText());
                 }
             }
         } catch (JsonProcessingException e) {

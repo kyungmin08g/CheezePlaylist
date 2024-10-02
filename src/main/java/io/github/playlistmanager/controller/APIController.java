@@ -89,8 +89,8 @@ public class APIController {
         return ResponseEntity.status(200).contentType(MediaType.APPLICATION_JSON).body(musicDatas);
     }
 
-    @DeleteMapping("/delete/{playlistId}/{artist}/{title}")
-    public ResponseEntity<?> delete(@PathVariable("playlistId") String playlistId, @PathVariable("artist") String artist, @PathVariable("title") String title) {
+    @GetMapping("/delete")
+    public ResponseEntity<?> delete(@RequestParam String playlistId, @RequestParam String artist, @RequestParam String title) {
         String customTitle = title.replace(" ", "_");
         musicService.delete(playlistId, artist, customTitle);
         log.info("해당 음악이 제거되었습니다.");

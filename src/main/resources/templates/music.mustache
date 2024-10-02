@@ -328,7 +328,7 @@
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = '삭제';
                 deleteButton.onclick = () => {
-                    fetch(`/api/v1/delete/{{playlistId}}/${musicData.artist}/${musicData.title}`, { method: 'DELETE' }).then(response => {
+                    fetch(`/api/v1/delete?playlistId={{playlistId}}&artist=${musicData.artist}&title=${musicData.title}`, { method: 'GET' }).then(response => {
                         if (response.ok) {
                             handleMusicDelete(index); // 음악 삭제 처리
                         }
