@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class PlaylistDto {
-    private String id;
-    private String name;
-    private String chzzkId;
+    private String playlistId;
+    private String playlistName;
+    private String chzzkChannelId;
 }

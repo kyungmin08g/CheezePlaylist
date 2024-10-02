@@ -46,7 +46,7 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public void memberMusicDownload(int roomId, String artist, String title) {
+    public void memberMusicDownload(String roomId, String artist, String title) {
         musicDownload(roomId, artist, title);
 
         String customTitle = title.replace(" ", "_");
@@ -63,7 +63,7 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public void donationMusicDownload(int roomId, String donationContent) {
+    public void donationMusicDownload(String roomId, String donationContent) {
         if (donationContent.matches("^(.*) - (.*)$")) {
             String artist = donationContent.substring(0, donationContent.indexOf("-") - 1);
             String title = donationContent.substring(donationContent.indexOf("-") + 1);
@@ -105,7 +105,7 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public void donationChat(int roomId, String chatJson) {
+    public void donationChat(String roomId, String chatJson) {
         try {
             JsonNode jsonNode = objectMapper.readTree(chatJson);
             JsonNode bdyJson = jsonNode.get("bdy");
@@ -169,7 +169,7 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public void musicDownload(int roomId, String artist, String title) {
+    public void musicDownload(String roomId, String artist, String title) {
         String query = artist + " - " + title; // 하나의 문자열로 만듬
         String customTitle = title.replace(" ", "_");
 
@@ -276,7 +276,7 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public void conversionAndDownload(int roomId, String youtubeURL, String artist, String customTitle) throws IOException, InterruptedException {
+    public void conversionAndDownload(String roomId, String youtubeURL, String artist, String customTitle) throws IOException, InterruptedException {
         byte[] mp3Data = mp3Conversion(youtubeURL);
 
         // DB에서 Title을 통해 조회하게 되는데 결과가 null인 경우에는 로그만 찍고 아래 로직을 실행하도록하는 검사 작업 -> 데이터가 존재하지 않으면 추가하는게 맞으니까
@@ -298,7 +298,7 @@ public class MusicServiceImpl implements MusicService {
 
     @Override
     public ChzzkChannelConnectDto chzzkChannelConnect(PlaylistDto playlistDto) {
-        String channelId = playlistDto.getChzzkId();
+        String channelId = playlistDto.getChzzkChannelId();
         String channelName = chzzkAPI.getChannelName(channelId);
         String chatChannelId = chzzkAPI.getChatChannelId(channelId);
         String accessToken = chzzkAPI.getAccessToken(chatChannelId);
@@ -310,7 +310,7 @@ public class MusicServiceImpl implements MusicService {
         serverId = Math.abs(serverId) % 9 + 1;
 
         ChzzkChannelConnectDto connectDto = ChzzkChannelConnectDto.builder()
-                .playlistId(playlistDto.getId())
+                .playlistId(playlistDto.getPlaylistId())
                 .chatChannelId(chatChannelId)
                 .accessToken(accessToken)
                 .serverId(String.valueOf(serverId))
@@ -326,12 +326,12 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public MusicFileDTO findByMusic(int roomId, String artist, String title) {
+    public MusicFileDTO findByMusic(String roomId, String artist, String title) {
         return musicMapper.findByMusic(roomId, artist, title);
     }
 
     @Override
-    public List<MusicFileDTO> findById(int roomId) {
+    public List<MusicFileDTO> findById(String roomId) {
         return musicMapper.findById(roomId);
     }
 
@@ -341,7 +341,7 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public void delete(int roomId, String artist, String title) {
+    public void delete(String roomId, String artist, String title) {
         musicMapper.delete(roomId, artist, title);
     }
 
@@ -353,5 +353,10 @@ public class MusicServiceImpl implements MusicService {
     @Override
     public PlaylistDto findByIdAndPlaylistName(String playlistId, String playlistName) {
         return musicMapper.findByIdAndPlaylistName(playlistId, playlistName);
+    }
+
+    @Override
+    public List<PlaylistDto> findAll() {
+        return musicMapper.findAll();
     }
 }

@@ -9,23 +9,24 @@ import java.io.IOException;
 import java.util.List;
 
 public interface MusicService {
-    void memberMusicDownload(int roomId, String artist, String title);
-    void donationMusicDownload(int roomId, String donationContent);
+    void memberMusicDownload(String roomId, String artist, String title);
+    void donationMusicDownload(String roomId, String donationContent);
     String calculateMonthsSubscribed(JsonNode streamingPropertyNode);
-    void donationChat(int roomId, String chatJson);
+    void donationChat(String roomId, String chatJson);
 
-    void musicDownload(int roomId, String artist, String title);
+    void musicDownload(String roomId, String artist, String title);
     String searchVideo(String query);
-    void conversionAndDownload(int roomId, String youtubeUrl, String artist, String customTitle) throws IOException, InterruptedException;
+    void conversionAndDownload(String roomId, String youtubeUrl, String artist, String customTitle) throws IOException, InterruptedException;
     byte[] mp3Conversion(String youtubeUrl) throws InterruptedException, IOException;
     ChzzkChannelConnectDto chzzkChannelConnect(PlaylistDto playlistDto);
 
     // Mapper 관련
     void save(MusicFileDTO musicFileDTO);
-    MusicFileDTO findByMusic(int roomId, String artist, String title);
-    List<MusicFileDTO> findById(int roomId);
+    MusicFileDTO findByMusic(String roomId, String artist, String title);
+    List<MusicFileDTO> findById(String roomId);
     MusicFileDTO findByArtistAndTitle(String artist, String title);
-    void delete(int roomId, String artist, String title);
+    void delete(String roomId, String artist, String title);
     void saveChannelId(PlaylistDto dto);
     PlaylistDto findByIdAndPlaylistName(String playlistId, String playlistName);
+    List<PlaylistDto> findAll();
 }

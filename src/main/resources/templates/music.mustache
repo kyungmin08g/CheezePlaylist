@@ -113,7 +113,7 @@
     </style>
 </head>
 <body>
-    <h1>음악 리스트</h1>
+    <h1>{{playlistName}}</h1>
     <table id="musicTable">
         <thead>
         <tr>
@@ -155,9 +155,6 @@
         let stompClient = null;
         let repeatEnabled = document.getElementById("repeatCheckbox").checked;
 
-        fetch("/api/v1/{{playlistId}}/{{name}}").then(response => {
-            console.log(response)
-        });
         connect(); // 웹소켓 연결
 
         const socket = new WebSocket("wss://kr-ss{{serverId}}.chat.naver.com/chat");

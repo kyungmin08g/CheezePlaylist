@@ -9,10 +9,11 @@ import java.util.List;
 @Mapper
 public interface MusicMapper {
     void save(MusicFileDTO musicFileDTO);
-    MusicFileDTO findByMusic(int roomId, String artist, String title);
-    List<MusicFileDTO> findById(int roomId);
+    MusicFileDTO findByMusic(String roomId, String artist, String title);
+    List<MusicFileDTO> findById(String roomId);
     MusicFileDTO findByArtistAndTitle(String artist, String title);
-    void delete(int roomId, String artist, String title);
+    void delete(String roomId, String artist, String title);
     void saveChannelId(PlaylistDto dto);
-    PlaylistDto findByIdAndPlaylistName(String id, String name);
+    PlaylistDto findByIdAndPlaylistName(String playlistId, String playlistName);
+    List<PlaylistDto> findAll();
 }

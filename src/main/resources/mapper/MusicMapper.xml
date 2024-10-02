@@ -11,7 +11,7 @@
         select * from music WHERE roomid = #{roomId} and artist ilike #{artist} and title ilike #{title};
     </select>
 
-    <select id="findById" parameterType="int" resultType="MusicDto">
+    <select id="findById" parameterType="string" resultType="MusicDto">
         select * from music where roomid = #{roomId};
     </select>
 
@@ -24,10 +24,14 @@
     </delete>
 
     <insert id="saveChannelId" parameterType="PlaylistDto">
-        insert into chzzk(id, name, chzzkid) values(#{id}, #{name}, #{chzzkId});
+        insert into playlist(playlistid, playlistname, chzzkchannelid) values(#{playlistId}, #{playlistName}, #{chzzkChannelId});
     </insert>
 
     <select id="findByIdAndPlaylistName" resultType="PlaylistDto">
-        select * from chzzk where id = #{id} and name = #{name};
+        select * from playlist where playlistid = #{playlistId} and playlistname = #{playlistName};
+    </select>
+
+    <select id="findAll">
+        select * from playlist;
     </select>
 </mapper>

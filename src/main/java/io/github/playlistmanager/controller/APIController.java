@@ -44,16 +44,33 @@ public class APIController {
         return ResponseEntity.status(200).build();
     }
 
-    @GetMapping("/{playlistId}/{name}/{chzzkChannelId}/on")
-    public ResponseEntity<?> chzzk(@PathVariable("playlistId") String playlistId, @PathVariable("name") String name, @PathVariable("chzzkChannelId") String chzzkChannelId) {
-        PlaylistDto dto = new PlaylistDto(playlistId, name, chzzkChannelId);
+    @GetMapping("/playlist")
+    public ResponseEntity<?> chzzk(@RequestParam String playlistName, @RequestParam String chzzkChannelId) {
+        String uuid = UUID.randomUUID().toString();
+        PlaylistDto dto = new PlaylistDto(uuid, playlistName, chzzkChannelId);
         musicService.saveChannelId(dto);
 
         return ResponseEntity.status(200).build();
     }
 
+    @GetMapping("/playlists")
+    public ResponseEntity<List<Map<String, String>>> getPlaylists() {
+        List<Map<String, String>> playlists = new ArrayList<>();
+        List<PlaylistDto> dto = musicService.findAll();
+
+        for (PlaylistDto playlistDto : dto) {
+            Map<String, String> playlist = new HashMap<>();
+            playlist.put("playlistId", playlistDto.getPlaylistId());
+            playlist.put("playlistName", playlistDto.getPlaylistName());
+            playlist.put("chzzkChannelId", playlistDto.getChzzkChannelId());
+            playlists.add(playlist);
+        }
+
+        return ResponseEntity.status(200).contentType(MediaType.APPLICATION_JSON).body(playlists);
+    }
+
     @GetMapping("/list/{playlistId}")
-    public ResponseEntity<List<Map<String, String>>> list(@PathVariable("playlistId") int playlistId) {
+    public ResponseEntity<List<Map<String, String>>> list(@PathVariable("playlistId") String playlistId) {
         List<Map<String, String>> musicDatas = new ArrayList<>();
         List<MusicFileDTO> listData = musicService.findById(playlistId);
 
@@ -73,7 +90,7 @@ public class APIController {
     }
 
     @DeleteMapping("/delete/{playlistId}/{artist}/{title}")
-    public ResponseEntity<?> delete(@PathVariable("playlistId") int playlistId, @PathVariable("artist") String artist, @PathVariable("title") String title) {
+    public ResponseEntity<?> delete(@PathVariable("playlistId") String playlistId, @PathVariable("artist") String artist, @PathVariable("title") String title) {
         String customTitle = title.replace(" ", "_");
         musicService.delete(playlistId, artist, customTitle);
         log.info("해당 음악이 제거되었습니다.");
@@ -82,13 +99,13 @@ public class APIController {
     }
 
     @MessageMapping("/api/v1/message/{playlistId}")
-    public ResponseEntity<?> message(@DestinationVariable("playlistId") int playlistId, MessageRequestDTO messageRequestDTO) {
+    public ResponseEntity<?> message(@DestinationVariable("playlistId") String playlistId, MessageRequestDTO messageRequestDTO) {
         musicService.memberMusicDownload(playlistId, messageRequestDTO.getArtist(), messageRequestDTO.getTitle());
         return ResponseEntity.status(200).build();
     }
 
     @MessageMapping("/api/v1/chat/{playlistId}")
-    public ResponseEntity<?> chzzkChatMessage(@DestinationVariable("playlistId") int playlistId, String chatJson) {
+    public ResponseEntity<?> chzzkChatMessage(@DestinationVariable("playlistId") String playlistId, String chatJson) {
         musicService.donationChat(playlistId, chatJson);
         return ResponseEntity.status(200).build();
     }
