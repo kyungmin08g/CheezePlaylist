@@ -26,13 +26,13 @@ public class RedisProvider {
     public void saveMap(String key, MusicFileDTO musicFileDTO) {
         Map<String, String> musicFileMap = new HashMap<>();
         musicFileMap.put("name", musicFileDTO.getTitle());
-        musicFileMap.put("data", Base64.getEncoder().encodeToString(musicFileDTO.getMusicFileBytes())); // byte[]를 Base64로 인코딩
+        musicFileMap.put("data", musicFileDTO.getMusicFileBytes()); // byte[]를 Base64로 인코딩
 
         redisTemplate.opsForHash().putAll(key, musicFileMap);
     }
 
     public void addMusicFileToList(String key, MusicFileDTO musicFileDTO) {
-        String musicFileString = musicFileDTO.getTitle() + ":" + Base64.getEncoder().encodeToString(musicFileDTO.getMusicFileBytes());
+        String musicFileString = musicFileDTO.getTitle() + ":" + musicFileDTO.getMusicFileBytes();
         redisTemplate.opsForList().rightPush(key, musicFileString);
     }
 

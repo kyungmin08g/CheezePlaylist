@@ -82,7 +82,7 @@ public class APIController {
             musicData.put("artist", dto.getArtist());
             musicData.put("roomId", customRoomId);
             musicData.put("title", customTitle);
-            musicData.put("musicFileBytes", Base64.getEncoder().encodeToString(dto.getMusicFileBytes())); // byte[]을 Base64로 인코딩
+            musicData.put("musicFileBytes", dto.getMusicFileBytes());
             musicDatas.add(musicData);
         }
 

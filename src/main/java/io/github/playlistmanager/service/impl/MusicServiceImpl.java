@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,30 +65,37 @@ public class MusicServiceImpl implements MusicService {
 
     @Override
     public void donationMusicDownload(String roomId, String donationContent) {
-        if (donationContent.matches("^(.*) - (.*)$") ||
-                donationContent.matches("^(.*) -(.*)$") ||
-                donationContent.matches("^(.*)- (.*)$") ||
-                donationContent.matches("^(.*)-(.*)$") ||
-                donationContent.matches("^(.*) - {2}(.*)$") ||
-                donationContent.matches("^(.*) {2}- (.*)$") ||
-                donationContent.matches("^(.*) {2}- {2}(.*)$")
-        ) {
-            String artist = donationContent.substring(0, donationContent.indexOf("-") - 1);
-            String title = donationContent.substring(donationContent.indexOf("-") + 1);
+        String artist;
+        String title;
 
-            musicDownload(roomId, artist, title);
-
-            String customTitle = title.replace(" ", "_");
-            MusicFileDTO dto = musicMapper.findByMusic(roomId, artist, customTitle);
-            String changeTitle = dto.getTitle().replace("_", " ");
-
-            MusicFileDTO musicFileDTO = MusicFileDTO.builder()
-                    .artist(artist)
-                    .roomId(roomId)
-                    .title(changeTitle)
-                    .musicFileBytes(dto.getMusicFileBytes()).build();
-
-            simpMessagingTemplate.convertAndSend("/sub/message/" + roomId, musicFileDTO);
+        if(donationContent.matches("^(.*) - (.*)$")) {
+            artist = donationContent.substring(0, donationContent.indexOf("-") - 1);
+            title = donationContent.substring(donationContent.indexOf("-") + 2);
+            memberMusicDownload(roomId, artist, title);
+        } else if (donationContent.matches("^(.*) -(.*)$")) {
+            artist = donationContent.substring(0, donationContent.indexOf("-") - 1);
+            title = donationContent.substring(donationContent.indexOf("-") + 1);
+            memberMusicDownload(roomId, artist, title);
+        } else if (donationContent.matches("^(.*)- (.*)$")) {
+            artist = donationContent.substring(0, donationContent.indexOf("-"));
+            title = donationContent.substring(donationContent.indexOf("-") + 2);
+            memberMusicDownload(roomId, artist, title);
+        } else if (donationContent.matches("^(.*)-(.*)$")) {
+            artist = donationContent.substring(0, donationContent.indexOf("-"));
+            title = donationContent.substring(donationContent.indexOf("-") + 1);
+            memberMusicDownload(roomId, artist, title);
+        } else if (donationContent.matches("^(.*) - {2}(.*)$")) {
+            artist = donationContent.substring(0, donationContent.indexOf("-") - 1);
+            title = donationContent.substring(donationContent.indexOf("-") + 3);
+            memberMusicDownload(roomId, artist, title);
+        } else if (donationContent.matches("^(.*) {2}- (.*)$")) {
+            artist = donationContent.substring(0, donationContent.indexOf("-") - 2);
+            title = donationContent.substring(donationContent.indexOf("-") + 2);
+            memberMusicDownload(roomId, artist, title);
+        } else if (donationContent.matches("^(.*) {2}- {2}(.*)$")) {
+            artist = donationContent.substring(0, donationContent.indexOf("-") - 2);
+            title = donationContent.substring(donationContent.indexOf("-") + 3);
+            memberMusicDownload(roomId, artist, title);
         }
     }
 
@@ -292,7 +300,7 @@ public class MusicServiceImpl implements MusicService {
                     .roomId(roomId)
                     .artist(artist)
                     .title(customTitle)
-                    .musicFileBytes(mp3Data)
+                    .musicFileBytes(Base64.getEncoder().encodeToString(mp3Data))
                     .build();
 
             save(musicFileDTO);
