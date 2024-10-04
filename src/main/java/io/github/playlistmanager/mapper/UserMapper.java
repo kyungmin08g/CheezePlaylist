@@ -7,4 +7,8 @@ import org.apache.ibatis.annotations.Mapper;
 public interface UserMapper {
     void save(JoinMemberDTO joinMemberDTO);
     JoinMemberDTO findByUsername(String username);
+
+    void refreshTokenSave(String username, String refreshToken);
+    String refreshTokenFindByUsername(String username);
+    void refreshTokenDeleteByUsername(String username);
 }

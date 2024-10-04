@@ -5,13 +5,64 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>편집</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #566ca9;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #3455ad;
+        }
+    </style>
 </head>
 <body>
-    <h2>수정 페이지 입니다.</h2>
-
-    <input type="text" id="playlistName" placeholder="이름을 입력하세요.">
-    <input type="text" id="chzzkChannelId" placeholder="치지직 아이디를 입력하세요.">
-    <button id="update-btn" onclick="update()">수정</button>
+    <div class="container">
+        <h2>수정</h2>
+        <input type="text" id="playlistName" placeholder="이름을 입력하세요.">
+        <input type="text" id="chzzkChannelId" placeholder="치지직 아이디를 입력하세요.">
+        <button id="update-btn" onclick="update()">수정</button>
+    </div>
 
     <script>
         function update() {

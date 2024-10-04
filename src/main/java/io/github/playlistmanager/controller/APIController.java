@@ -32,18 +32,6 @@ public class APIController {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-    @GetMapping("/signup")
-    public ResponseEntity<?> signUp(@RequestParam("username") String username, @RequestParam("email") String email, @RequestParam("password") String password) {
-        JoinMemberDTO memberDto = JoinMemberDTO.builder()
-                .username(username)
-                .email(email)
-                .password(bCryptPasswordEncoder.encode(password))
-                .role("ROLE_USER").build();
-
-        userService.save(memberDto);
-        return ResponseEntity.status(200).build();
-    }
-
     @GetMapping("/playlist")
     public ResponseEntity<?> chzzk(@RequestParam String playlistName, @RequestParam String chzzkChannelId) {
         String uuid = UUID.randomUUID().toString();
