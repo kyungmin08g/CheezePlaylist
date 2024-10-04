@@ -166,6 +166,7 @@ public class MusicServiceImpl implements MusicService {
     // 쿼리를 받으면 YouTube Data API를 통해 동영상을 검색하는 메소드임
     @Override
     public String searchVideo(String query) {
+        System.out.println("어떻게 검색하는지 궁금해서: " + query);
         Mono<String> response = WebClient.builder().baseUrl("https://www.googleapis.com").build().get()
                 .uri(uriBuilder -> uriBuilder.path("/youtube/v3/search")
                         .queryParam("part", "snippet")
@@ -370,5 +371,10 @@ public class MusicServiceImpl implements MusicService {
     @Override
     public List<PlaylistDto> findAll() {
         return musicMapper.findAll();
+    }
+
+    @Override
+    public void playlistDelete(String playlistId, String playlistName) {
+        musicMapper.playlistDelete(playlistId, playlistName);
     }
 }

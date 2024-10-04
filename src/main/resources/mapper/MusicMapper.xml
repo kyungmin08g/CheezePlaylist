@@ -34,4 +34,8 @@
     <select id="findAll">
         select * from playlist;
     </select>
+
+    <delete id="playlistDelete">
+        delete from playlist where playlistid = #{playlistId} and playlistname = #{playlistName};
+    </delete>
 </mapper>

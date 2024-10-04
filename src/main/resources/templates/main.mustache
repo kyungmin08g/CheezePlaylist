@@ -86,7 +86,10 @@
 <body>
     <table id="table">
         <thead>
-        <tr><th>플레이리스트 이름</th></tr>
+            <tr>
+                <th>플레이리스트 이름</th>
+                <th>삭제</th>
+            </tr>
         </thead>
         <tbody>
         </tbody>
@@ -94,27 +97,40 @@
     <button id="playlistAdd" onclick="playlistAdd()">플레이리스트 추가</button>
 
     <script>
-        list();
+        let playlists = [];
+        getPlaylist();
 
-        async function list() {
-            let playlists = [];
-
+        async function getPlaylist() {
             await fetch("/api/v1/playlists").then(response => response.json())
                     .then(data => {
                         playlists = data;
                     });
 
             const tableBody = document.querySelector('#table tbody');
+            tableBody.innerHTML = '';
+
             playlists.forEach(data => {
                 const row = document.createElement('tr');
-                const cell = document.createElement('td');
+                const playlistCell = document.createElement('td');
+                const deleteCell = document.createElement('td');
                 const button = document.createElement('button');
+                const deleteButton = document.createElement('button');
+
                 button.textContent = data.playlistName;
-                button.onclick = function() {
+                button.onclick = () => {
                     location.href = `/playlist?id=${data.playlistId}&name=${data.playlistName}`;
                 };
-                cell.appendChild(button);
-                row.appendChild(cell);
+
+                deleteButton.textContent = '제거'
+                deleteButton.onclick = async () => {
+                    await fetch(`/api/v1/playlist/delete?playlistId=${data.playlistId}&playlistName=${data.playlistName}`, { method: 'GET' })
+                    await getPlaylist();
+                }
+
+                playlistCell.appendChild(button);
+                deleteCell.appendChild(deleteButton);
+                row.appendChild(playlistCell);
+                row.appendChild(deleteCell);
                 tableBody.appendChild(row);
             });
         }

@@ -29,4 +29,5 @@ public interface MusicService {
     void saveChannelId(PlaylistDto dto);
     PlaylistDto findByIdAndPlaylistName(String playlistId, String playlistName);
     List<PlaylistDto> findAll();
+    void playlistDelete(String playlistId, String playlistName);
 }
