@@ -13,8 +13,11 @@ public interface MusicMapper {
     List<MusicFileDTO> findById(String roomId);
     MusicFileDTO findByArtistAndTitle(String artist, String title);
     void delete(String roomId, String artist, String title);
+    void deleteById(String playlistId);
+
     void saveChannelId(PlaylistDto dto);
     PlaylistDto findByIdAndPlaylistName(String playlistId, String playlistName);
     List<PlaylistDto> findAll();
+    void playlistUpdate(String playlistId, String playlistName, String chzzkChannelId);
     void playlistDelete(String playlistId, String playlistName);
 }

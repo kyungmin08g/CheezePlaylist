@@ -88,6 +88,7 @@
         <thead>
             <tr>
                 <th>플레이리스트 이름</th>
+                <th>수정</th>
                 <th>삭제</th>
             </tr>
         </thead>
@@ -112,24 +113,33 @@
             playlists.forEach(data => {
                 const row = document.createElement('tr');
                 const playlistCell = document.createElement('td');
+                const correctionCell = document.createElement('td');
                 const deleteCell = document.createElement('td');
-                const button = document.createElement('button');
+                const playlistButton = document.createElement('button');
+                const correctionButton = document.createElement('button');
                 const deleteButton = document.createElement('button');
 
-                button.textContent = data.playlistName;
-                button.onclick = () => {
+                playlistButton.textContent = data.playlistName;
+                playlistButton.onclick = () => {
                     location.href = `/playlist?id=${data.playlistId}&name=${data.playlistName}`;
                 };
 
-                deleteButton.textContent = '제거'
+                correctionButton.textContent = '수정';
+                correctionButton.onclick = () => {
+                    location.href = `/update?playlistId=${data.playlistId}`;
+                };
+
+                deleteButton.textContent = '제거';
                 deleteButton.onclick = async () => {
                     await fetch(`/api/v1/playlist/delete?playlistId=${data.playlistId}&playlistName=${data.playlistName}`, { method: 'GET' })
                     await getPlaylist();
-                }
+                };
 
-                playlistCell.appendChild(button);
+                playlistCell.appendChild(playlistButton);
                 deleteCell.appendChild(deleteButton);
+                correctionCell.appendChild(correctionButton)
                 row.appendChild(playlistCell);
+                row.appendChild(correctionCell);
                 row.appendChild(deleteCell);
                 tableBody.appendChild(row);
             });

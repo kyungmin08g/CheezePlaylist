@@ -3,6 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="io.github.playlistmanager.mapper.MusicMapper">
+    <!-- 음악 관련 -->
     <insert id="save" parameterType="MusicDto">
         insert into music(roomid, artist, title, musicFileBytes) values(#{roomId}, #{artist}, #{title}, #{musicFileBytes});
     </insert>
@@ -16,13 +17,18 @@
     </select>
 
     <select id="findByArtistAndTitle" resultType="MusicDto">
-        select * from music where artist ilike #{artist} and title ilike #{title};
+        select artist, title, musicfilebytes from music where artist ilike #{artist} and title ilike #{title} group by artist, title, musicfilebytes;
     </select>
 
     <delete id="delete">
         delete from music where roomid = #{roomId} and artist ilike #{artist} and title ilike #{title};
     </delete>
 
+    <delete id="deleteById">
+        delete from music where roomid = #{roomId};
+    </delete>
+
+    <!-- 플레이리스트 관련 -->
     <insert id="saveChannelId" parameterType="PlaylistDto">
         insert into playlist(playlistid, playlistname, chzzkchannelid) values(#{playlistId}, #{playlistName}, #{chzzkChannelId});
     </insert>
@@ -34,6 +40,10 @@
     <select id="findAll">
         select * from playlist;
     </select>
+
+    <update id="playlistUpdate">
+        update playlist set playlistname = #{playlistName}, chzzkchannelid = #{chzzkChannelId} where playlistid = #{playlistId};
+    </update>
 
     <delete id="playlistDelete">
         delete from playlist where playlistid = #{playlistId} and playlistname = #{playlistName};

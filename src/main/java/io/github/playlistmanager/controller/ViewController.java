@@ -26,6 +26,12 @@ public class ViewController {
         return "playlist-create";
     }
 
+    @GetMapping("/update")
+    public String updatePage(@RequestParam String playlistId, Model model) {
+        model.addAttribute("playlistId", playlistId);
+        return "update";
+    }
+
     @GetMapping("/playlist")
     public String view(@RequestParam String id, @RequestParam String name, Model model) {
         ChzzkChannelConnectDto connectDto = musicService.chzzkChannelConnect(musicService.findByIdAndPlaylistName(id, name));

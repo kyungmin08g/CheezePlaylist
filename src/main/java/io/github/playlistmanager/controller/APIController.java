@@ -98,9 +98,18 @@ public class APIController {
         return ResponseEntity.status(200).build();
     }
 
+    @GetMapping("/playlist/update")
+    public ResponseEntity<?> update(@RequestParam String playlistId, @RequestParam String playlistName, @RequestParam String chzzkChannelId) {
+        musicService.playlistUpdate(playlistId, playlistName, chzzkChannelId);
+        log.info("업데이트 되었습니다.");
+        return ResponseEntity.status(200).build();
+    }
+
     @GetMapping("/playlist/delete")
     public ResponseEntity<?> playlistDelete(@RequestParam String playlistId, @RequestParam String playlistName) {
         musicService.playlistDelete(playlistId, playlistName);
+        musicService.deleteById(playlistId);
+        log.info(playlistName + "이 제거되었습니다.");
         return ResponseEntity.status(200).build();
     }
 

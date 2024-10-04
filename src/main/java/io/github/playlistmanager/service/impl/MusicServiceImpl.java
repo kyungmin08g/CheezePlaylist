@@ -359,6 +359,11 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
+    public void deleteById(String playlistId) {
+        musicMapper.deleteById(playlistId);
+    }
+
+    @Override
     public void saveChannelId(PlaylistDto dto) {
         musicMapper.saveChannelId(dto);
     }
@@ -371,6 +376,11 @@ public class MusicServiceImpl implements MusicService {
     @Override
     public List<PlaylistDto> findAll() {
         return musicMapper.findAll();
+    }
+
+    @Override
+    public void playlistUpdate(String playlistId, String playlistName, String chzzkChannelId) {
+        musicMapper.playlistUpdate(playlistId, playlistName, chzzkChannelId);
     }
 
     @Override

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>편집</title>
+</head>
+<body>
+    <h2>수정 페이지 입니다.</h2>
+
+    <input type="text" id="playlistName" placeholder="이름을 입력하세요.">
+    <input type="text" id="chzzkChannelId" placeholder="치지직 아이디를 입력하세요.">
+    <button id="update-btn" onclick="update()">수정</button>
+
+    <script>
+        function update() {
+            const playlistName = document.getElementById("playlistName").value
+            const chzzkChannelId = document.getElementById("chzzkChannelId").value
+
+            fetch(`/api/v1/playlist/update?playlistId={{playlistId}}&playlistName=${playlistName}&chzzkChannelId=${chzzkChannelId}`, { method: 'GET' })
+            location.href = '/';
+        }
+    </script>
+</body>
+</html>
