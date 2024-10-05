@@ -14,6 +14,12 @@ import java.util.Date;
 @Component
 public class JwtProvider {
 
+    @Value("${jwt.access-token-expire-time}")
+    private long access_token_expire_time;
+
+    @Value("${jwt.refresh-token-expire-time}")
+    private long refresh_token_expire_time;
+
     private final Key secretKey;
 
     public JwtProvider(@Value("${jwt.secret-key}") String secretKey) {
@@ -33,7 +39,7 @@ public class JwtProvider {
                 .setHeaderParam("alg", "HS256")
                 .addClaims(claims)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + (60 * 1000)))
+                .setExpiration(new Date(System.currentTimeMillis() + (access_token_expire_time * 1000)))
                 .signWith(secretKey)
                 .compact();
     }
@@ -49,7 +55,7 @@ public class JwtProvider {
                 .setHeaderParam("alg", "HS256")
                 .addClaims(claims)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + (3 * 60 * 1000)))
+                .setExpiration(new Date(System.currentTimeMillis() + (refresh_token_expire_time * 1000)))
                 .signWith(secretKey)
                 .compact();
     }

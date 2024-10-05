@@ -6,6 +6,7 @@ import io.github.playlistmanager.service.impl.MusicServiceImpl;
 import io.github.playlistmanager.service.impl.UserServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,22 +19,17 @@ public class ViewController {
 
     private final MusicServiceImpl musicService;
     private final UserServiceImpl userService;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public ViewController(
-            MusicServiceImpl musicService,
-            UserServiceImpl userService,
-            BCryptPasswordEncoder bCryptPasswordEncoder
-    ) {
+    public ViewController(MusicServiceImpl musicService, UserServiceImpl userService) {
         this.musicService = musicService;
         this.userService = userService;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @Secured("ROLE_USER")
     @GetMapping("/")
-    public String mainPage(Model model) {
-        model.addAttribute("playlistData", musicService.findAll());
+    public String mainPage(Model model, SecurityContext securityContext) {
+        String username = (String) securityContext.getAuthentication().getPrincipal();
+        model.addAttribute("playlistData", musicService.findAll(username));
         return "main";
     }
 
@@ -50,22 +46,17 @@ public class ViewController {
         return "update";
     }
 
-    @PostMapping("/signup/create")
+    @PostMapping("/signup")
     public String signUp(JoinMemberDTO dto) {
-        JoinMemberDTO memberDto = JoinMemberDTO.builder()
-                .username(dto.getUsername())
-                .email(dto.getEmail())
-                .password(bCryptPasswordEncoder.encode(dto.getPassword()))
-                .role("ROLE_USER").build();
-
-        userService.save(memberDto);
+        userService.joinUser(dto);
         return "login";
     }
 
     @Secured("ROLE_USER")
     @GetMapping("/playlist")
-    public String view(@RequestParam String id, @RequestParam String name, Model model) {
-        ChzzkChannelConnectDto connectDto = musicService.chzzkChannelConnect(musicService.findByIdAndPlaylistName(id, name));
+    public String view(@RequestParam String id, @RequestParam String name, Model model, SecurityContext securityContext) {
+        String username = (String) securityContext.getAuthentication().getPrincipal();
+        ChzzkChannelConnectDto connectDto = musicService.chzzkChannelConnect(musicService.findByIdAndPlaylistName(id, name, username));
 
         model.addAttribute("playlistName", name);
         model.addAttribute("playlistId", connectDto.getPlaylistId());

@@ -12,6 +12,7 @@ import io.github.playlistmanager.service.MusicService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -369,22 +370,22 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public PlaylistDto findByIdAndPlaylistName(String playlistId, String playlistName) {
-        return musicMapper.findByIdAndPlaylistName(playlistId, playlistName);
+    public PlaylistDto findByIdAndPlaylistName(String playlistId, String playlistName, String username) {
+        return musicMapper.findByIdAndPlaylistName(playlistId, playlistName, username);
     }
 
     @Override
-    public List<PlaylistDto> findAll() {
-        return musicMapper.findAll();
+    public List<PlaylistDto> findAll(String username) {
+        return musicMapper.findAll(username);
     }
 
     @Override
-    public void playlistUpdate(String playlistId, String playlistName, String chzzkChannelId) {
-        musicMapper.playlistUpdate(playlistId, playlistName, chzzkChannelId);
+    public void playlistUpdate(String playlistId, String playlistName, String chzzkChannelId, String username) {
+        musicMapper.playlistUpdate(playlistId, playlistName, chzzkChannelId, username);
     }
 
     @Override
-    public void playlistDelete(String playlistId, String playlistName) {
-        musicMapper.playlistDelete(playlistId, playlistName);
+    public void playlistDelete(String playlistId, String playlistName, String username) {
+        musicMapper.playlistDelete(playlistId, playlistName, username);
     }
 }

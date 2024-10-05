@@ -72,8 +72,8 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
     }
 
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        log.error("인증 실패: {}", failed.getMessage());
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
+        log.error("예외: {}", failed.getMessage());
         response.sendRedirect("/signup");
     }
 }

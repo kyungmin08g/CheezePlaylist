@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,33 +19,28 @@ import java.util.*;
 @Slf4j
 public class APIController {
 
-    private final UserServiceImpl userService;
     private final MusicServiceImpl musicService;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public APIController(
-            UserServiceImpl userService,
-            MusicServiceImpl musicService,
-            BCryptPasswordEncoder bCryptPasswordEncoder
-    ) {
-        this.userService = userService;
+    public APIController(MusicServiceImpl musicService) {
         this.musicService = musicService;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @GetMapping("/playlist")
-    public ResponseEntity<?> chzzk(@RequestParam String playlistName, @RequestParam String chzzkChannelId) {
+    public ResponseEntity<?> chzzk(@RequestParam String playlistName, @RequestParam String chzzkChannelId, SecurityContext securityContext) {
         String uuid = UUID.randomUUID().toString();
-        PlaylistDto dto = new PlaylistDto(uuid, playlistName, chzzkChannelId);
+        String username = (String) securityContext.getAuthentication().getPrincipal();
+        PlaylistDto dto = new PlaylistDto(username, uuid, playlistName, chzzkChannelId);
         musicService.saveChannelId(dto);
 
         return ResponseEntity.status(200).build();
     }
 
     @GetMapping("/playlists")
-    public ResponseEntity<List<Map<String, String>>> getPlaylists() {
+    public ResponseEntity<List<Map<String, String>>> getPlaylists(SecurityContext securityContext) {
+        String username = (String) securityContext.getAuthentication().getPrincipal();
+
         List<Map<String, String>> playlists = new ArrayList<>();
-        List<PlaylistDto> dto = musicService.findAll();
+        List<PlaylistDto> dto = musicService.findAll(username);
 
         for (PlaylistDto playlistDto : dto) {
             Map<String, String> playlist = new HashMap<>();
@@ -87,15 +83,17 @@ public class APIController {
     }
 
     @GetMapping("/playlist/update")
-    public ResponseEntity<?> update(@RequestParam String playlistId, @RequestParam String playlistName, @RequestParam String chzzkChannelId) {
-        musicService.playlistUpdate(playlistId, playlistName, chzzkChannelId);
+    public ResponseEntity<?> update(@RequestParam String playlistId, @RequestParam String playlistName, @RequestParam String chzzkChannelId, SecurityContext securityContext) {
+        String username = (String) securityContext.getAuthentication().getPrincipal();
+        musicService.playlistUpdate(playlistId, playlistName, chzzkChannelId, username);
         log.info("업데이트 되었습니다.");
         return ResponseEntity.status(200).build();
     }
 
     @GetMapping("/playlist/delete")
-    public ResponseEntity<?> playlistDelete(@RequestParam String playlistId, @RequestParam String playlistName) {
-        musicService.playlistDelete(playlistId, playlistName);
+    public ResponseEntity<?> playlistDelete(@RequestParam String playlistId, @RequestParam String playlistName, SecurityContext securityContext) {
+        String username = (String) securityContext.getAuthentication().getPrincipal();
+        musicService.playlistDelete(playlistId, playlistName, username);
         musicService.deleteById(playlistId);
         log.info(playlistName + "이 제거되었습니다.");
         return ResponseEntity.status(200).build();

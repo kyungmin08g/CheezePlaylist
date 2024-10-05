@@ -55,6 +55,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        // 액세스 토큰은 있는데 리프레쉬 토큰이 없을때
+        if (userService.refreshTokenFindByUsername(jwtProvider.getUsername(accessToken)) == null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("accessToken")) {
+                    cookie.setMaxAge(0);
+                    Objects.requireNonNull(response).addCookie(cookie);
+
+                    Objects.requireNonNull(filterChain).doFilter(request, response);
+                    return;
+                }
+            }
+        }
+
         // 액세스 토큰 재발급
         if (!jwtProvider.getValidateToken(accessToken)) {
             for (Cookie cookie : cookies) {
@@ -64,8 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     String refreshToken = userService.refreshTokenFindByUsername(jwtProvider.getUsername(accessToken));
                     if (jwtProvider.getValidateToken(refreshToken)) {
-                        // 재발급
-                        System.out.println("재발급!!");
+                        System.out.println("액세스 토큰 재발급");
                         updateAccessToken(accessToken, response);
                     } else {
                         userService.refreshTokenDeleteByUsername(jwtProvider.getUsername(accessToken));

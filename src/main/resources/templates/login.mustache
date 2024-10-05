@@ -94,7 +94,7 @@
             <button type="submit" class="submit-btn">로그인</button>
         </form>
         <div class="signup-link">
-            계정이 없으신가요? <a href="/signup">지금 가입하세요!</a>
+            계정이 없으신가요? <a href="/join">지금 가입하세요!</a>
         </div>
     </div>
 
@@ -102,7 +102,6 @@
         document.getElementById("form").onsubmit = () => {
             const username = document.getElementById("username")
             const password = document.getElementById("password")
-            console.log("username: " + username.value + ", password: " + password.value)
 
             fetch('/login', {
                 method: 'POST',
@@ -115,12 +114,12 @@
                 })
             })
             .then(data => {
-                location.href='/'
+                location.href = '/'
             })
             .catch(err => {
                 username.value = ''
                 password.value = ''
-                alert("회원가입 먼저 해주세요!")
+                location.href = '/signup'
                 console.log(err)
             });
 

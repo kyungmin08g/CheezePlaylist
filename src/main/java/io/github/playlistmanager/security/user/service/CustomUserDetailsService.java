@@ -23,10 +23,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         JoinMemberDTO memberDTO = service.findByUsername(username);
 
-        if (Objects.equals(username, memberDTO.getUsername())) {
+        if (memberDTO != null && Objects.equals(username, memberDTO.getUsername())) {
             return new CustomUserDetails(memberDTO);
         }
 
-        return null;
+        throw new UsernameNotFoundException("없어 " + username);
     }
 }
