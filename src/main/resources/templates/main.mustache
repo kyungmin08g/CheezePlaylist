@@ -126,18 +126,23 @@
 
                 correctionButton.textContent = '수정';
                 correctionButton.onclick = () => {
-                    location.href = `/update?playlistId=${data.playlistId}`;
+                    location.href = `/update?playlistId=${data.playlistId}&playlistName=${data.playlistName}`;
                 };
 
-                deleteButton.textContent = '제거';
+                deleteButton.textContent = '삭제';
                 deleteButton.onclick = async () => {
-                    await fetch(`/api/v1/playlist/delete?playlistId=${data.playlistId}&playlistName=${data.playlistName}`, { method: 'GET' })
-                    await getPlaylist();
+                    await fetch(`/api/v1/playlist/delete?playlistId=${data.playlistId}&playlistName=${data.playlistName}`, { method: 'GET' }).then(response => {
+                        if (response.ok === false) {
+                            location.href = '/'
+                        } else {
+                            getPlaylist();
+                        }
+                    })
                 };
 
                 playlistCell.appendChild(playlistButton);
                 deleteCell.appendChild(deleteButton);
-                correctionCell.appendChild(correctionButton)
+                correctionCell.appendChild(correctionButton);
                 row.appendChild(playlistCell);
                 row.appendChild(correctionCell);
                 row.appendChild(deleteCell);

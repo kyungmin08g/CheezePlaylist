@@ -116,7 +116,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String accessToken = jwtProvider.createAccessToken(username, role);
 
         Cookie cookie = new Cookie("accessToken", accessToken);
-        cookie.setMaxAge(3600);
+        cookie.setMaxAge(90);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
         response.addCookie(cookie);
     }
 }

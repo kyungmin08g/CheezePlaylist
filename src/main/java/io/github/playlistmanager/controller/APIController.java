@@ -2,14 +2,12 @@ package io.github.playlistmanager.controller;
 
 import io.github.playlistmanager.dto.*;
 import io.github.playlistmanager.service.impl.MusicServiceImpl;
-import io.github.playlistmanager.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -29,10 +27,14 @@ public class APIController {
     public ResponseEntity<?> chzzk(@RequestParam String playlistName, @RequestParam String chzzkChannelId, SecurityContext securityContext) {
         String uuid = UUID.randomUUID().toString();
         String username = (String) securityContext.getAuthentication().getPrincipal();
-        PlaylistDto dto = new PlaylistDto(username, uuid, playlistName, chzzkChannelId);
-        musicService.saveChannelId(dto);
 
-        return ResponseEntity.status(200).build();
+        if (!username.equals("anonymousUser")) {
+            PlaylistDto dto = new PlaylistDto(username, uuid, playlistName, chzzkChannelId);
+            musicService.saveChannelId(dto);
+            return ResponseEntity.status(200).build();
+        }
+
+        return ResponseEntity.status(401).build();
     }
 
     @GetMapping("/playlists")
@@ -85,18 +87,29 @@ public class APIController {
     @GetMapping("/playlist/update")
     public ResponseEntity<?> update(@RequestParam String playlistId, @RequestParam String playlistName, @RequestParam String chzzkChannelId, SecurityContext securityContext) {
         String username = (String) securityContext.getAuthentication().getPrincipal();
-        musicService.playlistUpdate(playlistId, playlistName, chzzkChannelId, username);
-        log.info("업데이트 되었습니다.");
-        return ResponseEntity.status(200).build();
+
+        if (!username.equals("anonymousUser")) {
+            musicService.playlistUpdate(playlistId, playlistName, chzzkChannelId, username);
+            log.info("업데이트 되었습니다.");
+            return ResponseEntity.status(200).build();
+        }
+
+        return ResponseEntity.status(401).build();
     }
 
     @GetMapping("/playlist/delete")
     public ResponseEntity<?> playlistDelete(@RequestParam String playlistId, @RequestParam String playlistName, SecurityContext securityContext) {
         String username = (String) securityContext.getAuthentication().getPrincipal();
-        musicService.playlistDelete(playlistId, playlistName, username);
-        musicService.deleteById(playlistId);
-        log.info(playlistName + "이 제거되었습니다.");
-        return ResponseEntity.status(200).build();
+
+        System.out.println(username);
+        if (!username.equals("anonymousUser")) {
+            musicService.playlistDelete(playlistId, playlistName, username);
+            musicService.deleteById(playlistId);
+            log.info(playlistName + "이 제거되었습니다.");
+            return ResponseEntity.status(200).build();
+        }
+
+        return ResponseEntity.status(401).body("anonymousUser");
     }
 
     @MessageMapping("/api/v1/message/{playlistId}")

@@ -2,6 +2,7 @@ package io.github.playlistmanager.controller;
 
 import io.github.playlistmanager.dto.ChzzkChannelConnectDto;
 import io.github.playlistmanager.dto.JoinMemberDTO;
+import io.github.playlistmanager.dto.PlaylistDto;
 import io.github.playlistmanager.service.impl.MusicServiceImpl;
 import io.github.playlistmanager.service.impl.UserServiceImpl;
 import org.springframework.http.ResponseEntity;
@@ -41,8 +42,14 @@ public class ViewController {
 
     @Secured("ROLE_USER")
     @GetMapping("/update")
-    public String updatePage(@RequestParam String playlistId, Model model) {
+    public String updatePage(@RequestParam String playlistId, @RequestParam String playlistName, SecurityContext securityContext, Model model) {
+        String username = (String) securityContext.getAuthentication().getPrincipal();
+        PlaylistDto dto = musicService.findByIdAndPlaylistName(playlistId, playlistName, username);
+
+        model.addAttribute("playlistName", dto.getPlaylistName());
+        model.addAttribute("chzzkChannelId", dto.getChzzkChannelId());
         model.addAttribute("playlistId", playlistId);
+
         return "update";
     }
 

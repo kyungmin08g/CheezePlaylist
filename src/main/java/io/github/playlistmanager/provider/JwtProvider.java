@@ -23,9 +23,7 @@ public class JwtProvider {
     private final Key secretKey;
 
     public JwtProvider(@Value("${jwt.secret-key}") String secretKey) {
-        this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(
-                    Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8))
-                ));
+        this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8))));
     }
 
     // 액세스 토큰 생성

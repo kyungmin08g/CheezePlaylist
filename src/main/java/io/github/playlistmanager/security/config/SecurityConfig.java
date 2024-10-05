@@ -13,12 +13,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import javax.naming.AuthenticationException;
-import java.nio.file.AccessDeniedException;
 
 @Configuration
 @EnableWebSecurity
@@ -46,12 +42,9 @@ public class SecurityConfig {
         http.httpBasic(AbstractHttpConfigurer::disable);
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/").authenticated()
-                .anyRequest().permitAll()
-        );
-
-        http.exceptionHandling(exceptionHandling -> {
+        http.authorizeHttpRequests(auth -> {
+            auth.requestMatchers("/").authenticated().anyRequest().permitAll();
+        }).exceptionHandling(exceptionHandling -> { // 인증 실패 시 예외 처리
             exceptionHandling.authenticationEntryPoint((request, response, authException) -> {
                 response.sendRedirect("/logins");
             });

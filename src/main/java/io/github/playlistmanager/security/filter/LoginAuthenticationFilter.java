@@ -4,14 +4,11 @@ import io.github.playlistmanager.provider.JwtProvider;
 import io.github.playlistmanager.security.user.details.CustomUserDetails;
 import io.github.playlistmanager.service.impl.UserServiceImpl;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -58,16 +55,11 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
         String accessToken = jwtProvider.createAccessToken(username, role);
 
         if (userService.refreshTokenFindByUsername(username) != null) {
-            Cookie cookie = new Cookie("accessToken", accessToken);
-            cookie.setMaxAge(3600);
-            response.addCookie(cookie);
+            sendCookie(response, accessToken);
         } else {
             String refreshToken = jwtProvider.createRefreshToken(username, role);
             userService.refreshTokenSave(username, refreshToken);
-
-            Cookie cookie = new Cookie("accessToken", accessToken);
-            cookie.setMaxAge(3600);
-            response.addCookie(cookie);
+            sendCookie(response, accessToken);
         }
     }
 
@@ -75,5 +67,13 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
         log.error("예외: {}", failed.getMessage());
         response.sendRedirect("/signup");
+    }
+
+    private void sendCookie(HttpServletResponse response, String accessToken) {
+        Cookie cookie = new Cookie("accessToken", accessToken);
+        cookie.setMaxAge(90);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        response.addCookie(cookie);
     }
 }

@@ -21,6 +21,7 @@ public interface MusicService {
     ChzzkChannelConnectDto chzzkChannelConnect(PlaylistDto playlistDto);
 
     // Mapper 관련
+    // 음악
     void save(MusicFileDTO musicFileDTO);
     MusicFileDTO findByMusic(String roomId, String artist, String title);
     List<MusicFileDTO> findById(String roomId);
@@ -28,6 +29,7 @@ public interface MusicService {
     void delete(String roomId, String artist, String title);
     void deleteById(String playlistId);
 
+    // 플레이리스트
     void saveChannelId(PlaylistDto dto);
     PlaylistDto findByIdAndPlaylistName(String playlistId, String playlistName, String username);
     List<PlaylistDto> findAll(String username);

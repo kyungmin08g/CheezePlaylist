@@ -65,6 +65,9 @@
     </div>
 
     <script>
+        document.getElementById("playlistName").value = '{{playlistName}}'
+        document.getElementById("chzzkChannelId").value = '{{chzzkChannelId}}'
+
         function update() {
             const playlistName = document.getElementById("playlistName").value
             const chzzkChannelId = document.getElementById("chzzkChannelId").value
