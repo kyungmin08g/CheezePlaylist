@@ -3,6 +3,9 @@ package io.github.playlistmanager.security.config;
 import io.github.playlistmanager.provider.JwtProvider;
 import io.github.playlistmanager.security.filter.JwtAuthenticationFilter;
 import io.github.playlistmanager.security.filter.LoginAuthenticationFilter;
+import io.github.playlistmanager.security.oauth2.handler.OAuth2FailureHandler;
+import io.github.playlistmanager.security.oauth2.handler.OAuth2SuccessHandler;
+import io.github.playlistmanager.security.oauth2.user.service.impl.CustomOAuth2UserService;
 import io.github.playlistmanager.service.impl.UserServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,15 +27,24 @@ public class SecurityConfig {
     private final JwtProvider jwtProvider;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final UserServiceImpl userService;
+    private final CustomOAuth2UserService oAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
 
     public SecurityConfig(
             JwtProvider jwtProvider,
             AuthenticationConfiguration authenticationConfiguration,
-            UserServiceImpl userService
+            UserServiceImpl userService,
+            CustomOAuth2UserService oAuth2UserService,
+            OAuth2SuccessHandler oAuth2SuccessHandler,
+            OAuth2FailureHandler oAuth2FailureHandler
     ) {
         this.jwtProvider = jwtProvider;
         this.authenticationConfiguration = authenticationConfiguration;
         this.userService = userService;
+        this.oAuth2UserService = oAuth2UserService;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+        this.oAuth2FailureHandler = oAuth2FailureHandler;
     }
 
     @Bean
@@ -48,6 +60,14 @@ public class SecurityConfig {
             exceptionHandling.authenticationEntryPoint((request, response, authException) -> {
                 response.sendRedirect("/logins");
             });
+        });
+
+        // OAuth2.0 로그인
+        http.oauth2Login(oAuth2Login -> {
+           oAuth2Login.loginPage("/logins");
+           oAuth2Login.userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint.userService(oAuth2UserService));
+           oAuth2Login.successHandler(oAuth2SuccessHandler);
+           oAuth2Login.failureHandler(oAuth2FailureHandler);
         });
 
         http.addFilterBefore(new JwtAuthenticationFilter(jwtProvider, userService), LoginAuthenticationFilter.class);

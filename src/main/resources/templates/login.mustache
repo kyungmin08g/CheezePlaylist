@@ -64,6 +64,35 @@
             background-color: #4563bd;
         }
 
+        .social-login {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .social-login button {
+            width: 32%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            font-size: 14px;
+        }
+
+        .google-btn {
+            background-color: #db4437;
+        }
+
+        .naver-btn {
+            background-color: #1ec800;
+        }
+
+        .kakao-btn {
+            background-color: #fee500;
+            color: #3c1e1e;
+        }
+
         .signup-link {
             margin-top: 20px;
             font-size: 14px;
@@ -82,7 +111,7 @@
 <body>
     <div class="login-container">
         <h2>로그인</h2>
-        <form method="POST" id="form">
+        <form method="POST" id="loginForm">
             <div class="form-group">
                 <label for="username">유저 이름</label>
                 <input type="text" id="username" name="username" required>
@@ -93,13 +122,20 @@
             </div>
             <button type="submit" class="submit-btn">로그인</button>
         </form>
+
+        <div class="social-login">
+            <button class="google-btn" onclick="location.href = '/oauth2/authorization/google'">Google 로그인</button>
+            <button class="naver-btn" onclick="location.href = '/oauth2/authorization/naver'">Naver 로그인</button>
+            <button class="kakao-btn" onclick="location.href = '/oauth2/authorization/kakao'">Kakao 로그인</button>
+        </div>
+
         <div class="signup-link">
             계정이 없으신가요? <a href="/join">지금 가입하세요!</a>
         </div>
     </div>
 
     <script>
-        document.getElementById("form").onsubmit = () => {
+        document.getElementById("loginForm").onsubmit = function() {
             const username = document.getElementById("username")
             const password = document.getElementById("password")
 
@@ -113,7 +149,7 @@
                     'password': password.value
                 })
             })
-            .then(data => {
+            .then(() => {
                 location.href = '/'
             })
             .catch(err => {
@@ -128,4 +164,3 @@
     </script>
 </body>
 </html>
-
