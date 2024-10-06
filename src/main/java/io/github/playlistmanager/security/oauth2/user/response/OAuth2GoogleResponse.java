@@ -14,7 +14,7 @@ public class OAuth2GoogleResponse implements OAuth2Response {
 
     @Override
     public String getProvider() {
-        return "Google";
+        return "google";
     }
 
     @Override

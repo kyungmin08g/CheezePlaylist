@@ -1,6 +1,7 @@
 package io.github.playlistmanager.security.oauth2.user.service.impl;
 
 import io.github.playlistmanager.security.oauth2.OAuth2Response;
+import io.github.playlistmanager.security.oauth2.handler.OAuth2SuccessHandler;
 import io.github.playlistmanager.security.oauth2.user.response.OAuth2GoogleResponse;
 import io.github.playlistmanager.security.oauth2.user.response.OAuth2KakaoResponse;
 import io.github.playlistmanager.security.oauth2.user.response.OAuth2NaverResponse;
@@ -39,12 +40,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return oAuth2User;
     }
 
-    private OAuth2User oAuth2User(OAuth2Response oAuth2Response) {
-        log.info("\u001B[34m제공자: {}, 닉네임: {}, 이메일: {}\u001B[0m", oAuth2Response.getProvider(), oAuth2Response.getName(), oAuth2Response.getEmail());
-
+    private CustomOAuth2User oAuth2User(OAuth2Response oAuth2Response) {
         Map<String, String> attributes = new HashMap<>();
         attributes.put("name", oAuth2Response.getName());
         attributes.put("role", "ROLE_USER");
+
+        OAuth2SuccessHandler.provider = oAuth2Response.getProvider();
 
         return new CustomOAuth2User(attributes);
     }

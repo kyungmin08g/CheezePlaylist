@@ -14,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -61,7 +62,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (cookie.getName().equals("accessToken")) {
                     cookie.setMaxAge(0);
                     Objects.requireNonNull(response).addCookie(cookie);
-
                     Objects.requireNonNull(filterChain).doFilter(request, response);
                     return;
                 }
@@ -116,9 +116,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String accessToken = jwtProvider.createAccessToken(username, role);
 
         Cookie cookie = new Cookie("accessToken", accessToken);
-        cookie.setMaxAge(90);
+        cookie.setMaxAge(Integer.MAX_VALUE);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
+        cookie.setPath("/");
         response.addCookie(cookie);
     }
 }

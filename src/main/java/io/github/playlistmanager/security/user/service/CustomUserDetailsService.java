@@ -27,6 +27,15 @@ public class CustomUserDetailsService implements UserDetailsService {
             return new CustomUserDetails(memberDTO);
         }
 
-        throw new UsernameNotFoundException("없어 " + username);
+        if (username.matches("^(.*)_(.*)_(.*)$")) {
+            JoinMemberDTO oauth2MemberDto = JoinMemberDTO.builder()
+                    .username(username)
+                    .role("ROLE_USER")
+                    .build();
+
+            return new CustomUserDetails(oauth2MemberDto);
+        }
+
+        throw new UsernameNotFoundException(username + " 회원을 찾을 수 없습니다.");
     }
 }

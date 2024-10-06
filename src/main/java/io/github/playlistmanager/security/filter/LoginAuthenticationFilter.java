@@ -71,9 +71,10 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
 
     private void sendCookie(HttpServletResponse response, String accessToken) {
         Cookie cookie = new Cookie("accessToken", accessToken);
-        cookie.setMaxAge(90);
+        cookie.setMaxAge(Integer.MAX_VALUE);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
+        cookie.setPath("/");
         response.addCookie(cookie);
     }
 }

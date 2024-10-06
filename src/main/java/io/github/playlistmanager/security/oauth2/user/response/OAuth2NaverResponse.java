@@ -14,7 +14,7 @@ public class OAuth2NaverResponse implements OAuth2Response {
 
     @Override
     public String getProvider() {
-        return "Naver";
+        return "naver";
     }
 
     @Override
