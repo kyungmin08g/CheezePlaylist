@@ -1,6 +1,6 @@
 package io.github.playlistmanager.security.user.details;
 
-import io.github.playlistmanager.dto.JoinMemberDTO;
+import io.github.playlistmanager.dto.JoinMemberDto;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class CustomUserDetails implements UserDetails {
-    private final JoinMemberDTO memberDTO;
+    private final JoinMemberDto memberDTO;
 
-    public CustomUserDetails(JoinMemberDTO memberDTO) {
+    public CustomUserDetails(JoinMemberDto memberDTO) {
         this.memberDTO = memberDTO;
     }
 

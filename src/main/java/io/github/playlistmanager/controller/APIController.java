@@ -58,9 +58,9 @@ public class APIController {
     @GetMapping("/list/{playlistId}")
     public ResponseEntity<List<Map<String, String>>> list(@PathVariable("playlistId") String playlistId) {
         List<Map<String, String>> musicDatas = new ArrayList<>();
-        List<MusicFileDTO> listData = musicService.findById(playlistId);
+        List<MusicFileDto> listData = musicService.findById(playlistId);
 
-        for (MusicFileDTO dto : listData) {
+        for (MusicFileDto dto : listData) {
             Map<String, String> musicData = new HashMap<>();
 
             String customTitle = dto.getTitle().replace("_", " ");
@@ -113,7 +113,7 @@ public class APIController {
     }
 
     @MessageMapping("/api/v1/message/{playlistId}")
-    public ResponseEntity<?> message(@DestinationVariable("playlistId") String playlistId, MessageRequestDTO messageRequestDTO) {
+    public ResponseEntity<?> message(@DestinationVariable("playlistId") String playlistId, MessageRequestDto messageRequestDTO) {
         musicService.memberMusicDownload(playlistId, messageRequestDTO.getArtist(), messageRequestDTO.getTitle());
         return ResponseEntity.status(200).build();
     }

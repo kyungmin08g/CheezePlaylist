@@ -1,14 +1,12 @@
 package io.github.playlistmanager.controller;
 
 import io.github.playlistmanager.dto.ChzzkChannelConnectDto;
-import io.github.playlistmanager.dto.JoinMemberDTO;
+import io.github.playlistmanager.dto.JoinMemberDto;
 import io.github.playlistmanager.dto.PlaylistDto;
 import io.github.playlistmanager.service.impl.MusicServiceImpl;
 import io.github.playlistmanager.service.impl.UserServiceImpl;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,7 +52,7 @@ public class ViewController {
     }
 
     @PostMapping("/signup")
-    public String signUp(JoinMemberDTO dto) {
+    public String signUp(JoinMemberDto dto) {
         userService.joinUser(dto);
         return "login";
     }

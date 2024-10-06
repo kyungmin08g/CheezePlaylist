@@ -2,7 +2,7 @@ package io.github.playlistmanager.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.github.playlistmanager.dto.ChzzkChannelConnectDto;
-import io.github.playlistmanager.dto.MusicFileDTO;
+import io.github.playlistmanager.dto.MusicFileDto;
 import io.github.playlistmanager.dto.PlaylistDto;
 
 import java.io.IOException;
@@ -22,10 +22,10 @@ public interface MusicService {
 
     // Mapper 관련
     // 음악
-    void save(MusicFileDTO musicFileDTO);
-    MusicFileDTO findByMusic(String roomId, String artist, String title);
-    List<MusicFileDTO> findById(String roomId);
-    MusicFileDTO findByArtistAndTitle(String artist, String title);
+    void save(MusicFileDto musicFileDTO);
+    MusicFileDto findByMusic(String roomId, String artist, String title);
+    List<MusicFileDto> findById(String roomId);
+    MusicFileDto findByArtistAndTitle(String artist, String title);
     void delete(String roomId, String artist, String title);
     void deleteById(String playlistId);
 

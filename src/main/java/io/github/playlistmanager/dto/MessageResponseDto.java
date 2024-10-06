@@ -8,7 +8,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MessageResponseDTO {
+public class MessageResponseDto {
     private String artist;
     private String title;
 }

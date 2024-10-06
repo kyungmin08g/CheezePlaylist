@@ -1,15 +1,14 @@
 package io.github.playlistmanager.security.oauth2.handler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.playlistmanager.dto.JoinMemberDTO;
 import io.github.playlistmanager.provider.JwtProvider;
 import io.github.playlistmanager.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,11 +25,13 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     public static String provider;
 
+    private final String host;
     private final ObjectMapper objectMapper;
     private final JwtProvider jwtProvider;
     private final UserService userService;
 
-    public OAuth2SuccessHandler(JwtProvider jwtProvider, UserService userService) {
+    public OAuth2SuccessHandler(@Value("${server.host}") String host, JwtProvider jwtProvider, UserService userService) {
+        this.host = host;
         this.objectMapper = new ObjectMapper();
         this.jwtProvider = jwtProvider;
         this.userService = userService;
@@ -85,7 +86,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         }
     }
 
-    private HttpServletResponse sendAccessToken(String username, String id, HttpServletResponse response) throws IOException {
+    private void sendAccessToken(String username, String id, HttpServletResponse response) throws IOException {
         String name = provider + "_" + id + "_" + username;
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(name, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
@@ -98,13 +99,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
         accessTokenCookie.setMaxAge(Integer.MAX_VALUE);
-        accessTokenCookie.setSecure(false);
+        accessTokenCookie.setSecure(true);
         accessTokenCookie.setHttpOnly(true);
         accessTokenCookie.setPath("/");
         response.addCookie(accessTokenCookie);
-        response.sendRedirect("/");
-
-        return response;
+        response.sendRedirect(host + "/");
     }
 
 }

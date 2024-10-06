@@ -7,6 +7,7 @@ import io.github.playlistmanager.security.oauth2.handler.OAuth2FailureHandler;
 import io.github.playlistmanager.security.oauth2.handler.OAuth2SuccessHandler;
 import io.github.playlistmanager.security.oauth2.user.service.impl.CustomOAuth2UserService;
 import io.github.playlistmanager.service.impl.UserServiceImpl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
+    private final String host;
     private final JwtProvider jwtProvider;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final UserServiceImpl userService;
@@ -32,6 +34,7 @@ public class SecurityConfig {
     private final OAuth2FailureHandler oAuth2FailureHandler;
 
     public SecurityConfig(
+            @Value("${server.host}") String host,
             JwtProvider jwtProvider,
             AuthenticationConfiguration authenticationConfiguration,
             UserServiceImpl userService,
@@ -39,6 +42,7 @@ public class SecurityConfig {
             OAuth2SuccessHandler oAuth2SuccessHandler,
             OAuth2FailureHandler oAuth2FailureHandler
     ) {
+        this.host = host;
         this.jwtProvider = jwtProvider;
         this.authenticationConfiguration = authenticationConfiguration;
         this.userService = userService;
@@ -58,7 +62,7 @@ public class SecurityConfig {
             auth.requestMatchers("/").authenticated().anyRequest().permitAll();
         }).exceptionHandling(exceptionHandling -> { // 인증 실패 시 예외 처리
             exceptionHandling.authenticationEntryPoint((request, response, authException) -> {
-                response.sendRedirect("/logins");
+                response.sendRedirect(host + "/logins");
             });
         });
 

@@ -9,10 +9,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MusicFileDTO {
+public class JoinMemberDto {
     private String username;
-    private String roomId;
-    private String artist;
-    private String title;
-    private String musicFileBytes;
+    private String email;
+    private String password;
+    private String role;
 }

@@ -8,7 +8,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MusicDTO {
+public class MusicDto {
     private String artist;
     private String title;
 }

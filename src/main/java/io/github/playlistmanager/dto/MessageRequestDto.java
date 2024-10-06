@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MessageRequestDTO {
+public class MessageRequestDto {
     private String artist;
     private String title;
 }

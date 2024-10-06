@@ -1,6 +1,6 @@
 package io.github.playlistmanager.service.impl;
 
-import io.github.playlistmanager.dto.JoinMemberDTO;
+import io.github.playlistmanager.dto.JoinMemberDto;
 import io.github.playlistmanager.mapper.UserMapper;
 import io.github.playlistmanager.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +20,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void joinUser(JoinMemberDTO dto) {
-        JoinMemberDTO memberDto = JoinMemberDTO.builder()
+    public void joinUser(JoinMemberDto dto) {
+        JoinMemberDto memberDto = JoinMemberDto.builder()
                 .username(dto.getUsername())
                 .email(dto.getEmail())
                 .password(bCryptPasswordEncoder.encode(dto.getPassword()))
@@ -31,12 +31,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void save(JoinMemberDTO joinMemberDTO) {
+    public void save(JoinMemberDto joinMemberDTO) {
         userMapper.save(joinMemberDTO);
     }
 
     @Override
-    public JoinMemberDTO findByUsername(String username) {
+    public JoinMemberDto findByUsername(String username) {
         return userMapper.findByUsername(username);
     }
 

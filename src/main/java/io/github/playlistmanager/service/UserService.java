@@ -1,12 +1,12 @@
 package io.github.playlistmanager.service;
 
-import io.github.playlistmanager.dto.JoinMemberDTO;
+import io.github.playlistmanager.dto.JoinMemberDto;
 
 public interface UserService {
-    void joinUser(JoinMemberDTO dto);
+    void joinUser(JoinMemberDto dto);
 
-    void save(JoinMemberDTO joinMemberDTO);
-    JoinMemberDTO findByUsername(String username);
+    void save(JoinMemberDto joinMemberDTO);
+    JoinMemberDto findByUsername(String username);
 
     void refreshTokenSave(String username, String refreshToken);
     String refreshTokenFindByUsername(String username);

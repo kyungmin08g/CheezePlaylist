@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.chzzkapi.api.ChzzkAPI;
 import io.github.playlistmanager.dto.ChzzkChannelConnectDto;
-import io.github.playlistmanager.dto.MusicFileDTO;
+import io.github.playlistmanager.dto.MusicFileDto;
 import io.github.playlistmanager.dto.PlaylistDto;
 import io.github.playlistmanager.mapper.MusicMapper;
 import io.github.playlistmanager.service.MusicService;
@@ -51,10 +51,10 @@ public class MusicServiceImpl implements MusicService {
         musicDownload(roomId, artist, title);
 
         String customTitle = title.replace(" ", "_");
-        MusicFileDTO dto = musicMapper.findByMusic(roomId, artist, customTitle);
+        MusicFileDto dto = musicMapper.findByMusic(roomId, artist, customTitle);
         String changeTitle = dto.getTitle().replace("_", " ");
 
-        MusicFileDTO musicFileDTO = MusicFileDTO.builder()
+        MusicFileDto musicFileDTO = MusicFileDto.builder()
                 .artist(artist)
                 .roomId(roomId)
                 .title(changeTitle)
@@ -187,16 +187,16 @@ public class MusicServiceImpl implements MusicService {
         String customTitle = title.replace(" ", "_");
 
         // 검색 API 호출 전에 해당 음악이 있는지 체크
-        String optionalMusicFileDTO = Optional.ofNullable(findByMusic(roomId, artist, customTitle)).map(MusicFileDTO::getTitle).orElse("Untitled");
+        String optionalMusicFileDTO = Optional.ofNullable(findByMusic(roomId, artist, customTitle)).map(MusicFileDto::getTitle).orElse("Untitled");
         if (!optionalMusicFileDTO.equals("Untitled")) {
             log.info("해당 음악이 이미 있음");
             return;
         }
 
         // 다운로드 휫수를 줄이기 위해 해당음악이 있으면 가져와 저장
-        MusicFileDTO optionalTitleDTO = findByArtistAndTitle(artist, customTitle);
+        MusicFileDto optionalTitleDTO = findByArtistAndTitle(artist, customTitle);
         if (optionalTitleDTO != null) {
-            MusicFileDTO musicFileDTO = MusicFileDTO.builder()
+            MusicFileDto musicFileDTO = MusicFileDto.builder()
                     .artist(artist)
                     .roomId(roomId)
                     .title(customTitle)
@@ -297,7 +297,7 @@ public class MusicServiceImpl implements MusicService {
             log.info("URL에 대한 데이터가 없음");
         } else {
             // MusicFileDTO 객체 생성
-            MusicFileDTO musicFileDTO = MusicFileDTO.builder()
+            MusicFileDto musicFileDTO = MusicFileDto.builder()
                     .roomId(roomId)
                     .artist(artist)
                     .title(customTitle)
@@ -334,22 +334,22 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public void save(MusicFileDTO musicFileDTO) {
+    public void save(MusicFileDto musicFileDTO) {
         musicMapper.save(musicFileDTO);
     }
 
     @Override
-    public MusicFileDTO findByMusic(String roomId, String artist, String title) {
+    public MusicFileDto findByMusic(String roomId, String artist, String title) {
         return musicMapper.findByMusic(roomId, artist, title);
     }
 
     @Override
-    public List<MusicFileDTO> findById(String roomId) {
+    public List<MusicFileDto> findById(String roomId) {
         return musicMapper.findById(roomId);
     }
 
     @Override
-    public MusicFileDTO findByArtistAndTitle(String artist, String title) {
+    public MusicFileDto findByArtistAndTitle(String artist, String title) {
         return musicMapper.findByArtistAndTitle(artist, title);
     }
 
