@@ -3,7 +3,6 @@ package io.github.playlistmanager.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.chzzkapi.api.ChzzkAPI;
 import io.github.playlistmanager.dto.ChzzkChannelConnectDto;
 import io.github.playlistmanager.dto.MusicFileDto;
 import io.github.playlistmanager.dto.PlaylistDto;
@@ -31,19 +30,19 @@ public class MusicServiceImpl implements MusicService {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final MusicMapper musicMapper;
     private final ObjectMapper objectMapper;
-    private final ChzzkAPI chzzkAPI;
+
+    private String chatChannelId = null;
+    private String accessToken = null;
 
     public MusicServiceImpl(
             @Value("${youtube.api-key}") String key,
             SimpMessagingTemplate simpMessagingTemplate,
-            MusicMapper musicMapper,
-            ChzzkAPI chzzkAPI
+            MusicMapper musicMapper
     ) {
         this.key = key;
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.musicMapper = musicMapper;
         this.objectMapper = new ObjectMapper();
-        this.chzzkAPI = chzzkAPI;
     }
 
     @Override
@@ -235,12 +234,12 @@ public class MusicServiceImpl implements MusicService {
         log.info("유튜브 영상의 주소: {}", youtubeUrl);
 
         // yt-dlp 프로세스 생성
-        ProcessBuilder ytDlpBuilder = new ProcessBuilder("yt-dlp", "-f", "bestaudio", "-o", "-", youtubeUrl);
+        ProcessBuilder ytDlpBuilder = new ProcessBuilder("/app/venv/bin/yt-dlp", "-f", "bestaudio", "-o", "-", youtubeUrl);
         Process ytDlpProcess = ytDlpBuilder.start();
         log.info("yt-dlp 프로세스가 시작되었음");
 
         // ffmpeg 프로세스 생성
-        ProcessBuilder ffmpegBuilder = new ProcessBuilder("ffmpeg", "-i", "pipe:0", "-f", "mp3", "pipe:1");
+        ProcessBuilder ffmpegBuilder = new ProcessBuilder("/usr/bin/ffmpeg", "-i", "pipe:0", "-f", "mp3", "pipe:1");
         Process ffmpegProcess = ffmpegBuilder.start();
         log.info("ffmpeg 프로세스가 시작되었음");
 
@@ -312,9 +311,9 @@ public class MusicServiceImpl implements MusicService {
     @Override
     public ChzzkChannelConnectDto chzzkChannelConnect(PlaylistDto playlistDto) {
         String channelId = playlistDto.getChzzkChannelId();
-        String channelName = chzzkAPI.getChannelName(channelId);
-        String chatChannelId = chzzkAPI.getChatChannelId(channelId);
-        String accessToken = chzzkAPI.getAccessToken(chatChannelId);
+        String channelName = getChannelName(channelId);
+        String chatChannelId = getChatChannelId(channelId);
+        String accessToken = getAccessToken(chatChannelId);
 
         int serverId = 0;
         for (char i : chatChannelId.toCharArray()) {
@@ -329,7 +328,7 @@ public class MusicServiceImpl implements MusicService {
                 .serverId(String.valueOf(serverId))
                 .build();
 
-        log.info("\u001B[32m" + channelName + "님 채널에 연결하는 로직이 정상적으로 처리되었습니다.\u001B[0m");
+        log.info("\u001B[32m{}님 채널에 연결하는 로직이 정상적으로 처리되었습니다.\u001B[0m", channelName);
         return connectDto;
     }
 
@@ -386,5 +385,143 @@ public class MusicServiceImpl implements MusicService {
     @Override
     public void playlistDelete(String playlistId, String playlistName, String username) {
         musicMapper.playlistDelete(playlistId, playlistName, username);
+    }
+
+    // 채널 이름 구하는 메소드
+    private String getChannelName(String channelId) {
+        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
+                .get()
+                .uri("service/v1/channels/" + channelId)
+                .retrieve()
+                .bodyToMono(String.class);
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(response.block());
+            JsonNode content = jsonNode.get("content");
+
+            return content.get("channelName").asText();
+        } catch (JsonProcessingException e) {
+            e.fillInStackTrace();
+        }
+
+        return null;
+    }
+
+    // 채널 설명 구하는 메소드
+    private String getChannelDescription(String channelId) {
+        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
+                .get()
+                .uri("service/v1/channels/" + channelId)
+                .retrieve()
+                .bodyToMono(String.class);
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(response.block());
+            JsonNode content = jsonNode.get("content");
+
+            return content.get("channelDescription").asText();
+        } catch (JsonProcessingException e) {
+            e.fillInStackTrace();
+        }
+
+        return null;
+    }
+
+    // 채널 팔로워 상태 구하는 메소드
+    private String getFollowCount(String channelId) {
+        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
+                .get()
+                .uri("service/v1/channels/" + channelId)
+                .retrieve()
+                .bodyToMono(String.class);
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(response.block());
+            JsonNode content = jsonNode.get("content");
+
+            return content.get("followerCount").asText();
+        } catch (JsonProcessingException e) {
+            e.fillInStackTrace();
+        }
+
+        return null;
+    }
+
+    // 채널 채팅 규칙 받는 메소드
+    private String getChannelChatRule(String channelId) {
+        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
+                .get()
+                .uri("service/v1/channels/" + channelId + "/chat-rules")
+                .retrieve()
+                .bodyToMono(String.class);
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(response.block());
+            JsonNode content = jsonNode.get("content");
+
+            return content.get("rule").asText();
+        } catch (JsonProcessingException e) {
+            e.fillInStackTrace();
+        }
+
+        return null;
+    }
+
+    // 채널 라이브 상태 구하는 메소드
+    private boolean isLive(String channelId) {
+        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
+                .get()
+                .uri("service/v1/channels/" + channelId)
+                .retrieve()
+                .bodyToMono(String.class);
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(response.block());
+            JsonNode content = jsonNode.get("content");
+
+            return content.get("openLive").asBoolean();
+        } catch (JsonProcessingException e) {
+            e.fillInStackTrace();
+        }
+
+        return false;
+    }
+
+    // 채팅 아이디 받기 메소드
+    private String getChatChannelId(String channelId) {
+        Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
+                .get()
+                .uri("/polling/v3/channels/" + channelId + "/live-status")
+                .retrieve().bodyToMono(String.class);
+
+        try {
+            ObjectMapper liveStatusObjectMapper = new ObjectMapper();
+            JsonNode liveStatusJson = liveStatusObjectMapper.readTree(response.block());
+            JsonNode liveStatusContentJson = liveStatusJson.get("content");
+            chatChannelId = liveStatusContentJson.get("chatChannelId").asText();
+        } catch (JsonProcessingException e) {
+            e.fillInStackTrace();
+        }
+
+        return chatChannelId;
+    }
+
+    // 액세스 토큰 받기 메소드
+    private String getAccessToken(String chatChannelId) {
+        Mono<String> response = WebClient.builder().baseUrl("https://comm-api.game.naver.com").build()
+                .get()
+                .uri("nng_main/v1/chats/access-token?channelId=" + chatChannelId + "&chatType=STREAMING")
+                .retrieve().bodyToMono(String.class);
+
+        try {
+            ObjectMapper accessTokenObjectMapper = new ObjectMapper();
+            JsonNode accessTokenJson = accessTokenObjectMapper.readTree(response.block());
+            JsonNode accessTokenContentJson = accessTokenJson.get("content");
+            accessToken = accessTokenContentJson.get("accessToken").asText();
+        } catch (JsonProcessingException e) {
+            e.fillInStackTrace();
+        }
+
+        return accessToken;
     }
 }
