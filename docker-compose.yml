@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:latest
     environment:
-      POSTGRES_DB: PlaylistManager
+      POSTGRES_DB: playlistmanager
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
@@ -15,12 +15,10 @@ services:
     build: .
     ports:
       - "8080:8080"
-    depends_on:
-      - postgres
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/PlaylistManager
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/playlistmanager
+      SPRING_DATASOURCE_USERNAME: kyungmin
+      SPRING_DATASOURCE_PASSWORD: kyungmin2892
 
 volumes:
   pgdata:

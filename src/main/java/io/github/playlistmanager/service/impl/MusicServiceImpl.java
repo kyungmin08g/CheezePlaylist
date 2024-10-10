@@ -234,12 +234,12 @@ public class MusicServiceImpl implements MusicService {
         log.info("유튜브 영상의 주소: {}", youtubeUrl);
 
         // yt-dlp 프로세스 생성
-        ProcessBuilder ytDlpBuilder = new ProcessBuilder("/app/venv/bin/yt-dlp", "-f", "bestaudio", "-o", "-", youtubeUrl);
+        ProcessBuilder ytDlpBuilder = new ProcessBuilder("yt-dlp", "-f", "bestaudio", "-o", "-", youtubeUrl);
         Process ytDlpProcess = ytDlpBuilder.start();
         log.info("yt-dlp 프로세스가 시작되었음");
 
         // ffmpeg 프로세스 생성
-        ProcessBuilder ffmpegBuilder = new ProcessBuilder("/usr/bin/ffmpeg", "-i", "pipe:0", "-f", "mp3", "pipe:1");
+        ProcessBuilder ffmpegBuilder = new ProcessBuilder("ffmpeg", "-i", "pipe:0", "-f", "mp3", "pipe:1");
         Process ffmpegProcess = ffmpegBuilder.start();
         log.info("ffmpeg 프로세스가 시작되었음");
 
