@@ -2,35 +2,42 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>로그인</title>
     <style>
-        body {
+        @import url('https://fonts.googleapis.com/css2?family=Gothic+A1:wght@100;200;300;400;500;600;700;800;900&family=Jua&family=Yeon+Sung&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        }
+
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            min-height: 100vh;
+            background-color: #f4f4f4;
         }
 
         .login-container {
             background-color: white;
             padding: 40px;
+            width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
             text-align: center;
         }
 
         h2 {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            font-family: "Jua", sans-serif;
+            font-weight: 400;
         }
 
-        .form-group {
+        .input-group {
             margin-bottom: 20px;
             text-align: left;
         }
@@ -38,104 +45,118 @@
         label {
             display: block;
             margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 12px;
-            background-color: #566ca9;
-            color: white;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .submit-btn:hover {
-            background-color: #4563bd;
-        }
-
-        .social-login {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .social-login button {
-            width: 32%;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            color: white;
             font-size: 14px;
         }
 
-        .google-btn {
-            background-color: #db4437;
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
         }
 
-        .naver-btn {
-            background-color: #1ec800;
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #2171cb;
+            outline: none;
+            box-shadow: 0 0 5px rgba(13, 94, 180, 0.5);
         }
 
-        .kakao-btn {
-            background-color: #fee500;
-            color: #3c1e1e;
+        input::placeholder {
+            color: #ccc;
+        }
+
+        .forgot-password {
+            display: block;
+            text-align: right;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: #555;
+            font-family: "Jua", sans-serif;
+        }
+
+        .login-btn {
+            width: 100%;
+            background-color: rgba(22, 98, 180);
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-family: "Jua", sans-serif;
+            font-weight: 400;
         }
 
         .signup-link {
             margin-top: 20px;
-            font-size: 14px;
+            font-size: 12px;
+            color: #555;
+            font-family: "Jua", sans-serif;
         }
 
         .signup-link a {
-            color: #566ca9;
+            color: #007bff;
             text-decoration: none;
         }
 
-        .signup-link a:hover {
-            text-decoration: underline;
+        .social-login {
+            margin-bottom: 20px;
+        }
+
+        .social-icons img {
+            width: 40px;
+            margin: 0 15px;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        hr {
+            border: none;
+            height: 1px;
+            background-color: #ddd;
+            margin: 30px 0;
         }
     </style>
 </head>
-<body>
+    <body>
     <div class="login-container">
         <h2>로그인</h2>
-        <form method="POST" id="loginForm">
-            <div class="form-group">
-                <label for="username">유저 이름</label>
-                <input type="text" id="username" name="username" required>
+        <form method="post" id="login-form">
+            <div class="input-group">
+                <label for="id">닉네임</label>
+                <input type="text" id="username" name="username" placeholder="닉네임을 입력하세요">
             </div>
-            <div class="form-group">
+            <div class="input-group">
                 <label for="password">비밀번호</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요">
             </div>
-            <button type="submit" class="submit-btn">로그인</button>
+            <a href="#" class="forgot-password">비밀번호 찾기</a>
+            <button type="submit" class="login-btn">로그인</button>
         </form>
-
-        <div class="social-login">
-            <button class="google-btn" onclick="location.href = '/oauth2/authorization/google'">Google 로그인</button>
-            <button class="naver-btn" onclick="location.href = '/oauth2/authorization/naver'">Naver 로그인</button>
-            <button class="kakao-btn" onclick="location.href = '/oauth2/authorization/kakao'">Kakao 로그인</button>
-        </div>
-
         <div class="signup-link">
-            계정이 없으신가요? <a href="/join">지금 가입하세요!</a>
+            계정이 없으신가요? <a href="/join">지금 생성하세요!</a>
+        </div>
+        <hr>
+        <div class="social-login">
+            <div class="social-icons">
+                <a href="/oauth2/authorization/google"><img src="google-login-image.png" alt="Google"></a>
+                <a href="/oauth2/authorization/kakao"><img src="kakao-login-image.png" alt="Kakao"></a>
+                <a href="/oauth2/authorization/naver"><img src="naver-login-image.png" alt="Naver"></a>
+                <a href="/oauth2/authorization/facebook"><img src="facebook-login-image.png" alt="Facebook"></a>
+            </div>
         </div>
     </div>
 
     <script>
-        document.getElementById("loginForm").onsubmit = function() {
+        document.getElementById("login-form").onsubmit = function() {
             const username = document.getElementById("username")
             const password = document.getElementById("password")
 

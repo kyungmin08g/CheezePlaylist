@@ -83,6 +83,18 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                     sendAccessToken(username, id, response);
                     return;
                 }
+            case "facebook":
+                for (JsonNode authorities : attributesNode.path("authorities")) {
+                    JsonNode attributes = authorities.path("attributes");
+
+                    String sub = attributes.path("id").asText();
+                    String username = attributes.path("name").asText();
+                    String email = attributes.path("email").asText();
+
+                    log.info("\u001B[34m제공자: {}, 닉네임: {}, 이메일: {}\u001B[0m", provider, username, email);
+                    sendAccessToken(username, sub, response);
+                    return;
+                }
         }
     }
 

@@ -2,6 +2,7 @@ package io.github.playlistmanager.security.oauth2.user.service.impl;
 
 import io.github.playlistmanager.security.oauth2.OAuth2Response;
 import io.github.playlistmanager.security.oauth2.handler.OAuth2SuccessHandler;
+import io.github.playlistmanager.security.oauth2.user.response.OAuth2FacebookResponse;
 import io.github.playlistmanager.security.oauth2.user.response.OAuth2GoogleResponse;
 import io.github.playlistmanager.security.oauth2.user.response.OAuth2KakaoResponse;
 import io.github.playlistmanager.security.oauth2.user.response.OAuth2NaverResponse;
@@ -34,6 +35,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             }
             case "kakao" -> {
                 oAuth2User(new OAuth2KakaoResponse(oAuth2User.getAttributes()));
+            }
+            case "facebook" -> {
+                oAuth2User(new OAuth2FacebookResponse(oAuth2User.getAttributes()));
             }
         }
 

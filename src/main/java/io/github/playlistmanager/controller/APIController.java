@@ -2,6 +2,7 @@ package io.github.playlistmanager.controller;
 
 import io.github.playlistmanager.dto.*;
 import io.github.playlistmanager.service.impl.MusicServiceImpl;
+import io.github.playlistmanager.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +19,22 @@ import java.util.*;
 public class APIController {
 
     private final MusicServiceImpl musicService;
+    private final UserServiceImpl userService;
 
-    public APIController(MusicServiceImpl musicService) {
+    public APIController(MusicServiceImpl musicService, UserServiceImpl userService) {
         this.musicService = musicService;
+        this.userService = userService;
+    }
+
+    @GetMapping("/identical")
+    public ResponseEntity<?> identicalUsername(@RequestParam String username) {
+        String identicalUsername = userService.identicalUsername(username);
+
+        if (identicalUsername == null) {
+            return ResponseEntity.ok().body("undefined");
+        }
+
+        return ResponseEntity.status(201).body(identicalUsername);
     }
 
     @GetMapping("/playlist")
@@ -101,7 +115,6 @@ public class APIController {
     public ResponseEntity<?> playlistDelete(@RequestParam String playlistId, @RequestParam String playlistName, SecurityContext securityContext) {
         String username = (String) securityContext.getAuthentication().getPrincipal();
 
-        System.out.println(username);
         if (!username.equals("anonymousUser")) {
             musicService.playlistDelete(playlistId, playlistName, username);
             musicService.deleteById(playlistId);

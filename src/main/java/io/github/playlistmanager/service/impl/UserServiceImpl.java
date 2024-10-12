@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
@@ -28,6 +30,11 @@ public class UserServiceImpl implements UserService {
                 .role("ROLE_USER").build();
 
         save(memberDto);
+    }
+
+    @Override
+    public String identicalUsername(String username) {
+        return Optional.ofNullable(userMapper.findByUsername(username)).map(JoinMemberDto::getUsername).orElse(null);
     }
 
     @Override

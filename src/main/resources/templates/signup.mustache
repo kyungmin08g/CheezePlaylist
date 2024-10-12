@@ -2,13 +2,14 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>회원가입</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Gothic+A1:wght@100;200;300;400;500;600;700;800;900&family=Jua&family=Yeon+Sung&display=swap');
+
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #f3f3f3;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -16,72 +17,196 @@
             margin: 0;
         }
 
-        .signup-container {
+        .container {
             background-color: white;
             padding: 40px;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 360px;
         }
 
         h2 {
             text-align: center;
             margin-bottom: 30px;
+            font-size: 24px;
+            font-family: "Jua", sans-serif;
+            font-weight: 400;
         }
 
         .form-group {
             margin-bottom: 20px;
         }
 
-        label {
+        .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-family: "Jua", sans-serif;
+            font-weight: 400;
         }
 
-        input[type="text"], input[type="email"], input[type="password"] {
+        .form-group input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
+            padding: 12px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            box-sizing: border-box;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="email"]:focus,
+        .form-group input[type="password"]:focus {
+            border-color: #2171cb;
+            outline: none;
+            box-shadow: 0 0 5px rgba(13, 94, 180, 0.5);
+        }
+
+        .form-group input[type="text"]:invalid,
+        .form-group input[type="email"]:invalid,
+        .form-group input[type="password"]:invalid {
+            border-color: red;
+        }
+
+        .form-group input[type="text"]:valid,
+        .form-group input[type="email"]:valid,
+        .form-group input[type="password"]:valid {
+            border-color: #2171cb;
+        }
+
+        .form-group .error-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+            visibility: hidden;
+        }
+
+        .form-group input:invalid + .error-message {
+            visibility: visible;
         }
 
         .submit-btn {
             width: 100%;
             padding: 12px;
-            background-color: #566ca9;
-            color: white;
             font-size: 16px;
+            background-color: #0066cc;
+            color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
+            margin-top: 10px;
+            font-family: "Jua", sans-serif;
+            font-weight: 400;
         }
 
         .submit-btn:hover {
-            background-color: #4264c0;
+            background-color: #004999;
         }
+
+        .extra-links {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            font-family: "Jua", sans-serif;
+            font-weight: 400;
+        }
+
+        .extra-links a {
+            color: #0066cc;
+            text-decoration: none;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .extra-links a:hover {
+            text-decoration: underline;
+        }
+
     </style>
 </head>
 <body>
-    <div class="signup-container">
+    <div class="container">
         <h2>회원가입</h2>
-        <form action="/signup" method="POST">
+        <form action="/signup" method="post" id="form">
             <div class="form-group">
-                <label for="name">이름</label>
-                <input type="text" id="name" name="username" required>
+                <label for="nickname">닉네임</label>
+                <input type="text" id="nickname" name="username" placeholder="닉네임을 입력하세요" minlength="김경민">
+                <div class="error-message">중복된 닉네임입니다.</div>
             </div>
             <div class="form-group">
                 <label for="email">이메일</label>
-                <input type="email" id="email" name="email" required>
+                <input type="email" id="email" name="email" placeholder="example@gmail.com">
+                <div class="error-message">유효한 이메일 주소를 입력하세요.</div>
             </div>
             <div class="form-group">
                 <label for="password">비밀번호</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" minlength="8">
+                <div class="error-message">비밀번호는 최소 8자 이상이어야 합니다.</div>
+            </div>
+            <div class="form-group">
+                <label for="passwordConfirm">비밀번호 확인</label>
+                <input type="password" id="passwordConfirm" placeholder="비밀번호를 다시 입력하세요" minlength="8">
+                <div class="error-message">비밀번호를 다시 입력하세요.</div>
             </div>
             <button type="submit" class="submit-btn">회원가입</button>
         </form>
+
+        <div class="extra-links">
+            <p>계정이 이미 있으신가요? <a href="/logins" id="link">로그인</a></p>
+        </div>
     </div>
+
+    <script>
+        const nicknameInput = document.getElementById('nickname');
+        const email = document.getElementById('email');
+        const password = document.getElementById('password');
+        const passwordConfirm = document.getElementById('passwordConfirm');
+        const passwordMismatchError = document.getElementById('passwordMismatchError');
+        const checkNicknameBtn = document.getElementById('checkNickname');
+        const nicknameError = document.getElementById('nicknameError');
+        const errorMessage = document.querySelector('.error-message');
+        const form = document.getElementById('form');
+
+        form.addEventListener('submit', (event) => {
+            if (nicknameInput.value === '' || email.value === '' || password.value === '' || passwordConfirm.value === '' || errorMessage.style.visibility === 'visible') {
+                event.preventDefault();
+                alert("올바르게 작성해주세요")
+            }
+        });
+
+        passwordConfirm.addEventListener('input', function() {
+            if (password.value !== passwordConfirm.value) {
+                passwordConfirm.setCustomValidity('비밀번호가 일치하지 않습니다.');
+            } else {
+                passwordConfirm.setCustomValidity('');
+            }
+        });
+
+        nicknameInput.addEventListener('input', () => {
+            if (nicknameInput.value != null && nicknameInput.value.trim()) {
+                fetch(`/api/v1/identical?username=${nicknameInput.value.trim()}`, { method: 'GET' }).then(response => {
+                    if (response.status === 201) {
+                        return response.text()
+                    } else {
+                        return response.text()
+                    }
+                })
+                .then(data => {
+                    console.log(data)
+                    if (data.toString() !== 'undefined') {
+                        nicknameInput.classList.remove('valid');
+                        nicknameInput.classList.add('invalid');
+                        errorMessage.style.visibility = 'visible';
+                    } else {
+                        nicknameInput.classList.add('valid');
+                        nicknameInput.classList.remove('invalid');
+                        errorMessage.style.visibility = 'hidden';
+                    }
+                }).catch(error => {
+                    console.log(error);
+                })
+            }
+        });
+    </script>
 </body>
 </html>
