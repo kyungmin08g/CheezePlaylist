@@ -47,6 +47,7 @@ public class ViewController {
         model.addAttribute("playlistName", dto.getPlaylistName());
         model.addAttribute("chzzkChannelId", dto.getChzzkChannelId());
         model.addAttribute("playlistId", playlistId);
+        model.addAttribute("donationPrice", dto.getDonationPrice());
 
         return "update";
     }
@@ -55,6 +56,11 @@ public class ViewController {
     public String signUp(JoinMemberDto dto) {
         userService.joinUser(dto);
         return "login";
+    }
+
+    @GetMapping("/find")
+    public String findPage() {
+        return "find-password";
     }
 
     @Secured("ROLE_USER")

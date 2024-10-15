@@ -30,8 +30,12 @@
 
     <!-- 플레이리스트 관련 -->
     <insert id="saveChannelId" parameterType="PlaylistDto">
-        insert into playlist(username, playlistid, playlistname, chzzkchannelid) values(#{username}, #{playlistId}, #{playlistName}, #{chzzkChannelId});
+        insert into playlist(username, playlistid, playlistname, chzzkchannelid, donationprice) values(#{username}, #{playlistId}, #{playlistName}, #{chzzkChannelId}, #{donationPrice});
     </insert>
+
+    <select id="findByPlaylistId" parameterType="string" resultType="PlaylistDto">
+        select * from playlist where playlistid = #{playlistId}
+    </select>
 
     <select id="findByIdAndPlaylistName" resultType="PlaylistDto">
         select * from playlist where playlistid = #{playlistId} and playlistname = #{playlistName} and username = #{username};
@@ -42,7 +46,7 @@
     </select>
 
     <update id="playlistUpdate">
-        update playlist set playlistname = #{playlistName}, chzzkchannelid = #{chzzkChannelId} where playlistid = #{playlistId} and username = #{username};
+        update playlist set playlistname = #{playlistName}, chzzkchannelid = #{chzzkChannelId}, donationprice = #{donationPrice} where playlistid = #{playlistId} and username = #{username};
     </update>
 
     <delete id="playlistDelete">

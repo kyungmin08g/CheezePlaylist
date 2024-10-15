@@ -31,8 +31,9 @@ public interface MusicService {
 
     // 플레이리스트
     void saveChannelId(PlaylistDto dto);
+    PlaylistDto findByPlaylistId(String playlistId);
     PlaylistDto findByIdAndPlaylistName(String playlistId, String playlistName, String username);
     List<PlaylistDto> findAll(String username);
-    void playlistUpdate(String playlistId, String playlistName, String chzzkChannelId, String username);
+    void playlistUpdate(String playlistId, String playlistName, String chzzkChannelId, String username, String donationPrice);
     void playlistDelete(String playlistId, String playlistName, String username);
 }

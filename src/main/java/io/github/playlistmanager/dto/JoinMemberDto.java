@@ -13,5 +13,6 @@ public class JoinMemberDto {
     private String username;
     private String email;
     private String password;
+    private String encryptionPassword;
     private String role;
 }

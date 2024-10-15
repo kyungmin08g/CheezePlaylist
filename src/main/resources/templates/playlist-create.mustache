@@ -58,6 +58,7 @@
     <div class="container">
         <input type="text" id="playlistName" placeholder="방 이름을 입력해주세요.">
         <input type="text" id="chzzkChannelId" placeholder="치지직 아이디를 입력하세요.">
+        <input type="text" id="donationPrice" placeholder="도네이션 가격">
         <input type="submit" value="플레이리스트 추가" onclick="add()">
     </div>
 
@@ -65,11 +66,13 @@
         function add() {
             let playlistName = document.getElementById("playlistName").value;
             let chzzkChannelId = document.getElementById("chzzkChannelId").value;
+            let donationPrice = document.getElementById("donationPrice").value;
 
             document.getElementById("playlistName").value = '';
             document.getElementById("chzzkChannelId").value = '';
+            document.getElementById("donationPrice").value = '';
 
-            fetch(`/api/v1/playlist?playlistName=${playlistName}&chzzkChannelId=${chzzkChannelId}`)
+            fetch(`/api/v1/playlist?playlistName=${playlistName}&chzzkChannelId=${chzzkChannelId}&donationPrice=${donationPrice}`)
             location.href = '/'
         }
     </script>

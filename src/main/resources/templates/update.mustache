@@ -61,18 +61,21 @@
         <h2>수정</h2>
         <input type="text" id="playlistName" placeholder="이름을 입력하세요.">
         <input type="text" id="chzzkChannelId" placeholder="치지직 아이디를 입력하세요.">
+        <input type="text" id="donationPrice" placeholder="도네이션 가격을 입력하세요.">
         <button id="update-btn" onclick="update()">수정</button>
     </div>
 
     <script>
         document.getElementById("playlistName").value = '{{playlistName}}'
         document.getElementById("chzzkChannelId").value = '{{chzzkChannelId}}'
+        document.getElementById("donationPrice").value = '{{donationPrice}}'
 
         function update() {
             const playlistName = document.getElementById("playlistName").value
             const chzzkChannelId = document.getElementById("chzzkChannelId").value
+            const donationPrice = document.getElementById("donationPrice").value
 
-            fetch(`/api/v1/playlist/update?playlistId={{playlistId}}&playlistName=${playlistName}&chzzkChannelId=${chzzkChannelId}`, { method: 'GET' })
+            fetch(`/api/v1/playlist/update?playlistId={{playlistId}}&playlistName=${playlistName}&chzzkChannelId=${chzzkChannelId}&donationPrice=${donationPrice}`, { method: 'GET' })
             location.href = '/';
         }
     </script>

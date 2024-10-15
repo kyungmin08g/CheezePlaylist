@@ -120,6 +120,8 @@ public class MusicServiceImpl implements MusicService {
 
     @Override
     public void donationChat(String roomId, String chatJson) {
+        PlaylistDto donationPrice = musicMapper.findByPlaylistId(roomId);
+
         try {
             JsonNode jsonNode = objectMapper.readTree(chatJson);
             JsonNode bdyJson = jsonNode.get("bdy");
@@ -137,21 +139,25 @@ public class MusicServiceImpl implements MusicService {
                     String payAmount = objectMapper.readTree(bdyNode.get("extras").asText()).get("payAmount").asText();
                     JsonNode message = bdyNode.get("msg");
 
-                    if (profile.equals("null")) { // 프로필이 없을 떄
-                        System.out.println("\u001B[33m[후원] 익명: " + message.asText() + " [" + payAmount + "원]\u001B[0m");
-                        donationMusicDownload(roomId, message.asText());
-                    } else {
-                        JsonNode profileNode = objectMapper.readTree(profile);
-                        JsonNode nickname = profileNode.get("nickname");
-                        JsonNode streamingProperty = profileNode.get("streamingProperty"); // 구독
+                    if (donationPrice.getDonationPrice().equals(payAmount)) {
+                        System.out.println(donationPrice.getDonationPrice() + "이다!");
 
-                        String subscriptionMonth = calculateMonthsSubscribed(streamingProperty);
-                        if (subscriptionMonth != null) {
-                            System.out.println("\u001B[33m[후원] " + nickname.asText() + ": " + message.asText() + " [" + payAmount + "원]" + " [" + subscriptionMonth + " 구독 중]" + "\u001B[0m");
+                        if (profile.equals("null")) { // 프로필이 없을 떄
+                            System.out.println("\u001B[33m[후원] 익명: " + message.asText() + " [" + payAmount + "원]\u001B[0m");
                             donationMusicDownload(roomId, message.asText());
                         } else {
-                            System.out.println("\u001B[33m[후원] " + nickname.asText() + ": " + message.asText() + " [" + payAmount + "원]" + "\u001B[0m");
-                            donationMusicDownload(roomId, message.asText());
+                            JsonNode profileNode = objectMapper.readTree(profile);
+                            JsonNode nickname = profileNode.get("nickname");
+                            JsonNode streamingProperty = profileNode.get("streamingProperty"); // 구독
+
+                            String subscriptionMonth = calculateMonthsSubscribed(streamingProperty);
+                            if (subscriptionMonth != null) {
+                                System.out.println("\u001B[33m[후원] " + nickname.asText() + ": " + message.asText() + " [" + payAmount + "원]" + " [" + subscriptionMonth + " 구독 중]" + "\u001B[0m");
+                                donationMusicDownload(roomId, message.asText());
+                            } else {
+                                System.out.println("\u001B[33m[후원] " + nickname.asText() + ": " + message.asText() + " [" + payAmount + "원]" + "\u001B[0m");
+                                donationMusicDownload(roomId, message.asText());
+                            }
                         }
                     }
 
@@ -368,6 +374,11 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
+    public PlaylistDto findByPlaylistId(String playlistId) {
+        return musicMapper.findByPlaylistId(playlistId);
+    }
+
+    @Override
     public PlaylistDto findByIdAndPlaylistName(String playlistId, String playlistName, String username) {
         return musicMapper.findByIdAndPlaylistName(playlistId, playlistName, username);
     }
@@ -378,8 +389,8 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public void playlistUpdate(String playlistId, String playlistName, String chzzkChannelId, String username) {
-        musicMapper.playlistUpdate(playlistId, playlistName, chzzkChannelId, username);
+    public void playlistUpdate(String playlistId, String playlistName, String chzzkChannelId, String username, String donationPrice) {
+        musicMapper.playlistUpdate(playlistId, playlistName, chzzkChannelId, username, donationPrice);
     }
 
     @Override

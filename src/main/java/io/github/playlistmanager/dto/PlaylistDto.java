@@ -13,4 +13,5 @@ public class PlaylistDto {
     private String playlistId;
     private String playlistName;
     private String chzzkChannelId;
+    private String donationPrice;
 }

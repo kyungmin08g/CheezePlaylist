@@ -26,7 +26,8 @@ public class UserServiceImpl implements UserService {
         JoinMemberDto memberDto = JoinMemberDto.builder()
                 .username(dto.getUsername())
                 .email(dto.getEmail())
-                .password(bCryptPasswordEncoder.encode(dto.getPassword()))
+                .password(dto.getPassword())
+                .encryptionPassword(bCryptPasswordEncoder.encode(dto.getPassword()))
                 .role("ROLE_USER").build();
 
         save(memberDto);

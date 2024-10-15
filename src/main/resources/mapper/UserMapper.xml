@@ -5,7 +5,7 @@
 <mapper namespace="io.github.playlistmanager.mapper.UserMapper">
     <!-- 회원 관련 -->
     <insert id="save" parameterType="MemberDto">
-        insert into member(username, email, password, role) values(#{username}, #{email}, #{password}, #{role});
+        insert into member(username, email, password, encryptionpassword, role) values(#{username}, #{email}, #{password}, #{encryptionPassword}, #{role});
     </insert>
 
     <select id="findByUsername" parameterType="string" resultType="MemberDto">

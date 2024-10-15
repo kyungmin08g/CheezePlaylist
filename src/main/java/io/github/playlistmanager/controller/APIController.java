@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -20,10 +21,12 @@ public class APIController {
 
     private final MusicServiceImpl musicService;
     private final UserServiceImpl userService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public APIController(MusicServiceImpl musicService, UserServiceImpl userService) {
+    public APIController(MusicServiceImpl musicService, UserServiceImpl userService, BCryptPasswordEncoder passwordEncoder) {
         this.musicService = musicService;
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/identical")
@@ -37,13 +40,24 @@ public class APIController {
         return ResponseEntity.status(201).body(identicalUsername);
     }
 
+    @GetMapping("/find")
+    public ResponseEntity<?> findUsername(@RequestParam String username) {
+        String findPassword = Optional.ofNullable(userService.findByUsername(username)).map(JoinMemberDto::getPassword).orElse(null);
+
+        if (findPassword == null) {
+            return ResponseEntity.status(201).body("회원가입이 되어있지 않습니다.");
+        }
+
+        return ResponseEntity.ok().body(findPassword);
+    }
+
     @GetMapping("/playlist")
-    public ResponseEntity<?> chzzk(@RequestParam String playlistName, @RequestParam String chzzkChannelId, SecurityContext securityContext) {
+    public ResponseEntity<?> chzzk(@RequestParam String playlistName, @RequestParam String chzzkChannelId, @RequestParam String donationPrice, SecurityContext securityContext) {
         String uuid = UUID.randomUUID().toString();
         String username = (String) securityContext.getAuthentication().getPrincipal();
 
         if (!username.equals("anonymousUser")) {
-            PlaylistDto dto = new PlaylistDto(username, uuid, playlistName, chzzkChannelId);
+            PlaylistDto dto = new PlaylistDto(username, uuid, playlistName, chzzkChannelId, donationPrice);
             musicService.saveChannelId(dto);
             return ResponseEntity.status(200).build();
         }
@@ -99,11 +113,11 @@ public class APIController {
     }
 
     @GetMapping("/playlist/update")
-    public ResponseEntity<?> update(@RequestParam String playlistId, @RequestParam String playlistName, @RequestParam String chzzkChannelId, SecurityContext securityContext) {
+    public ResponseEntity<?> update(@RequestParam String playlistId, @RequestParam String playlistName, @RequestParam String chzzkChannelId, @RequestParam String donationPrice, SecurityContext securityContext) {
         String username = (String) securityContext.getAuthentication().getPrincipal();
 
         if (!username.equals("anonymousUser")) {
-            musicService.playlistUpdate(playlistId, playlistName, chzzkChannelId, username);
+            musicService.playlistUpdate(playlistId, playlistName, chzzkChannelId, username, donationPrice);
             log.info("업데이트 되었습니다.");
             return ResponseEntity.status(200).build();
         }
