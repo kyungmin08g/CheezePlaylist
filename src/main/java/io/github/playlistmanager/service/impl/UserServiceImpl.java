@@ -23,6 +23,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void joinUser(JoinMemberDto dto) {
+        String username = Optional.ofNullable(findByUsername(dto.getUsername())).map(JoinMemberDto::getUsername).orElse(null);
+        if (username != null) return;
+
         JoinMemberDto memberDto = JoinMemberDto.builder()
                 .username(dto.getUsername())
                 .email(dto.getEmail())
@@ -46,6 +49,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public JoinMemberDto findByUsername(String username) {
         return userMapper.findByUsername(username);
+    }
+
+    @Override
+    public JoinMemberDto findByEmail(String email) {
+        return userMapper.findByEmail(email);
     }
 
     @Override

@@ -38,7 +38,7 @@
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             text-align: left;
         }
 
@@ -67,6 +67,14 @@
 
         input::placeholder {
             color: #ccc;
+        }
+
+        .forgot-userid {
+            display: block;
+            text-align: right;
+            font-size: 12px;
+            color: #555;
+            font-family: "Jua", sans-serif;
         }
 
         .forgot-password {
@@ -134,11 +142,12 @@
                 <label for="id">아이디</label>
                 <input type="text" id="username" name="username" placeholder="아이디을 입력하세요">
             </div>
+            <a href="/userid" class="forgot-userid">아이디 찾기</a>
             <div class="input-group">
                 <label for="password">비밀번호</label>
                 <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요">
             </div>
-            <a href="/find" class="forgot-password">비밀번호 찾기</a>
+            <a href="/password" class="forgot-password">비밀번호 찾기</a>
             <button type="submit" class="login-btn">로그인</button>
         </form>
         <div class="signup-link">

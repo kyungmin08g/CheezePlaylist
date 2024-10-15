@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>아이디 찾기</title>
+</head>
+<body>
+    <div class="container">
+        <h2>아이디 찾기</h2>
+        <input type="email" id="email" name="email" placeholder="이메일을 입력하세요.">
+        <button id="btn" onclick="find()">찾기</button>
+    </div>
+    <p id="findUserId"></p>
+    <button onclick="location.href='/logins'">돌아가기</button>
+
+    <script>
+        function find() {
+            const email = document.getElementById("email");
+            const findUserId = document.getElementById("findUserId");
+
+            fetch(`/api/v1/find/userid?email=${email.value}`, { method: 'GET' }).then(response => response.text())
+                    .then(data => {
+                        findUserId.innerText = data
+                    }).catch(error => {
+                        console.log(error)
+                    })
+        }
+    </script>
+</body>
+</html>

@@ -15,4 +15,7 @@ public class MusicFileDto {
     private String artist;
     private String title;
     private String musicFileBytes;
+    private String donationUsername;
+    private String donationPrice;
+    private String donationSubscriber;
 }

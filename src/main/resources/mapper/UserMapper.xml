@@ -12,6 +12,10 @@
         select * from member where username = #{username};
     </select>
 
+    <select id="findByEmail" parameterType="string" resultType="MemberDto">
+        select * from member where email = #{email};
+    </select>
+
     <!-- 리프레쉬 토큰 관련 -->
     <insert id="refreshTokenSave" parameterType="string">
         insert into refreshtoken(username, refreshtoken) values(#{username}, #{refreshToken});

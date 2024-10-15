@@ -5,6 +5,7 @@ import io.github.playlistmanager.dto.JoinMemberDto;
 import io.github.playlistmanager.dto.PlaylistDto;
 import io.github.playlistmanager.service.impl.MusicServiceImpl;
 import io.github.playlistmanager.service.impl.UserServiceImpl;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.io.IOException;
 
 @Controller
 public class ViewController {
@@ -22,6 +25,12 @@ public class ViewController {
     public ViewController(MusicServiceImpl musicService, UserServiceImpl userService) {
         this.musicService = musicService;
         this.userService = userService;
+    }
+
+    @PostMapping("/signup")
+    public void signUp(JoinMemberDto dto, HttpServletResponse response) throws IOException {
+        userService.joinUser(dto);
+        response.sendRedirect("/logins");
     }
 
     @Secured("ROLE_USER")
@@ -50,17 +59,6 @@ public class ViewController {
         model.addAttribute("donationPrice", dto.getDonationPrice());
 
         return "update";
-    }
-
-    @PostMapping("/signup")
-    public String signUp(JoinMemberDto dto) {
-        userService.joinUser(dto);
-        return "login";
-    }
-
-    @GetMapping("/find")
-    public String findPage() {
-        return "find-password";
     }
 
     @Secured("ROLE_USER")

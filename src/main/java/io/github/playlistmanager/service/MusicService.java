@@ -10,13 +10,14 @@ import java.util.List;
 
 public interface MusicService {
     void memberMusicDownload(String roomId, String artist, String title);
-    void donationMusicDownload(String roomId, String donationContent);
+    void donationMusicDownloader(String roomId, String artist, String title, String donationUsername, String donationPrice, String donationSubscriber);
+    void donationMusicDownload(String roomId, String donationContent, String donationUsername, String donationPrice, String donationSubscriber);
     String calculateMonthsSubscribed(JsonNode streamingPropertyNode);
     void donationChat(String roomId, String chatJson);
 
-    void musicDownload(String roomId, String artist, String title);
+    void musicDownload(String roomId, String artist, String title, String donationUsername, String donationPrice, String donationSubscriber);
     String searchVideo(String query);
-    void conversionAndDownload(String roomId, String youtubeUrl, String artist, String customTitle) throws IOException, InterruptedException;
+    void conversionAndDownload(String roomId, String youtubeUrl, String artist, String customTitle, String donationUsername, String donationPrice, String donationSubscriber) throws IOException, InterruptedException;
     byte[] mp3Conversion(String youtubeUrl) throws InterruptedException, IOException;
     ChzzkChannelConnectDto chzzkChannelConnect(PlaylistDto playlistDto);
 

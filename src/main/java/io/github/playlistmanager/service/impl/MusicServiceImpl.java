@@ -47,7 +47,7 @@ public class MusicServiceImpl implements MusicService {
 
     @Override
     public void memberMusicDownload(String roomId, String artist, String title) {
-        musicDownload(roomId, artist, title);
+        musicDownload(roomId, artist, title, null, null, null);
 
         String customTitle = title.replace(" ", "_");
         MusicFileDto dto = musicMapper.findByMusic(roomId, artist, customTitle);
@@ -63,38 +63,58 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public void donationMusicDownload(String roomId, String donationContent) {
+    public void donationMusicDownloader(String roomId, String artist, String title, String donationUsername, String donationPrice, String donationSubscriber) {
+        musicDownload(roomId, artist, title, donationUsername, donationPrice, donationSubscriber);
+
+        String customTitle = title.replace(" ", "_");
+        MusicFileDto dto = musicMapper.findByMusic(roomId, artist, customTitle);
+        String changeTitle = dto.getTitle().replace("_", " ");
+
+        MusicFileDto musicFileDTO = MusicFileDto.builder()
+                .artist(artist)
+                .roomId(roomId)
+                .title(changeTitle)
+                .musicFileBytes(dto.getMusicFileBytes()).build();
+
+        simpMessagingTemplate.convertAndSend("/sub/message/" + roomId, musicFileDTO);
+    }
+
+    @Override
+    public void donationMusicDownload(String roomId, String donationContent, String donationUsername, String donationPrice, String donationSubscriber) {
         String artist;
         String title;
+
+        // 테스트 용
+        donationMusicDownloader(roomId, "Gemini", "UFO", donationUsername, donationPrice, donationSubscriber);
 
         if(donationContent.matches("^(.*) - (.*)$")) {
             artist = donationContent.substring(0, donationContent.indexOf("-") - 1);
             title = donationContent.substring(donationContent.indexOf("-") + 2);
-            memberMusicDownload(roomId, artist, title);
+            donationMusicDownloader(roomId, artist, title, donationUsername, donationPrice, donationSubscriber);
         } else if (donationContent.matches("^(.*) -(.*)$")) {
             artist = donationContent.substring(0, donationContent.indexOf("-") - 1);
             title = donationContent.substring(donationContent.indexOf("-") + 1);
-            memberMusicDownload(roomId, artist, title);
+            donationMusicDownloader(roomId, artist, title, donationUsername, donationPrice, donationSubscriber);
         } else if (donationContent.matches("^(.*)- (.*)$")) {
             artist = donationContent.substring(0, donationContent.indexOf("-"));
             title = donationContent.substring(donationContent.indexOf("-") + 2);
-            memberMusicDownload(roomId, artist, title);
+            donationMusicDownloader(roomId, artist, title, donationUsername, donationPrice, donationSubscriber);
         } else if (donationContent.matches("^(.*)-(.*)$")) {
             artist = donationContent.substring(0, donationContent.indexOf("-"));
             title = donationContent.substring(donationContent.indexOf("-") + 1);
-            memberMusicDownload(roomId, artist, title);
+            donationMusicDownloader(roomId, artist, title, donationUsername, donationPrice, donationSubscriber);
         } else if (donationContent.matches("^(.*) - {2}(.*)$")) {
             artist = donationContent.substring(0, donationContent.indexOf("-") - 1);
             title = donationContent.substring(donationContent.indexOf("-") + 3);
-            memberMusicDownload(roomId, artist, title);
+            donationMusicDownloader(roomId, artist, title, donationUsername, donationPrice, donationSubscriber);
         } else if (donationContent.matches("^(.*) {2}- (.*)$")) {
             artist = donationContent.substring(0, donationContent.indexOf("-") - 2);
             title = donationContent.substring(donationContent.indexOf("-") + 2);
-            memberMusicDownload(roomId, artist, title);
+            donationMusicDownloader(roomId, artist, title, donationUsername, donationPrice, donationSubscriber);
         } else if (donationContent.matches("^(.*) {2}- {2}(.*)$")) {
             artist = donationContent.substring(0, donationContent.indexOf("-") - 2);
             title = donationContent.substring(donationContent.indexOf("-") + 3);
-            memberMusicDownload(roomId, artist, title);
+            donationMusicDownloader(roomId, artist, title, donationUsername, donationPrice, donationSubscriber);
         }
     }
 
@@ -140,11 +160,9 @@ public class MusicServiceImpl implements MusicService {
                     JsonNode message = bdyNode.get("msg");
 
                     if (donationPrice.getDonationPrice().equals(payAmount)) {
-                        System.out.println(donationPrice.getDonationPrice() + "이다!");
-
                         if (profile.equals("null")) { // 프로필이 없을 떄
                             System.out.println("\u001B[33m[후원] 익명: " + message.asText() + " [" + payAmount + "원]\u001B[0m");
-                            donationMusicDownload(roomId, message.asText());
+                            donationMusicDownload(roomId, message.asText(), "익명", payAmount, null);
                         } else {
                             JsonNode profileNode = objectMapper.readTree(profile);
                             JsonNode nickname = profileNode.get("nickname");
@@ -153,10 +171,10 @@ public class MusicServiceImpl implements MusicService {
                             String subscriptionMonth = calculateMonthsSubscribed(streamingProperty);
                             if (subscriptionMonth != null) {
                                 System.out.println("\u001B[33m[후원] " + nickname.asText() + ": " + message.asText() + " [" + payAmount + "원]" + " [" + subscriptionMonth + " 구독 중]" + "\u001B[0m");
-                                donationMusicDownload(roomId, message.asText());
+                                donationMusicDownload(roomId, message.asText(), nickname.asText(), payAmount, subscriptionMonth);
                             } else {
                                 System.out.println("\u001B[33m[후원] " + nickname.asText() + ": " + message.asText() + " [" + payAmount + "원]" + "\u001B[0m");
-                                donationMusicDownload(roomId, message.asText());
+                                donationMusicDownload(roomId, message.asText(), nickname.asText(), payAmount, null);
                             }
                         }
                     }
@@ -187,7 +205,7 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public void musicDownload(String roomId, String artist, String title) {
+    public void musicDownload(String roomId, String artist, String title, String donationUsername, String donationPrice, String donationSubscriber) {
         String query = artist + " - " + title; // 하나의 문자열로 만듬
         String customTitle = title.replace(" ", "_");
 
@@ -206,9 +224,13 @@ public class MusicServiceImpl implements MusicService {
                     .roomId(roomId)
                     .title(customTitle)
                     .musicFileBytes(optionalTitleDTO.getMusicFileBytes())
+                    .donationUsername(donationUsername)
+                    .donationPrice(donationPrice)
+                    .donationSubscriber(donationSubscriber)
                     .build();
 
             save(musicFileDTO);
+            System.out.println(musicFileDTO.getTitle());
             log.info("DB에 음악이 있으므로 검색하지 않고 저장함.");
             return;
         }
@@ -227,7 +249,7 @@ public class MusicServiceImpl implements MusicService {
             }
 
             String url = "https://www.youtube.com/watch?v=" + videoIdValue; // 유튜브 영상의 주소를 만듬
-            conversionAndDownload(roomId, url, artist, customTitle); // URL과 해당 음악의 제목을 넣으면 음악 byte[]를 DB에 저장함
+            conversionAndDownload(roomId, url, artist, customTitle, donationUsername, donationPrice, donationSubscriber); // URL과 해당 음악의 제목을 넣으면 음악 byte[]를 DB에 저장함
 
             log.info("해당 음악을 다운로드하고 DB에 저장하는 로직이 정상적으로 처리되었습니다.");
         } catch (Exception e) {
@@ -294,7 +316,7 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public void conversionAndDownload(String roomId, String youtubeURL, String artist, String customTitle) throws IOException, InterruptedException {
+    public void conversionAndDownload(String roomId, String youtubeURL, String artist, String customTitle, String donationUsername, String donationPrice, String donationSubscriber) throws IOException, InterruptedException {
         byte[] mp3Data = mp3Conversion(youtubeURL);
 
         // DB에서 Title을 통해 조회하게 되는데 결과가 null인 경우에는 로그만 찍고 아래 로직을 실행하도록하는 검사 작업 -> 데이터가 존재하지 않으면 추가하는게 맞으니까
@@ -307,6 +329,9 @@ public class MusicServiceImpl implements MusicService {
                     .artist(artist)
                     .title(customTitle)
                     .musicFileBytes(Base64.getEncoder().encodeToString(mp3Data))
+                    .donationUsername(donationUsername)
+                    .donationPrice(donationPrice)
+                    .donationSubscriber(donationSubscriber)
                     .build();
 
             save(musicFileDTO);

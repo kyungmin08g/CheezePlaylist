@@ -51,6 +51,18 @@ public class APIController {
         return ResponseEntity.ok().body(findPassword);
     }
 
+    @GetMapping("/find/userid")
+    public ResponseEntity<?> findEmail(@RequestParam String email) {
+        String findUserId = Optional.ofNullable(userService.findByEmail(email)).map(JoinMemberDto::getUsername).orElse(null);
+        System.out.println(findUserId);
+
+        if (findUserId == null) {
+            return ResponseEntity.status(201).body("회원가입이 되어있지 않습니다.");
+        }
+
+        return ResponseEntity.ok().body(findUserId);
+    }
+
     @GetMapping("/playlist")
     public ResponseEntity<?> chzzk(@RequestParam String playlistName, @RequestParam String chzzkChannelId, @RequestParam String donationPrice, SecurityContext securityContext) {
         String uuid = UUID.randomUUID().toString();
