@@ -54,7 +54,6 @@ public class APIController {
     @GetMapping("/find/userid")
     public ResponseEntity<?> findEmail(@RequestParam String email) {
         String findUserId = Optional.ofNullable(userService.findByEmail(email)).map(JoinMemberDto::getUsername).orElse(null);
-        System.out.println(findUserId);
 
         if (findUserId == null) {
             return ResponseEntity.status(201).body("회원가입이 되어있지 않습니다.");

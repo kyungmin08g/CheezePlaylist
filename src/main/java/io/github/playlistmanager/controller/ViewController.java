@@ -42,12 +42,6 @@ public class ViewController {
     }
 
     @Secured("ROLE_USER")
-    @GetMapping("/add")
-    public String addPage() {
-        return "playlist-create";
-    }
-
-    @Secured("ROLE_USER")
     @GetMapping("/update")
     public String updatePage(@RequestParam String playlistId, @RequestParam String playlistName, SecurityContext securityContext, Model model) {
         String username = (String) securityContext.getAuthentication().getPrincipal();
@@ -75,5 +69,4 @@ public class ViewController {
 
         return "music";
     }
-
 }

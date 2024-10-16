@@ -22,6 +22,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addViewController("/userid/**").setViewName("exception");
         registry.addViewController("/password").setViewName("find-password");
         registry.addViewController("/password/**").setViewName("exception");
+
+        registry.addViewController("/add").setViewName("playlist-create");
+        registry.addViewController("/add/**").setViewName("exception");
     }
 
     @Override

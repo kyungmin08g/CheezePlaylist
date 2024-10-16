@@ -189,7 +189,6 @@ public class MusicServiceImpl implements MusicService {
     // 쿼리를 받으면 YouTube Data API를 통해 동영상을 검색하는 메소드임
     @Override
     public String searchVideo(String query) {
-        System.out.println("어떻게 검색하는지 궁금해서: " + query);
         Mono<String> response = WebClient.builder().baseUrl("https://www.googleapis.com").build().get()
                 .uri(uriBuilder -> uriBuilder.path("/youtube/v3/search")
                         .queryParam("part", "snippet")
@@ -271,12 +270,12 @@ public class MusicServiceImpl implements MusicService {
         Process ffmpegProcess = ffmpegBuilder.start();
         log.info("ffmpeg 프로세스가 시작되었음");
 
-        // yt-dlp의 출력을 ffmpeg의 입력으로 연결
+        // yt-dlp의 출력을 ffmpeg의 입력으로 연결함
         try (InputStream ytDlpOutput = ytDlpProcess.getInputStream();
              InputStream ffmpegInput = ffmpegProcess.getInputStream();
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
-            // yt-dlp의 출력을 ffmpeg에 연결
+            // yt-dlp의 출력을 ffmpeg에 연결함
             Thread ytDlpToFfmpeg = new Thread(() -> {
                 try {
                     byte[] buffer = new byte[8192];
@@ -293,7 +292,7 @@ public class MusicServiceImpl implements MusicService {
 
             ytDlpToFfmpeg.start();
 
-            // ffmpeg의 출력을 byte array로 읽기
+            // ffmpeg의 출력을 byte array로 읽ㅇㅓ!!!
             byte[] buffer = new byte[8192];
             int bytesRead;
             while ((bytesRead = ffmpegInput.read(buffer)) != -1) {
@@ -301,7 +300,7 @@ public class MusicServiceImpl implements MusicService {
             }
             log.info("ffmpeg 출력을 성공적으로 읽음");
 
-            ytDlpToFfmpeg.join(); // yt-dlp 쓰레드가 끝날 때까지 기다리기
+            ytDlpToFfmpeg.join(); // yt-dlp 쓰레드가 끝날 때까지 기다림
             log.info("yt-dlp 스레드가 완료됨");
 
             return outputStream.toByteArray();
