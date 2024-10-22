@@ -13,17 +13,17 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/join").setViewName("signup");
+        registry.addViewController("/join").setViewName("join");
         registry.addViewController("/join/**").setViewName("exception");
         registry.addViewController("/logins").setViewName("login");
         registry.addViewController("/logins/**").setViewName("exception");
 
-        registry.addViewController("/userid").setViewName("find-userId");
+        registry.addViewController("/userid").setViewName("user");
         registry.addViewController("/userid/**").setViewName("exception");
-        registry.addViewController("/password").setViewName("find-password");
+        registry.addViewController("/password").setViewName("password");
         registry.addViewController("/password/**").setViewName("exception");
 
-        registry.addViewController("/add").setViewName("playlist-create");
+        registry.addViewController("/add").setViewName("create");
         registry.addViewController("/add/**").setViewName("exception");
     }
 

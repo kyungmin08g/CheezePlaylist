@@ -8,64 +8,102 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #eef2f3;
+            font-family: 'Roboto', sans-serif;
+            background-color: #2e2b45;
             margin: 0;
             padding: 20px;
-            color: #333;
+            color: #fff;
         }
 
         h1 {
             text-align: center;
-            color: #566ca9;
-            margin-bottom: 20px;
+            color: rgb(207, 207, 207);
+            margin-bottom: 30px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        #musicContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .music-card {
+            background: #3b3a5e;
             border-radius: 8px;
-            overflow: hidden;
+            padding: 15px;
+            margin: 5px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+            height: 60px;
         }
 
-        th, td {
-            padding: 12px;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .music-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .music-info {
             text-align: left;
+            flex: 1;
         }
 
-        th {
-            background-color: #566ca9;
-            color: white;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+        .music-title {
+            font-size: 1.2em;
+            font-weight: 500;
+            margin: 0;
         }
 
-        tr:hover {
-            background-color: #f1f1f1;
+        .music-artist {
+            font-size: 0.8em;
+            color: #bbb;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
         }
 
         button {
             background-color: #566ca9;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 5px 10px;
             cursor: pointer;
             border-radius: 4px;
             transition: background-color 0.3s, transform 0.2s;
             font-weight: bold;
+            font-size: 0.9em;
         }
 
         button:hover {
-            background-color: #566ca9;
+            background-color: #455a8c;
             transform: scale(1.05);
         }
 
-        .playing {
-            background-color: #aec0ec;
-        }
-
-        #controls {
+        .controls {
             display: flex;
             justify-content: center;
             margin-top: 20px;
@@ -74,7 +112,7 @@
         }
 
         input[type="text"] {
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
             width: 200px;
@@ -94,58 +132,72 @@
             max-width: 500px;
         }
 
-        #playPause {
-            margin-bottom: 10px;
-        }
-
-        #seekSlider {
-            width: 100%;
-        }
-
-        #volumeControl {
+        #seekSlider, #volumeControl {
             width: 100%;
             margin-top: 10px;
         }
 
-        #timeDisplay {
-            margin: 5px 0;
+        @media (max-width: 768px) {
+            .music-card {
+                flex-direction: column;
+                align-items: flex-start;
+                height: auto;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .music-title {
+                font-size: 1.1em;
+            }
+
+            .music-artist {
+                font-size: 0.8em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            input[type="text"] {
+                width: 150px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
         }
     </style>
 </head>
 <body>
     <h1>{{playlistName}}</h1>
-    <table id="musicTable">
-        <thead>
-        <tr>
-            <th>아티스트</th>
-            <th>제목</th>
-            <th>재생</th>
-            <th>삭제</th>
-        </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div id="musicContainer"></div>
 
     <div class="custom-audio">
         <audio id="audioPlayer"></audio>
         <button id="playPause">재생</button>
-        <label for="seekSlider">재생 시간</label><input type="range" id="seekSlider" min="0" max="100" value="0" step="1">
+        <label for="seekSlider">재생 시간</label>
+        <input type="range" id="seekSlider" min="0" max="100" value="0" step="1">
         <div id="timeDisplay">00:00 / 00:00</div>
-        <label for="volumeControl">볼륨</label><input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1">
+        <label for="volumeControl">볼륨</label>
+        <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1">
         <div>
             <input type="checkbox" id="repeatCheckbox" checked>
             <label for="repeatCheckbox">반복 재생</label>
         </div>
     </div>
 
-    <div id="controls">
+    <div class="controls">
         <label for="artist">가수: </label>
         <input type="text" id="artist" placeholder="가수를 입력하세요">
         <label for="title">노래: </label>
         <input type="text" id="title" placeholder="노래 제목을 입력하세요">
         <button id="send">음악 추가</button>
     </div>
-
     <script>
         let musicList = [];
         let currentIndex = -1;
@@ -235,226 +287,113 @@
             }
         });
 
-        document.getElementById("volumeControl").addEventListener("input", function() {
-            audioPlayer.volume = this.value;
-        });
-
-        document.getElementById("seekSlider").addEventListener("input", function() {
-            audioPlayer.currentTime = audioPlayer.duration * (this.value / 100);
-        });
-
-        audioPlayer.addEventListener("timeupdate", function() {
-            updateSeekSlider();
-            updateTimeDisplay();
-        });
-
         audioPlayer.addEventListener("ended", function() {
-            if (repeatEnabled) {
-                // 반복 재생이 활성화된 경우
-                if (currentIndex === musicList.length - 1) {
-                    // 현재 곡이 마지막 곡인 경우
-                    currentIndex = 0; // 첫 곡으로 돌아감
-                } else {
-                    currentIndex++; // 다음 곡으로 이동
-                }
-                playCurrentAudio(); // 현재 곡 재생
+            if (currentIndex < musicList.length - 1) {
+                currentIndex++;
+                playCurrentAudio();
+            } else if (repeatEnabled) {
+                currentIndex = 0;
+                playCurrentAudio();
             } else {
-                // 반복 재생이 비활성화된 경우
-                if (currentIndex < musicList.length - 1) {
-                    currentIndex++;
-                    playCurrentAudio();
-                } else {
-                    isPlaying = false;
-                    currentIndex = -1;
-                    document.getElementById("playPause").textContent = '재생';
-                }
+                isPlaying = false;
+                document.getElementById("playPause").textContent = '재생';
             }
         });
+
+        function playCurrentAudio() {
+            const currentMusic = musicList[currentIndex];
+            console.log(currentMusic);
+
+            const byteCharacters = atob(currentMusic.musicFileBytes);
+            const byteNumbers = new Uint8Array(byteCharacters.length);
+
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+
+            const blob = new Blob([byteNumbers], { type: 'audio/mpeg' });
+            const url = URL.createObjectURL(blob);
+
+            audioPlayer.src = url;
+            audioPlayer.play().then(() => {
+                document.getElementById("playPause").textContent = '일시정지';
+                updateSeekSlider();
+            }).catch((error) => {
+                console.error("재생 중 오류 발생:", error);
+            });
+        }
+
+        function addMusicToList(musicData) {
+            musicList.push(musicData);
+            renderMusicList();
+        }
+
+        function renderMusicList() {
+            const musicContainer = document.getElementById("musicContainer");
+            musicContainer.innerHTML = ''; // 이전 음악 리스트를 지우기
+            musicList.forEach((music, index) => {
+                const musicCard = document.createElement("div");
+                musicCard.className = "music-card";
+                musicCard.innerHTML = `
+                        <div class="music-info">
+                            <h2 class="music-title">${music.title}</h2>
+                            <p class="music-artist">${music.artist}</p>
+                        </div>
+                        <div class="button-group">
+                            <button onclick="playMusic(${index})">재생</button>
+                            <button onclick="removeMusic(${index})">삭제</button>
+                        </div>
+                    `;
+                musicContainer.appendChild(musicCard);
+                musicCard.style.opacity = 1; // 페이드 인 효과를 위해 초기 opacity 설정
+            });
+        }
+
+        function playMusic(index) {
+            currentIndex = index;
+            playCurrentAudio();
+        }
+
+        function removeMusic(index) {
+            musicList.splice(index, 1);
+            if (index < currentIndex) {
+                currentIndex--; // 삭제된 곡의 인덱스가 현재 인덱스보다 작으면 인덱스 조정
+            }
+            if (currentIndex >= musicList.length) {
+                currentIndex = musicList.length - 1; // 현재 인덱스가 리스트의 범위를 넘지 않도록 조정
+            }
+            renderMusicList();
+        }
 
         document.getElementById("send").addEventListener("click", function() {
-            if (document.getElementById("artist").value === '' && document.getElementById("title").value === '') {
-                console.log("아티스트 이름과 노래 제목을 넣어주세요!");
-            } else {
-                sendMessage();
-                document.getElementById("artist").value = '';
-                document.getElementById("title").value = '';
-            }
+            sendMessage();
         });
 
         document.getElementById("repeatCheckbox").addEventListener("change", function() {
             repeatEnabled = this.checked;
         });
 
-        function addMusicToList(musicData) {
-            musicList.push(musicData);
-            updateMusicTable(musicData);
-
-            // 만약 마지막 곡이 끝난 후 새로운 곡이 추가되었을 때
-            if (currentIndex === -1 || (currentIndex === musicList.length - 1 && !isPlaying)) {
-                // 현재 곡이 끝났거나, 음악이 재생 중이지 않으면 현재 음악 재생
-                currentIndex = musicList.length - 1; // 마지막으로 추가된 곡 인덱스 설정
-                playCurrentAudio(); // 마지막 곡 재생
-                document.getElementById("playPause").textContent = '일시정지';
-            }
-        }
-
-        function updateMusicTable() {
-            const tbody = document.getElementById('musicTable').querySelector('tbody');
-            tbody.innerHTML = ''; // 기존 내용을 초기화
-
-            musicList.forEach((musicData, index) => {
-                const row = document.createElement('tr');
-                const artistCell = document.createElement('td');
-                const titleCell = document.createElement('td');
-                const buttonCell = document.createElement('td');
-                const deleteCell = document.createElement('td');
-
-                artistCell.textContent = musicData.artist; // 아티스트 표시
-                titleCell.textContent = musicData.title; // 제목 표시
-
-                // 재생 버튼 추가
-                const playButton = document.createElement('button');
-                playButton.textContent = '재생';
-                playButton.onclick = () => playAudio(index); // 클릭 시 해당 곡 재생
-
-                // 삭제 버튼 추가
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = '삭제';
-                deleteButton.onclick = () => {
-                    fetch(`/api/v1/delete?playlistId={{playlistId}}&artist=${musicData.artist}&title=${musicData.title}`, { method: 'GET' }).then(response => {
-                        if (response.ok) {
-                            handleMusicDelete(index); // 음악 삭제 처리
-                        }
-                    });
-                };
-
-                buttonCell.appendChild(playButton); // 재생 버튼 추가
-                deleteCell.appendChild(deleteButton); // 삭제 버튼 추가
-                row.appendChild(artistCell); // 아티스트 셀 추가
-                row.appendChild(titleCell); // 제목 셀 추가
-                row.appendChild(buttonCell); // 버튼 셀 추가
-                row.appendChild(deleteCell); // 삭제 셀 추가
-                tbody.appendChild(row); // 테이블에 행 추가
-            });
-            highlightCurrentRow(); // 현재 곡 강조 유지
-        }
-
-        function handleMusicDelete(index) {
-            if (musicList.length === 0) {
-                audioPlayer.pause(); // 모든 곡이 삭제되면 음악 멈춤
-                isPlaying = false;
-                document.getElementById("playPause").textContent = '재생';
-                currentIndex = -1; // 인덱스 초기화
-            } else {
-                if (index === currentIndex) {
-                    musicList.splice(index, 1); // 현재 곡 삭제
-                    if (musicList.length === 0) {
-                        audioPlayer.pause(); // 모든 곡이 삭제되면 음악 멈춤
-                        isPlaying = false;
-                        document.getElementById("playPause").textContent = '재생'; // 버튼 텍스트 변경
-                        currentIndex = -1; // 인덱스 초기화
-                    } else {
-                        // 현재 곡 삭제 후 마지막 곡일 때
-                        if (musicList.length === 1) {
-                            audioPlayer.pause(); // 음악 멈춤
-                            isPlaying = false;
-                            document.getElementById("playPause").textContent = '재생'; // 버튼 텍스트 변경
-                            currentIndex = -1; // 인덱스 초기화
-                        } else {
-                            // 체크박스가 체크되지 않은 상태에서 마지막 곡이 삭제될 때
-                            if (!document.getElementById("repeatCheckbox").checked && currentIndex === musicList.length) {
-                                audioPlayer.pause(); // 음악을 일시 정지
-                                isPlaying = false;
-                                document.getElementById("playPause").textContent = '재생'; // 버튼 텍스트 변경
-                                currentIndex = -1; // 인덱스 초기화
-                            } else {
-                                // 삭제한 곡이 마지막 곡이 아닌 경우
-                                if (currentIndex === musicList.length) {
-                                    currentIndex = 0; // 첫 곡으로 돌아감 (이 부분은 필요 시 제거)
-                                }
-                                playCurrentAudio(); // 다음 곡 재생
-                            }
-                        }
-                    }
-                } else {
-                    musicList.splice(index, 1); // 리스트에서 곡 삭제
-                    if (index < currentIndex) {
-                        currentIndex--; // 삭제한 곡이 현재 곡 인덱스보다 앞에 있을 경우 인덱스 조정
-                    }
-                }
-            }
-            updateMusicTable();
-        }
-
-        function playAudio(index) {
-            currentIndex = index; // 현재 인덱스 설정
-            playCurrentAudio(); // 음악 재생
-        }
-
-        function playCurrentAudio() {
-            if (currentIndex >= 0 && currentIndex < musicList.length) {
-                const musicData = musicList[currentIndex];
-                const byteCharacters = atob(musicData.musicFileBytes);
-                const byteNumbers = new Uint8Array(byteCharacters.length);
-                for (let i = 0; i < byteCharacters.length; i++) {
-                    byteNumbers[i] = byteCharacters.charCodeAt(i);
-                }
-                const blob = new Blob([byteNumbers], { type: 'audio/mpeg' });
-                const url = URL.createObjectURL(blob);
-                audioPlayer.src = url;
-                audioPlayer.play();
-                isPlaying = true;
-                document.getElementById("playPause").textContent = '일시정지';
-                highlightCurrentRow(); // Highlight the current row
-            }
-        }
-
-        function playNextAudio() {
-            currentIndex++;
-            if (currentIndex < musicList.length) {
-                playCurrentAudio();
-            } else {
-                currentIndex = 0; // 반복 재생 시 첫 곡으로 돌아감
-                playCurrentAudio();
-            }
-        }
-
-        function highlightCurrentRow() {
-            const rows = document.querySelectorAll('#musicTable tbody tr');
-            rows.forEach((row, index) => {
-                if (index === currentIndex) {
-                    row.style.backgroundColor = '#e0e0e0'; // 현재 곡 강조 색상
-                } else {
-                    row.style.backgroundColor = ''; // 기본 색상으로 복구
-                }
-            });
-        }
-
         function updateSeekSlider() {
-            const seekSlider = document.getElementById('seekSlider');
-            if (audioPlayer.duration > 0) {
-                seekSlider.value = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-            }
-        }
+            const seekSlider = document.getElementById("seekSlider");
+            seekSlider.max = audioPlayer.duration;
+            seekSlider.value = audioPlayer.currentTime;
 
-        function updateTimeDisplay() {
-            const timeDisplay = document.getElementById('timeDisplay');
-            const currentTime = formatTime(audioPlayer.currentTime);
-            const duration = formatTime(audioPlayer.duration);
-            timeDisplay.textContent = `${currentTime} / ${duration}`;
+            setInterval(() => {
+                seekSlider.value = audioPlayer.currentTime;
+                document.getElementById("timeDisplay").innerText = formatTime(audioPlayer.currentTime) + " / " + formatTime(audioPlayer.duration);
+            }, 1000);
         }
 
         function formatTime(seconds) {
-            if (isNaN(seconds)) return '00:00'; // NaN 처리
             const minutes = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
-            return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            return `${minutes}:${secs < 10 ? '0' + secs : secs}`;
         }
 
         async function list() {
             await fetch("/api/v1/list/{{playlistId}}").then(response => response.json()).then(data => {
                 musicList = data;
-                updateMusicTable();
+                renderMusicList();
             });
         }
 

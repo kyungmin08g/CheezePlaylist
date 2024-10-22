@@ -62,6 +62,23 @@ public class APIController {
         return ResponseEntity.ok().body(findUserId);
     }
 
+    @GetMapping("/channel")
+    public ResponseEntity<?> findChannel(@RequestParam String chzzkChannelId, SecurityContext context) {
+        String username = (String) context.getAuthentication().getPrincipal();
+        String channelId = musicService.getChannelName(chzzkChannelId);
+        List<PlaylistDto> dtoList = musicService.findAll(username);
+
+        if (!channelId.equals("(알 수 없음)")) {
+            for (PlaylistDto dto : dtoList) {
+                if (Objects.equals(dto.getChzzkChannelId(), chzzkChannelId)) {
+                    return ResponseEntity.ok().body(dto.getChzzkChannelId());
+                }
+            }
+        }
+
+        return ResponseEntity.status(401).body("null");
+    }
+
     @GetMapping("/playlist")
     public ResponseEntity<?> chzzk(@RequestParam String playlistName, @RequestParam String chzzkChannelId, @RequestParam String donationPrice, SecurityContext securityContext) {
         String uuid = UUID.randomUUID().toString();
@@ -88,6 +105,7 @@ public class APIController {
             playlist.put("playlistId", playlistDto.getPlaylistId());
             playlist.put("playlistName", playlistDto.getPlaylistName());
             playlist.put("chzzkChannelId", playlistDto.getChzzkChannelId());
+            playlist.put("donationPrice", playlistDto.getDonationPrice());
             playlists.add(playlist);
         }
 

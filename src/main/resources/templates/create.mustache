@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>편집</title>
+    <title>플레이리스트 생성</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -80,11 +80,11 @@
             transform: translateY(-1px);
         }
 
-        .update-btn {
+        .add-room-btn {
             background-color: #514575;
         }
 
-        .update-btn:hover {
+        .add-room-btn:hover {
             background-color: #473c68;
         }
 
@@ -99,9 +99,9 @@
 </head>
 <body>
     <div class="container">
-        <h1>플레이리스트 수정하기</h1>
+        <h1>플레이리스트 추가하기</h1>
         <div class="form-group">
-            <label for="room-name">플레이리스트 이름:</label>
+            <label for="room-name">이름:</label>
             <input type="text" id="playlistName" placeholder="플레이리스트 이름을 입력하세요" required>
         </div>
         <div class="form-group">
@@ -110,25 +110,25 @@
         </div>
         <div class="form-group">
             <label for="support-price">후원 가격:</label>
-            <input type="number" id="support-price" placeholder="후원 가격을 입력하세요" required>
+            <input type="text" id="support-price" placeholder="후원 가격을 입력하세요" required>
         </div>
         <div class="button-group">
-            <button class="update-btn" onclick="update()">수정 완료</button>
+            <button class="add-room-btn" onclick="add()">생성</button>
             <button class="cancel-btn" onclick="window.history.back();">취소</button>
         </div>
     </div>
     <script>
-        document.getElementById("playlistName").value = '{{playlistName}}'
-        document.getElementById("channel-id").value = '{{chzzkChannelId}}'
-        document.getElementById("support-price").value = '{{donationPrice}}'
+        function add() {
+            let playlistName = document.getElementById("playlistName").value;
+            let chzzkChannelId = document.getElementById("channel-id").value;
+            let donationPrice = document.getElementById("support-price").value;
 
-        function update() {
-            const playlistName = document.getElementById("playlistName").value
-            const chzzkChannelId = document.getElementById("channel-id").value
-            const donationPrice = document.getElementById("support-price").value
+            document.getElementById("playlistName").value = '';
+            document.getElementById("channel-id").value = '';
+            document.getElementById("support-price").value = '';
 
-            fetch(`/api/v1/playlist/update?playlistId={{playlistId}}&playlistName=${playlistName}&chzzkChannelId=${chzzkChannelId}&donationPrice=${donationPrice}`, { method: 'GET' })
-            location.href = '/';
+            fetch(`/api/v1/playlist?playlistName=${playlistName}&chzzkChannelId=${chzzkChannelId}&donationPrice=${donationPrice}`)
+            location.href = '/'
         }
     </script>
 </body>

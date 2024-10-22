@@ -7,98 +7,168 @@
     <title>홈</title>
     <style>
         body {
-            font-family: 'Helvetica Neue', sans-serif;
-            background-color: #e9ecef;
+            font-family: Arial, sans-serif;
+            background-color: #2e2b45;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+            color: #f0f0f0;
+            animation: fadeIn 1s ease-in-out;
         }
 
-        table {
-            width: 100%;
-            max-width: 600px;
-            border-collapse: collapse;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding-top: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
             margin-bottom: 20px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            animation: fadeInDown 0.5s ease-in-out forwards;
         }
 
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
+        @keyframes fadeInDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
-        th {
-            background-color: #566ca9;
-            color: #ffffff;
-            font-size: 18px;
-            letter-spacing: 1px;
-        }
-
-        td {
-            font-size: 16px;
-        }
-
-        tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        button {
-            background-color: #566ca9;
-            color: white;
+        .button-group button {
+            padding: 10px 20px;
+            margin-left: 10px;
             border: none;
-            padding: 10px 15px;
-            font-size: 14px;
-            border-radius: 8px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        button:hover {
-            background-color: #4c5f8d;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-        }
-
-        #playlistAdd {
-            background-color: #566ca9;
-            padding: 10px 15px;
-            margin-top: 15px;
-            border-radius: 8px;
             font-size: 16px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            color: white;
         }
 
-        #playlistAdd:hover {
-            background-color: #4c5f8d;
+        .button-group button:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .add-room-btn {
+            background-color: #66549e;
+        }
+
+        .add-room-btn:hover {
+            background-color: #5d4b91;
+        }
+
+        .logout-btn {
+            background-color: #963f3f;
+        }
+
+        .logout-btn:hover {
+            background-color: #8a3636;
+        }
+
+        .card {
+            background-color: #3e3b5b;
+            border: 1px solid #464255;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            animation: fadeInUp 1s ease-in-out;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            color: #e0e0e0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #ffffff;
+        }
+
+        .card p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #b0b0b0;
+        }
+
+        .card .actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .card button {
+            padding: 8px 15px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+        }
+
+        .card .edit-btn {
+            background-color: #66549e;
+        }
+
+        .card .edit-btn:hover {
+            background-color: #5d4b91;
+        }
+
+        .card .delete-btn {
+            background-color: #b83333;
+        }
+
+        .card .delete-btn:hover {
+            background-color: #ad2d2d;
         }
     </style>
 </head>
 <body>
-    <table id="table">
-        <thead>
-            <tr>
-                <th>플레이리스트 이름</th>
-                <th>수정</th>
-                <th>삭제</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-    <button id="playlistAdd" onclick="playlistAdd()">플레이리스트 추가</button>
-
+    <div class="container">
+        <div class="button-group">
+            <button class="add-room-btn" onclick="location.href = '/add'">추가</button>
+            <button class="logout-btn" onclick="logout()">로그아웃</button>
+        </div>
+        <div id="card-container"></div>
+    </div>
     <script>
         let playlists = [];
+        let datalist = [];
         getPlaylist();
 
         async function getPlaylist() {
@@ -107,51 +177,55 @@
                         playlists = data;
                     });
 
-            const tableBody = document.querySelector('#table tbody');
-            tableBody.innerHTML = '';
+            const cardContainer = document.getElementById('card-container');
+            cardContainer.innerHTML = '';
 
             playlists.forEach(data => {
-                const row = document.createElement('tr');
-                const playlistCell = document.createElement('td');
-                const correctionCell = document.createElement('td');
-                const deleteCell = document.createElement('td');
-                const playlistButton = document.createElement('button');
-                const correctionButton = document.createElement('button');
-                const deleteButton = document.createElement('button');
+                const card = document.createElement('div');
+                datalist = [];
+                datalist = data;
+                card.className = 'card';
+                card.innerHTML = `
+            <h2>${data.playlistName}</h2>
+            <p>ID: ${data.chzzkChannelId}</p>
+            <p>후원: ${data.donationPrice}원</p>
+            <div class="actions">
+                <button class="edit-btn" onclick="correction(datalist, event)">수정</button>
+                <button class="delete-btn" onclick="eliminate(datalist, event)">삭제</button>
+            </div>`;
+                card.onclick = () => playlist(data);
 
-                playlistButton.textContent = data.playlistName;
-                playlistButton.onclick = () => {
-                    location.href = `/playlist?id=${data.playlistId}&name=${data.playlistName}`;
-                };
-
-                correctionButton.textContent = '수정';
-                correctionButton.onclick = () => {
-                    location.href = `/update?playlistId=${data.playlistId}&playlistName=${data.playlistName}`;
-                };
-
-                deleteButton.textContent = '삭제';
-                deleteButton.onclick = async () => {
-                    await fetch(`/api/v1/playlist/delete?playlistId=${data.playlistId}&playlistName=${data.playlistName}`, { method: 'GET' }).then(response => {
-                        if (response.ok === false) {
-                            location.href = '/'
-                        } else {
-                            getPlaylist();
-                        }
-                    })
-                };
-
-                playlistCell.appendChild(playlistButton);
-                deleteCell.appendChild(deleteButton);
-                correctionCell.appendChild(correctionButton);
-                row.appendChild(playlistCell);
-                row.appendChild(correctionCell);
-                row.appendChild(deleteCell);
-                tableBody.appendChild(row);
+                cardContainer.appendChild(card);
             });
         }
 
-        function playlistAdd() {
-            location.href = '/add';
+        function correction(data, event) {
+            event.stopPropagation();
+            location.href = `/update?playlistId=${data.playlistId}&playlistName=${encodeURIComponent(data.playlistName)}`;
+        }
+
+        async function eliminate(data, event) {
+            event.stopPropagation();
+            const response = await fetch(`/api/v1/playlist/delete?playlistId=${data.playlistId}&playlistName=${encodeURIComponent(data.playlistName)}`, { method: 'GET' });
+            if (!response.ok) throw new Error('네트워크 응답 예외');
+            await getPlaylist();
+        }
+
+        function logout() {
+            location.href = `/logouts?username={{username}}`;
+        }
+
+        function playlist(data) {
+            fetch(`/api/v1/channel?chzzkChannelId=${data.chzzkChannelId}`, { method: 'GET' }).then(response => response.text())
+                    .then(result => {
+                        if (result === 'null') {
+                            alert("옮바른 치지직 아이디가 아닙니다!");
+                        } else {
+                            location.href = `/playlist?id=${data.playlistId}&name=${data.playlistName}`;
+                        }
+                    }).catch(err => {
+                        console.log(err);
+                    })
         }
     </script>
 </body>

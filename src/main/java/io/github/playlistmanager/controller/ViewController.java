@@ -5,6 +5,7 @@ import io.github.playlistmanager.dto.JoinMemberDto;
 import io.github.playlistmanager.dto.PlaylistDto;
 import io.github.playlistmanager.service.impl.MusicServiceImpl;
 import io.github.playlistmanager.service.impl.UserServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContext;
@@ -33,11 +34,18 @@ public class ViewController {
         response.sendRedirect("/logins");
     }
 
+    @GetMapping("/logouts")
+    public void logout(@RequestParam String username, HttpServletResponse response) throws IOException {
+        userService.refreshTokenDeleteByUsername(username);
+        response.sendRedirect("/");
+    }
+
     @Secured("ROLE_USER")
     @GetMapping("/")
     public String mainPage(Model model, SecurityContext securityContext) {
         String username = (String) securityContext.getAuthentication().getPrincipal();
         model.addAttribute("playlistData", musicService.findAll(username));
+        model.addAttribute("username", username);
         return "main";
     }
 

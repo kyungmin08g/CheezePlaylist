@@ -261,7 +261,7 @@ public class MusicServiceImpl implements MusicService {
         log.info("유튜브 영상의 주소: {}", youtubeUrl);
 
         // yt-dlp 프로세스 생성
-        ProcessBuilder ytDlpBuilder = new ProcessBuilder("yt-dlp", "-f", "bestaudio", "-o", "-", youtubeUrl);
+        ProcessBuilder ytDlpBuilder = new ProcessBuilder("yt-dlp", "-f", "bestaudio", "--cookies", "/Users/k.kyungmin/Developer/Aws/cookies.txt", "-o", "-", youtubeUrl);
         Process ytDlpProcess = ytDlpBuilder.start();
         log.info("yt-dlp 프로세스가 시작되었음");
 
@@ -423,7 +423,7 @@ public class MusicServiceImpl implements MusicService {
     }
 
     // 채널 이름 구하는 메소드
-    private String getChannelName(String channelId) {
+    public String getChannelName(String channelId) {
         Mono<String> response = WebClient.builder().baseUrl("https://api.chzzk.naver.com").build()
                 .get()
                 .uri("service/v1/channels/" + channelId)
