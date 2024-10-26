@@ -126,6 +126,7 @@ public class APIController {
             musicData.put("roomId", customRoomId);
             musicData.put("title", customTitle);
             musicData.put("musicFileBytes", dto.getMusicFileBytes());
+            musicData.put("date", dto.getDate());
             musicDatas.add(musicData);
         }
 
@@ -161,7 +162,7 @@ public class APIController {
         if (!username.equals("anonymousUser")) {
             musicService.playlistDelete(playlistId, playlistName, username);
             musicService.deleteById(playlistId);
-            log.info(playlistName + "이 제거되었습니다.");
+            log.info("{}이 제거되었습니다.", playlistName);
             return ResponseEntity.status(200).build();
         }
 

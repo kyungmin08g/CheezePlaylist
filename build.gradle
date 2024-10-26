@@ -71,6 +71,9 @@ dependencies {
 
     // Oauth2.0 Client
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    // Jsoup
+    implementation 'org.jsoup:jsoup:1.14.3'
 }
 
 tasks.named('test') {

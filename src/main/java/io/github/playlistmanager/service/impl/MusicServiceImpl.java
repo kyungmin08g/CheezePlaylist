@@ -9,6 +9,10 @@ import io.github.playlistmanager.dto.PlaylistDto;
 import io.github.playlistmanager.mapper.MusicMapper;
 import io.github.playlistmanager.service.MusicService;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -18,9 +22,14 @@ import reactor.core.publisher.Mono;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -85,7 +94,7 @@ public class MusicServiceImpl implements MusicService {
         String title;
 
         // 테스트 용
-        donationMusicDownloader(roomId, "Gemini", "UFO", donationUsername, donationPrice, donationSubscriber);
+        donationMusicDownloader(roomId, "Gemini", "MIA", donationUsername, donationPrice, donationSubscriber);
 
         if(donationContent.matches("^(.*) - (.*)$")) {
             artist = donationContent.substring(0, donationContent.indexOf("-") - 1);
@@ -189,18 +198,24 @@ public class MusicServiceImpl implements MusicService {
     // 쿼리를 받으면 YouTube Data API를 통해 동영상을 검색하는 메소드임
     @Override
     public String searchVideo(String query) {
-        Mono<String> response = WebClient.builder().baseUrl("https://www.googleapis.com").build().get()
-                .uri(uriBuilder -> uriBuilder.path("/youtube/v3/search")
-                        .queryParam("part", "snippet")
-                        .queryParam("q", query + " (lyrics)")
-                        .queryParam("maxResults", "1")
-                        .queryParam("type", "video")
-                        .queryParam("key", key).build())
-                .retrieve()
-                .bodyToMono(String.class);
+        int count = 0;
+        try {
+            String searchUrl = "https://www.google.com/search?q=" + query + " (lyrics) site:youtube.com";
+            Document doc = Jsoup.connect(searchUrl).get();
 
-        log.info("유튜브 데이터 API를 통해서 동영상을 검색하는 로직이 정상적으로 처리되었습니다.");
-        return response.block(); // Json으로 리턴함
+            Elements videoElements = doc.select("div[jscontroller=rTuANe]");
+            for (Element videoElement : videoElements) {
+                String videoUrl = videoElement.attr("data-surl");
+                String videoId = videoElement.attr("data-vid");
+                count++;
+
+                if (count == 1 && !videoUrl.isEmpty()) return videoId;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     @Override
@@ -226,6 +241,7 @@ public class MusicServiceImpl implements MusicService {
                     .donationUsername(donationUsername)
                     .donationPrice(donationPrice)
                     .donationSubscriber(donationSubscriber)
+                    .date(String.valueOf(LocalDate.now()))
                     .build();
 
             save(musicFileDTO);
@@ -234,20 +250,14 @@ public class MusicServiceImpl implements MusicService {
             return;
         }
 
-        String searchVideoResultJson = searchVideo(query); // 만든 문자열을 담아 유튜브 동영상을 검색함
         try {
-            String videoIdValue = "";
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode json = objectMapper.readTree(searchVideoResultJson); // Json을 Tree 형태로 바꿔줌
-            JsonNode items = json.get("items"); // 해당 트리의 하위 배열을 가져옴
-
-            for (JsonNode item : items) {
-                JsonNode id = item.get("id"); // 해당 트리의 하위 배열을 가져옴
-                JsonNode videoId = id.get("videoId"); // 해당 트리의 값을 가져옴
-                videoIdValue = videoId.asText(); // 텍스트(문자열)로 바꿈
+            String videoId = searchVideo(query);
+            if (videoId == null) {
+                log.info("해당 음악을 다운로드하고 DB에 저장하는 로직에 예외를 발생시켰습니다.");
+                return;
             }
 
-            String url = "https://www.youtube.com/watch?v=" + videoIdValue; // 유튜브 영상의 주소를 만듬
+            String url = "https://www.youtube.com/watch?v=" + videoId; // 유튜브 영상의 주소를 만듬
             conversionAndDownload(roomId, url, artist, customTitle, donationUsername, donationPrice, donationSubscriber); // URL과 해당 음악의 제목을 넣으면 음악 byte[]를 DB에 저장함
 
             log.info("해당 음악을 다운로드하고 DB에 저장하는 로직이 정상적으로 처리되었습니다.");
@@ -331,6 +341,7 @@ public class MusicServiceImpl implements MusicService {
                     .donationUsername(donationUsername)
                     .donationPrice(donationPrice)
                     .donationSubscriber(donationSubscriber)
+                    .date(String.valueOf(LocalDate.now()))
                     .build();
 
             save(musicFileDTO);
@@ -338,7 +349,7 @@ public class MusicServiceImpl implements MusicService {
         }
     }
 
-    @Override
+//    @Override
     public ChzzkChannelConnectDto chzzkChannelConnect(PlaylistDto playlistDto) {
         String channelId = playlistDto.getChzzkChannelId();
         String channelName = getChannelName(channelId);
@@ -351,15 +362,13 @@ public class MusicServiceImpl implements MusicService {
         }
         serverId = Math.abs(serverId) % 9 + 1;
 
-        ChzzkChannelConnectDto connectDto = ChzzkChannelConnectDto.builder()
+        log.info("\u001B[32m{}님 채널에 연결하는 로직이 정상적으로 처리되었습니다.\u001B[0m", channelName);
+        return ChzzkChannelConnectDto.builder()
                 .playlistId(playlistDto.getPlaylistId())
                 .chatChannelId(chatChannelId)
                 .accessToken(accessToken)
                 .serverId(String.valueOf(serverId))
                 .build();
-
-        log.info("\u001B[32m{}님 채널에 연결하는 로직이 정상적으로 처리되었습니다.\u001B[0m", channelName);
-        return connectDto;
     }
 
     @Override
