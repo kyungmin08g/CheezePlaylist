@@ -505,7 +505,7 @@
         }
 
         tbody tr:hover td {
-            background-color: #d7d7d7;
+            background-color: #e0e0e0;
         }
 
         .song-title {
@@ -538,6 +538,10 @@
             width: 16px;
             height: 16px;
             padding-top: 2px;
+        }
+
+        #audio-a {
+            margin-top: 4px;
         }
     </style>
 </head>
@@ -580,7 +584,7 @@
 
             <div id="audio-icon">
                 <div id="sound">
-                    <img src="audio_negative.png" id="audio">
+                    <a href="javascript:void(0);" id="audio-a" onclick="audioSound()"><img src="audio_negative.png" id="audio"></a>
                     <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1">
                 </div>
                 <a href="javascript:void(0);" onclick="beforePlay()" id="before-a"><img src="before.png" id="before"></a>
@@ -653,7 +657,7 @@
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 console.log('웹소켓에 연결되었습니다: ' + frame);
-                stompClient.subscribe('/sub/message/{{playlistId}}', function(message) {
+                stompClient.subscribe('/sub/message/{{playlistId}}', function (message) {
                     const musicData = JSON.parse(message.body);
                     const exists = musicList.some(music => music.title === musicData.title && music.artist === musicData.artist);
                     if (!exists) {
@@ -661,10 +665,6 @@
                     }
                 });
             });
-        }
-
-        function addTable() {
-
         }
 
         function sendMessage() {
@@ -689,13 +689,13 @@
             const rows = document.querySelectorAll('#musicTable tbody tr');
             rows.forEach((row, number) => {
                 if (number === index) {
-                    row.style.backgroundColor = '#e7e7e7'; // 현재 곡 강조 색상
+                    row.style.backgroundColor = '#e7e7e7';
                     row.style.borderTopLeftRadius = '10px'
                     row.style.borderBottomLeftRadius = '10px'
                     row.style.borderTopRightRadius = '10px'
                     row.style.borderBottomRightRadius = '10px'
                 } else {
-                    row.style.backgroundColor = ''; // 기본 색상으로 복구
+                    row.style.backgroundColor = '';
                 }
             });
         }
@@ -762,7 +762,7 @@
                 td2.appendChild(songTitle);
                 td2.appendChild(artist);
 
-                // 추가된 날짜
+                // 시간
                 const td3 = document.createElement("td");
                 td3.className = "table-time";
                 td3.textContent ='00:00';
@@ -833,6 +833,10 @@
                             if (selfIndex === `${index + 1}`) {
                                 console.log("재생중인 음악을 삭제했습니다.");
 
+                                /*
+                                  - 정민이가 말한 요구사항 해결 및 추가 -> 완료
+                                */
+
                                 if (`${selfIndex - 1}` === `${musicList.length - 1}`) {
                                     console.log("마지막 곡 삭제");
                                     if (reproduction.src === 'http://localhost:8080/stop.png') {
@@ -878,7 +882,6 @@
                                          playCurrentAudio(++index);
                                      }
                                      --index;
-                                    // index = 0;
                                 }
 
                                 console.log(index)
@@ -1081,11 +1084,40 @@
             }
         }
 
+        const audioSoundA = document.getElementById('audio-a');
+        let playSound = volumeControl.value;
+        function audioSound() {
+            if (audio.src === 'http://localhost:8080/audio_negative.png') {
+                playSound = volumeControl.value;
+                audio.src = 'mute.png';
+                audio.style.width = '20px';
+                audio.style.marginRight = '13px';
+                audioPlayer.muted = true;
+                volumeControl.value = 0;
+            } else {
+                audio.src = 'audio_negative.png';
+                audio.style.width = '26px';
+                audio.style.marginRight = '7px';
+                audioPlayer.muted = false;
+                volumeControl.value = playSound;
+                audioPlayer.volume = playSound;
+            }
+
+            const value = (volumeControl.value - volumeControl.min) / (volumeControl.max - volumeControl.min) * 100;
+            volumeControl.style.background = `linear-gradient(to right, rgb(0, 0, 0) ${value}%, rgb(112, 112, 112) ${value}%)`;
+        }
+
         // 볼륨 조절할떄 이미지 및 색상 변경
+        const audio = document.getElementById('audio');
         volumeControl.addEventListener('input', function() {
             const value = (volumeControl.value - volumeControl.min) / (volumeControl.max - volumeControl.min) * 100;
-            const audio = document.getElementById('audio');
-            if(value === 0) {
+            if (value > 0 && audio.src === 'http://localhost:8080/mute.png') {
+                audio.src = 'audio_negative.png'
+                audio.style.width = '26px'
+                audio.style.marginRight = '7px'
+                volumeControl.style.background = `linear-gradient(to right, rgb(0, 0, 0) ${value}%, rgb(112, 112, 112) ${value}%)`;
+                audioPlayer.muted = false;
+            } else if (value === 0) {
                 audio.src = 'mute.png'
                 audio.style.width = '20px'
                 audio.style.marginRight = '13px'
