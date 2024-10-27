@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -195,23 +196,47 @@ public class MusicServiceImpl implements MusicService {
         }
     }
 
-    // 쿼리를 받으면 YouTube Data API를 통해 동영상을 검색하는 메소드임
+    // 쿼리를 받으면 동영상을 검색하는 메소드임
     @Override
     public String searchVideo(String query) {
-        int count = 0;
+        String searchUrl = "https://www.youtube.com/results?search_query=" + query + " lyrics&sp=EgIYBA==";
         try {
-            String searchUrl = "https://www.google.com/search?q=" + query + " (lyrics) site:youtube.com";
-            Document doc = Jsoup.connect(searchUrl).get();
+            Document document = Jsoup.connect(searchUrl).get();
+            Elements scriptElements = document.select("script");
 
-            Elements videoElements = doc.select("div[jscontroller=rTuANe]");
-            for (Element videoElement : videoElements) {
-                String videoUrl = videoElement.attr("data-surl");
-                String videoId = videoElement.attr("data-vid");
-                count++;
+            for (Element scriptElement : scriptElements) {
+                String scriptContent = scriptElement.html();
 
-                if (count == 1 && !videoUrl.isEmpty()) return videoId;
+                String ytInitialDataPrefix = "var ytInitialData = ";
+                int startIndex = scriptContent.indexOf(ytInitialDataPrefix);
+
+                if (startIndex != -1) {
+                    startIndex += ytInitialDataPrefix.length();
+                    int endIndex = scriptContent.indexOf("};", startIndex) + 1;
+                    String ytInitialDataJson = scriptContent.substring(startIndex, endIndex);
+
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    JsonNode jsonNode = objectMapper.readTree(ytInitialDataJson);
+
+                    JsonNode contents = jsonNode.path("contents")
+                            .path("twoColumnSearchResultsRenderer")
+                            .path("primaryContents")
+                            .path("sectionListRenderer")
+                            .path("contents");
+
+                    for (JsonNode content : contents) {
+                        JsonNode itemSection = content.path("itemSectionRenderer").path("contents");
+
+                        for (JsonNode item : itemSection) {
+                            JsonNode videoRenderer = item.path("videoRenderer");
+                            String videoId = videoRenderer.path("videoId").asText();
+                            if (!videoId.isEmpty()) return "https://www.youtube.com/watch?v=" + videoId;
+                        }
+                    }
+                }
             }
-        } catch (IOException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -241,7 +266,6 @@ public class MusicServiceImpl implements MusicService {
                     .donationUsername(donationUsername)
                     .donationPrice(donationPrice)
                     .donationSubscriber(donationSubscriber)
-                    .date(String.valueOf(LocalDate.now()))
                     .build();
 
             save(musicFileDTO);
@@ -251,13 +275,11 @@ public class MusicServiceImpl implements MusicService {
         }
 
         try {
-            String videoId = searchVideo(query);
-            if (videoId == null) {
+            String url = searchVideo(query); // 유튜브 영상의 주소를 만듬
+            if (url == null) {
                 log.info("해당 음악을 다운로드하고 DB에 저장하는 로직에 예외를 발생시켰습니다.");
                 return;
             }
-
-            String url = "https://www.youtube.com/watch?v=" + videoId; // 유튜브 영상의 주소를 만듬
             conversionAndDownload(roomId, url, artist, customTitle, donationUsername, donationPrice, donationSubscriber); // URL과 해당 음악의 제목을 넣으면 음악 byte[]를 DB에 저장함
 
             log.info("해당 음악을 다운로드하고 DB에 저장하는 로직이 정상적으로 처리되었습니다.");
@@ -341,7 +363,6 @@ public class MusicServiceImpl implements MusicService {
                     .donationUsername(donationUsername)
                     .donationPrice(donationPrice)
                     .donationSubscriber(donationSubscriber)
-                    .date(String.valueOf(LocalDate.now()))
                     .build();
 
             save(musicFileDTO);

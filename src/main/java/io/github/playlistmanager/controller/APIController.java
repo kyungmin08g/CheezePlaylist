@@ -126,7 +126,7 @@ public class APIController {
             musicData.put("roomId", customRoomId);
             musicData.put("title", customTitle);
             musicData.put("musicFileBytes", dto.getMusicFileBytes());
-            musicData.put("date", dto.getDate());
+            musicData.put("donationUser", dto.getDonationUsername());
             musicDatas.add(musicData);
         }
 

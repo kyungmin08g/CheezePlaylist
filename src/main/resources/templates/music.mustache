@@ -12,10 +12,10 @@
 
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #e7e7e7;
+            background-color: #eeeeee;
             margin: 0;
             padding: 20px;
-            color: #fff;
+            color: #333333;
         }
 
         h1 {
@@ -375,14 +375,15 @@
 
         table {
             position: fixed;
+            top: 8%;
             left: 50%;
             transform: translateX(-50%);
             display: block;
             overflow-x: hidden;
             overflow-y: auto;
             max-height: 670px;
-            width: 1137px;
-            height: auto;
+            width: 837px;
+            height: 100%;
             border-collapse: collapse;
             border-spacing: 0;
         }
@@ -391,15 +392,15 @@
             display: block;
             max-height: 100%;
             /*overflow-y: auto;*/
-            width: 1137px;
+            width: 837px;
         }
 
         thead th {
             position: sticky;
-            width: 1137px;
+            width: 837px;
             top: 0;
             z-index: 1;
-            background-color: #e7e7e7;
+            background-color: #eeeeee;
         }
 
         thead th::after {
@@ -409,25 +410,53 @@
             left: 0;
             right: 0;
             height: 1px;
-            background-color: #a2a2a2;
+            background-color: #383838;
         }
 
-        thead th:first-child,
-        tbody td:first-child {
-            text-align: center;
+        th:first-child,
+        td:first-child {
+            text-align: left;
+        }
+
+        td:last-child {
+            width: 100px;
+            padding-right: 24px;
+            text-align: end;
+        }
+
+        th:last-child {
+            padding-left: 0;
+            padding-right: 10px;
         }
 
         thead th:nth-child(3) {
-            padding-left: 172px;
+            padding-left: 100px;
         }
 
         tbody td:nth-child(3) {
-            padding-left: 52px;
+            padding-left: 20px;
         }
 
-        thead th:not(:first-child),
-        tbody td:not(:first-child) {
+        thead th:nth-child(4) {
+            padding-left: 0;
+        }
+
+        tbody td:nth-child(4) {
+            padding-left: 26px;
+        }
+
+        thead th:not(:first-child, :last-child),
+        tbody td:not(:first-child, :last-child) {
             text-align: left;
+            min-width: 179px;
+        }
+
+        th, td {
+            padding-top: 7px;
+            padding-bottom: 7px;
+            padding-left: 16px;
+            /*min-width: 179px;*/
+            /*border: 1px solid black;*/
         }
 
         table::-webkit-scrollbar {
@@ -458,13 +487,6 @@
             border-bottom-right-radius: 10px;
         }
 
-        th, td {
-            padding-top: 7px;
-            padding-bottom: 7px;
-            padding-left: 16px;
-            min-width: 179px;
-        }
-
         th {
             color: #454545;
             text-transform: uppercase;
@@ -490,13 +512,21 @@
             font-size: 16px;
             color: #22a04e;
             display: block;
-            width: 300px;
+            width: 283px;
+            padding-left: 12px;
         }
 
         .artist {
             font-size: 14px;
             color: #b3b3b3;
             display: block;
+            width: 283px;
+            padding-left: 12px;
+        }
+
+        .table-time {
+            /*padding-right: 34px;*/
+            /*padding-left: 0;*/
         }
 
         #table-reproduction {
@@ -512,13 +542,13 @@
     </style>
 </head>
 <body>
-    <h1>{{playlistName}}</h1>
+<!--    <h1>{{playlistName}}</h1>-->
     <div id="controls">
         <label for="artist">가수: </label>
         <input type="text" id="artist" placeholder="가수를 입력하세요">
-        <label for="title">노래: </label>
+        <label for="title">제목: </label>
         <input type="text" id="musicTitle" placeholder="노래 제목을 입력하세요">
-        <button id="send">음악 추가</button>
+        <button id="send">추가</button>
     </div>
 
     <table id="musicTable">
@@ -526,7 +556,7 @@
             <tr>
                 <th id="number">#</th>
                 <th>제목</th>
-                <th>날짜</th>
+                <th>시간</th>
                 <th>후원자</th>
                 <th>삭제</th>
             </tr>
@@ -553,9 +583,9 @@
                     <img src="audio_negative.png" id="audio">
                     <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1">
                 </div>
-                <a href="javascript:void(0);" onclick="beforePlay()"><img src="before.png" id="before"></a>
+                <a href="javascript:void(0);" onclick="beforePlay()" id="before-a"><img src="before.png" id="before"></a>
                 <a href="javascript:void(0);" onclick="play()"><img src="stop.png" id="reproduction"></a>
-                <a href="javascript:void(0);" onclick="nextPlay()"><img src="next.png" id="next"></a>
+                <a href="javascript:void(0);" onclick="nextPlay()" id="next-a"><img src="next.png" id="next"></a>
                 <a href="javascript:void(0);" id="repeat-a"><img src="repeat.png" id="repeat"></a>
             </div>
         </div>
@@ -633,6 +663,10 @@
             });
         }
 
+        function addTable() {
+
+        }
+
         function sendMessage() {
             console.log(document.getElementById("musicTitle").value)
             stompClient.send("/app/api/v1/message/{{playlistId}}", {}, JSON.stringify({
@@ -655,7 +689,7 @@
             const rows = document.querySelectorAll('#musicTable tbody tr');
             rows.forEach((row, number) => {
                 if (number === index) {
-                    row.style.backgroundColor = '#e0e0e0'; // 현재 곡 강조 색상
+                    row.style.backgroundColor = '#e7e7e7'; // 현재 곡 강조 색상
                     row.style.borderTopLeftRadius = '10px'
                     row.style.borderBottomLeftRadius = '10px'
                     row.style.borderTopRightRadius = '10px'
@@ -702,6 +736,7 @@
             }
         }
 
+        let num = 0;
         function addMusicTable() {
             const tbody = document.getElementById('musicTable').querySelector('tbody');
             tbody.innerHTML = '';
@@ -710,6 +745,7 @@
                 // 순서
                 const newRow = document.createElement("tr");
                 const td1 = document.createElement("td");
+                td1.style.width = '50px';
                 td1.textContent = `${currentIndex + 1}`;
 
                 // 제목
@@ -729,27 +765,25 @@
                 // 추가된 날짜
                 const td3 = document.createElement("td");
                 td3.className = "table-time";
-                td3.textContent = musicData.date;
+                td3.textContent ='00:00';
 
-                // const byteCharacters = atob(musicData.musicFileBytes);
-                // const byteNumbers = new Uint8Array(byteCharacters.length);
-                // for (let i = 0; i < byteCharacters.length; i++) {
-                //     byteNumbers[i] = byteCharacters.charCodeAt(i);
-                // }
-                // const blob = new Blob([byteNumbers], { type: 'audio/mpeg' });
-                // const url = URL.createObjectURL(blob);
-                // audioPlayer.src = url;
-                //
-                // const audioPlayer2 = new Audio(audioPlayer.src);
-                // audioPlayer2.addEventListener('loadedmetadata', () => {
-                //     const duration = audioPlayer2.duration;
-                //     td3.textContent = formatTime(duration);
-                //     audioPlayer2.pause();
-                // });
+                const byteCharacters = atob(musicData.musicFileBytes);
+                const byteNumbers = new Uint8Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const blob = new Blob([byteNumbers], { type: 'audio/mpeg' });
+                const url = URL.createObjectURL(blob);
+
+                const timeAudioPlayer = new Audio(url);
+                timeAudioPlayer.addEventListener('loadedmetadata', function() {
+                    td3.textContent = formatTime(timeAudioPlayer.duration);
+                    timeAudioPlayer.pause();
+                });
 
                 // 후원자
                 const td4 = document.createElement("td");
-                td4.textContent = "익명";
+                td4.textContent = donationUser(musicData);
 
                 // 삭제
                 const td5 = document.createElement("td");
@@ -771,6 +805,22 @@
 
                 // 해당 열을 클릭했을때
                 newRow.addEventListener("click", function(event) {
+                    const cells = newRow.querySelectorAll("td");
+                    const rowData = Array.from(cells).map(cell => cell.textContent);
+                    num = rowData.find(num => num > 1);
+
+                    newRow.addEventListener('dblclick', function () { // 해당 셀을 더블 클릭시 음악 재생
+                        const cells = newRow.querySelectorAll("td");
+                        const rowData = Array.from(cells).map(cell => cell.textContent);
+                        let selfIndex = rowData.find(num => num > 1);
+
+                        if (num === selfIndex) {
+                            this.currentIndex = 0;
+                            index = currentIndex;
+                            playCurrentAudio(currentIndex);
+                        }
+                    });
+
                     if (event.target === deleteImg) { // 삭제 이미지 클릭했을 시
                         event.preventDefault();
                         const cells = newRow.querySelectorAll("td");
@@ -785,27 +835,40 @@
 
                                 if (`${selfIndex - 1}` === `${musicList.length - 1}`) {
                                     console.log("마지막 곡 삭제");
-                                    index = musicList.length - 1;
+                                    if (reproduction.src === 'http://localhost:8080/stop.png') {
+                                        console.log("ㅡ아안");
+                                        index = musicList.length - 1;
+                                        audioPlayer.currentTime = audioPlayer.duration;
+                                        console.log(index);
+                                    }
                                     audioPlayer.currentTime = audioPlayer.duration;
+                                    index = musicList.length - 1;
                                     return;
                                 } else playCurrentAudio(++index);
 
                                 --index;
                             } else {
                                 console.log("음악을 삭제했습니다.");
-
-                                /*
-                                문제
-                                1. 처음 곡을 재생하고 삭제하면 삭제된 곡이 재생됨. -> 해결!!
-                                 */
+                                console.log("삭제한 인덱스: " + selfIndex);
+                                console.log("현재 재생중인 인덱스: " + index);
 
                                 if (`${index + 1}` === `${selfIndex - 1}`) {
                                     console.log("처음곡 바로 다음 곡 삭제");
+                                } if (selfIndex < `${index}` || selfIndex > `${index}`) {
+                                    console.log("들어왔어!");
                                 } else if (index === 0) { // 여기만 제대로 작성해줬다면 문제 없는데 왜 아오 ㅆ
                                     // 대충 설명하자면 처음 곡을 삭제하면 그 다음곡이 재생되고 index를 처음 곡으로 맞추기 위해서 0으로 만듬.
                                     console.log("처음 곡 삭제");
-                                    playCurrentAudio(++index);
-                                    index = 0;
+                                    if (reproduction.src === 'http://localhost:8080/stop.png' && `${selfIndex - 1}` === `${musicList.length - 1}`) {
+                                        console.log("마지막걱")
+                                    } else if (index === musicList.length - 1) {
+                                        console.log("더 이상 곡이 없습니다.");
+                                        audioPlayer.currentTime = audioPlayer.duration;
+                                        // index = 0;
+                                    } else {
+                                        playCurrentAudio(++index);
+                                        index = 0;
+                                    }
                                 } else if (selfIndex - 1 === musicList.length - 1 && index - 1 === musicList.length - 1) {
                                     console.log("삭제만 했습니다.");
                                     audioPlayer.currentTime = audioPlayer.duration;
@@ -814,7 +877,8 @@
                                      if (selfIndex === `${0}`) {
                                          playCurrentAudio(++index);
                                      }
-                                     // index = 0;
+                                     --index;
+                                    // index = 0;
                                 }
 
                                 console.log(index)
@@ -822,14 +886,19 @@
                         });
                     } else if (event.target === td5) { // 삭제 열을 클릭했을 시
                         event.preventDefault();
-                    } else {
-                        this.currentIndex = 0;
-                        index = currentIndex;
-                        playCurrentAudio(currentIndex);
                     }
                 });
                 playBackgroundColor();
             });
+        }
+
+        function donationUser(data) {
+            const user = data.donationUser;
+            if (user === null) {
+                return '-'
+            }
+
+            return user;
         }
 
         function playCurrentAudio(index) {
@@ -837,6 +906,12 @@
             const title = document.getElementById("title");
 
             if (title.innerText === '-') {
+                if (index === 0 && index === musicList.length) {
+                    reproduction.src = "stop.png";
+                    alert('음악을 추가해주세요!');
+                    return;
+                }
+
                 const indexData = musicList[index];
                 const byteCharacters = atob(indexData.musicFileBytes);
                 const byteNumbers = new Uint8Array(byteCharacters.length);
@@ -866,7 +941,6 @@
                 reproduction.src = "play.png";
                 title.innerText = indexData.title;
                 playBackgroundColor();
-                console.log("인덱스: " + index);
             }
         }
 
@@ -882,9 +956,21 @@
             const current = formatTime(audioPlayer.currentTime);
             const duration = formatTime(audioPlayer.duration);
 
-            console.log(index)
-            if (index === 0) before.src = 'beforeProhibition.png'; else before.src = 'before.png';
-            if (index === musicList.length - 1) next.src = 'nextProhibition.png'; else next.src = 'next.png';
+            if (index === 0) {
+                before.src = 'beforeProhibition.png';
+                beforeA.style.cursor = 'not-allowed';
+            } else {
+                before.src = 'before.png';
+                beforeA.style.cursor = 'pointer';
+            }
+
+            if (index === musicList.length - 1) {
+                next.src = 'nextProhibition.png';
+                nextA.style.cursor = 'not-allowed';
+            } else {
+                next.src = 'next.png';
+                nextA.style.cursor = 'pointer';
+            }
 
             if (audioPlayer.duration > 0) {
                 seekSlider.value = (audioPlayer.currentTime / audioPlayer.duration) * 100;
@@ -912,11 +998,14 @@
             } else {
                 count = 0;
             }
-            if (index === musicList.length - 1) console.log("마지막 곡이었습니다.");
+            if (index === musicList.length - 1) {
+                console.log("마지막 곡이었습니다.");
+            }
 
             currentIndex = index;
             nowIndex = index;
             if (currentIndex === musicList.length - 1) {
+                console.log("1");
                 currentIndex = 0;
                 index = 0;
                 if (repeat.src === 'http://localhost:8080/repeating.png') {
@@ -926,13 +1015,12 @@
                     console.log('음악을 멈춥니다.');
                     currentIndex--;
 
+                    console.log("dsddsdsds")
                     let timeId = setInterval(function() {
                         if (currentIndex === -1 && nowIndex < musicList.length - 1) {
-                            currentIndex = 0;
-                            index = 0;
-                            currentIndex = nowIndex;
-                            playCurrentAudio(musicList.length - 1);
                             index = musicList.length - 1;
+                            currentIndex = nowIndex;
+                            playCurrentAudio(index);
                         }
                     }, 1000);
 
@@ -967,6 +1055,7 @@
 
         // 이전 곡으로 넘어가는 함수
         const before = document.getElementById("before");
+        const beforeA = document.getElementById('before-a');
         function beforePlay() {
             list();
             if (index === 0) {
@@ -980,6 +1069,7 @@
 
         // 다음 곡으로 넘어가는 함수
         const next = document.getElementById("next");
+        const nextA = document.getElementById('next-a');
         function nextPlay() {
             list();
             if (index === musicList.length - 1) {
@@ -1035,7 +1125,10 @@
 
         function checkTablePosition() {
             const table = document.querySelector('table');
-            table.style.maxHeight = `${window.outerHeight - 390}px`;
+            console.log("Viewport Height: " + document.documentElement.clientHeight);
+            console.log("Window Height: " + window.innerHeight);
+            table.style.maxHeight = `${window.innerHeight - 262}px`;
+            // table.style.maxHeight = `${window.innerHeight - 332}px`;
         }
 
         document.addEventListener('scroll', checkTablePosition);

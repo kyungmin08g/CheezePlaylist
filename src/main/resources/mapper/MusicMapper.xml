@@ -5,19 +5,19 @@
 <mapper namespace="io.github.playlistmanager.mapper.MusicMapper">
     <!-- 음악 관련 -->
     <insert id="save" parameterType="MusicDto">
-        insert into music(roomid, artist, title, musicFileBytes, donationusername, donationprice, donationsubscriber, date) values(#{roomId}, #{artist}, #{title}, #{musicFileBytes}, #{donationUsername}, #{donationPrice}, #{donationSubscriber}, #{date});
+        insert into music(roomid, artist, title, musicFileBytes, donationusername, donationprice, donationsubscriber) values(#{roomId}, #{artist}, #{title}, #{musicFileBytes}, #{donationUsername}, #{donationPrice}, #{donationSubscriber});
     </insert>
 
     <select id="findByMusic" resultType="MusicDto">
-        select * from music WHERE roomid = #{roomId} and artist ilike #{artist} and title ilike #{title};
+        select * from music where id >= 1 and roomid = #{roomId} and artist ilike #{artist} and title ilike #{title};
     </select>
 
     <select id="findById" parameterType="string" resultType="MusicDto">
-        select * from music where roomid = #{roomId};
+        select * from music where id >= 1 and roomid = #{roomId};
     </select>
 
     <select id="findByArtistAndTitle" resultType="MusicDto">
-        select artist, title, musicfilebytes from music where artist ilike #{artist} and title ilike #{title} group by artist, title, musicfilebytes;
+        select artist, title, musicfilebytes from music where id >= 1 and artist ilike #{artist} and title ilike #{title} group by artist, title, musicfilebytes;
     </select>
 
     <delete id="delete">

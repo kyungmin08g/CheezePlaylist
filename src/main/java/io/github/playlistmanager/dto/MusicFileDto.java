@@ -18,5 +18,4 @@ public class MusicFileDto {
     private String donationUsername;
     private String donationPrice;
     private String donationSubscriber;
-    private String date;
 }

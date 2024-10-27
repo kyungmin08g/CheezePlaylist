@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #2e2b45;
+            background-color: #eeeeee;
             margin: 0;
             padding: 0;
             display: flex;
@@ -16,7 +16,7 @@
             align-items: center;
             justify-content: flex-start;
             height: 100vh;
-            color: #f0f0f0;
+            color: black;
             animation: fadeIn 1s ease-in-out;
         }
 
@@ -31,7 +31,7 @@
 
         .container {
             width: 90%;
-            max-width: 1200px;
+            max-width: 800px;
             margin: 20px auto;
             padding-top: 20px;
         }
@@ -71,31 +71,31 @@
         }
 
         .add-room-btn {
-            background-color: #66549e;
+            background-color: #363636;
         }
 
         .add-room-btn:hover {
-            background-color: #5d4b91;
+            background-color: #333333;
         }
 
         .logout-btn {
-            background-color: #963f3f;
+            background-color: #5c5c5c;
         }
 
         .logout-btn:hover {
-            background-color: #8a3636;
+            background-color: #525252;
         }
 
         .card {
-            background-color: #3e3b5b;
-            border: 1px solid #464255;
+            background-color: #eeeeee;
+            border: 1px solid #b6b6b6;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 5px rgba(66, 66, 66, 0.2);
             animation: fadeInUp 1s ease-in-out;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            color: #e0e0e0;
+            color: black;
         }
 
         @keyframes fadeInUp {
@@ -117,13 +117,13 @@
 
         .card h2 {
             margin-top: 0;
-            color: #ffffff;
+            color: #333333;
         }
 
         .card p {
             margin: 5px 0;
             font-size: 14px;
-            color: #b0b0b0;
+            color: #696969;
         }
 
         .card .actions {
@@ -142,11 +142,11 @@
         }
 
         .card .edit-btn {
-            background-color: #66549e;
+            background-color: #363636;
         }
 
         .card .edit-btn:hover {
-            background-color: #5d4b91;
+            background-color: #333333;
         }
 
         .card .delete-btn {
@@ -181,6 +181,7 @@
             cardContainer.innerHTML = '';
 
             playlists.forEach(data => {
+                console.log(data)
                 const card = document.createElement('div');
                 datalist = [];
                 datalist = data;
@@ -190,18 +191,13 @@
             <p>ID: ${data.chzzkChannelId}</p>
             <p>후원: ${data.donationPrice}원</p>
             <div class="actions">
-                <button class="edit-btn" onclick="correction(datalist, event)">수정</button>
-                <button class="delete-btn" onclick="eliminate(datalist, event)">삭제</button>
+                <button class="edit-btn" onclick="location.href ='/update?playlistId=${data.playlistId}&playlistName=${encodeURIComponent(data.playlistName)}'">수정</button>
+                <button class="delete-btn" onclick="location.href ='/update?playlistId=${data.playlistId}&playlistName=${encodeURIComponent(data.playlistName)}'">삭제</button>
             </div>`;
                 card.onclick = () => playlist(data);
 
                 cardContainer.appendChild(card);
             });
-        }
-
-        function correction(data, event) {
-            event.stopPropagation();
-            location.href = `/update?playlistId=${data.playlistId}&playlistName=${encodeURIComponent(data.playlistName)}`;
         }
 
         async function eliminate(data, event) {
