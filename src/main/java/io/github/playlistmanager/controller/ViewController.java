@@ -40,6 +40,11 @@ public class ViewController {
         response.sendRedirect("/");
     }
 
+    @GetMapping("/test")
+    public String test() {
+        return "test";
+    }
+
     @Secured("ROLE_USER")
     @GetMapping("/")
     public String mainPage(Model model, SecurityContext securityContext) {
@@ -53,9 +58,7 @@ public class ViewController {
     @GetMapping("/update")
     public String updatePage(@RequestParam String playlistId, @RequestParam String playlistName, SecurityContext securityContext, Model model) {
         String username = (String) securityContext.getAuthentication().getPrincipal();
-        System.out.println("playlistId: " + playlistId + ", playlistName: " + playlistName + ", username: " + username);
         PlaylistDto dto = musicService.findByIdAndPlaylistName(playlistId, playlistName, username);
-        System.out.println(dto);
 
         model.addAttribute("playlistName", dto.getPlaylistName());
         model.addAttribute("chzzkChannelId", dto.getChzzkChannelId());

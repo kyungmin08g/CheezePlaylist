@@ -338,7 +338,7 @@ public class MusicServiceImpl implements MusicService {
             return outputStream.toByteArray();
         } catch (IOException e) {
             log.error("오디오 처리 중 오류 발생: {}", e.getMessage());
-            throw e; // 다시 예외를 던져서 컨트롤러에서 처리할 수 있도록 함
+            throw e; // 예외를 던져서 컨트롤러에서 처리할 수 있도록 함
         } finally {
             ytDlpProcess.waitFor();
             ffmpegProcess.waitFor();
@@ -373,22 +373,22 @@ public class MusicServiceImpl implements MusicService {
 //    @Override
     public ChzzkChannelConnectDto chzzkChannelConnect(PlaylistDto playlistDto) {
         String channelId = playlistDto.getChzzkChannelId();
-        String channelName = getChannelName(channelId);
-        String chatChannelId = getChatChannelId(channelId);
-        String accessToken = getAccessToken(chatChannelId);
-
-        int serverId = 0;
-        for (char i : chatChannelId.toCharArray()) {
-            serverId += Character.getNumericValue(i);
-        }
-        serverId = Math.abs(serverId) % 9 + 1;
-
-        log.info("\u001B[32m{}님 채널에 연결하는 로직이 정상적으로 처리되었습니다.\u001B[0m", channelName);
+//        String channelName = getChannelName(channelId);
+//        String chatChannelId = getChatChannelId(channelId);
+//        String accessToken = getAccessToken(chatChannelId);
+//
+//        int serverId = 0;
+//        for (char i : chatChannelId.toCharArray()) {
+//            serverId += Character.getNumericValue(i);
+//        }
+//        serverId = Math.abs(serverId) % 9 + 1;
+//
+//        log.info("\u001B[32m{}님 채널에 연결하는 로직이 정상적으로 처리되었습니다.\u001B[0m", channelName);
         return ChzzkChannelConnectDto.builder()
                 .playlistId(playlistDto.getPlaylistId())
-                .chatChannelId(chatChannelId)
-                .accessToken(accessToken)
-                .serverId(String.valueOf(serverId))
+                .chatChannelId("")
+                .accessToken("")
+                .serverId("")
                 .build();
     }
 
