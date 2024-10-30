@@ -45,6 +45,11 @@ import java.util.Optional;
 @Slf4j
 public class MusicServiceImpl implements MusicService {
 
+    @Value("${spotify.clientId}")
+    String clientId;
+    @Value("${spotify.clientSecret}")
+    String clientSecret;
+
     private final String key;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final MusicMapper musicMapper;
@@ -400,8 +405,6 @@ public class MusicServiceImpl implements MusicService {
     // Spotify API를 사용해서 음악 앨범 이미지 가져오기
     @Override
     public byte[] spotifyMusicAlbum(String artist, String title) {
-        String clientId = "23b4ed445c6c4cf5b417dc0ed3f99e41";
-        String clientSecret = "988fbfb10bb54c2c8ad8109fd969e8e8";
         String credentials = clientId + ":" + clientSecret;
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
 
