@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.github.playlistmanager.dto.ChzzkChannelConnectDto;
 import io.github.playlistmanager.dto.MusicFileDto;
 import io.github.playlistmanager.dto.PlaylistDto;
+import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,6 +21,7 @@ public interface MusicService {
     void conversionAndDownload(String roomId, String youtubeUrl, String artist, String customTitle, String donationUsername, String donationPrice, String donationSubscriber) throws IOException, InterruptedException;
     byte[] mp3Conversion(String youtubeUrl) throws InterruptedException, IOException;
 //    ChzzkChannelConnectDto chzzkChannelConnect(PlaylistDto playlistDto);
+    byte[] spotifyMusicAlbum(String artist, String title);
 
     // Mapper 관련
     // 음악

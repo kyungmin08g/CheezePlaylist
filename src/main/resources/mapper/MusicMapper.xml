@@ -5,7 +5,7 @@
 <mapper namespace="io.github.playlistmanager.mapper.MusicMapper">
     <!-- 음악 관련 -->
     <insert id="save" parameterType="MusicDto">
-        insert into music(roomid, artist, title, musicFileBytes, donationusername, donationprice, donationsubscriber) values(#{roomId}, #{artist}, #{title}, #{musicFileBytes}, #{donationUsername}, #{donationPrice}, #{donationSubscriber});
+        insert into music(roomid, image, artist, title, musicFileBytes, donationusername, donationprice, donationsubscriber) values(#{roomId}, #{image}, #{artist}, #{title}, #{musicFileBytes}, #{donationUsername}, #{donationPrice}, #{donationSubscriber});
     </insert>
 
     <select id="findByMusic" resultType="MusicDto">

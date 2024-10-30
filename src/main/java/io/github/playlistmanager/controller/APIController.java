@@ -4,6 +4,8 @@ import io.github.playlistmanager.dto.*;
 import io.github.playlistmanager.service.impl.MusicServiceImpl;
 import io.github.playlistmanager.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -122,8 +124,9 @@ public class APIController {
 
             String customTitle = dto.getTitle().replace("_", " ");
             String customRoomId = String.valueOf(dto.getRoomId());
-            musicData.put("artist", dto.getArtist());
             musicData.put("roomId", customRoomId);
+            musicData.put("image", dto.getImage());
+            musicData.put("artist", dto.getArtist());
             musicData.put("title", customTitle);
             musicData.put("musicFileBytes", dto.getMusicFileBytes());
             musicData.put("donationUser", dto.getDonationUsername());
@@ -171,6 +174,7 @@ public class APIController {
 
     @MessageMapping("/api/v1/message/{playlistId}")
     public ResponseEntity<?> message(@DestinationVariable("playlistId") String playlistId, MessageRequestDto messageRequestDTO) {
+        System.out.println(messageRequestDTO.getTitle());
         musicService.memberMusicDownload(playlistId, messageRequestDTO.getArtist(), messageRequestDTO.getTitle());
         return ResponseEntity.status(200).build();
     }
@@ -179,5 +183,13 @@ public class APIController {
     public ResponseEntity<?> chzzkChatMessage(@DestinationVariable("playlistId") String playlistId, String chatJson) {
         musicService.donationChat(playlistId, chatJson);
         return ResponseEntity.status(200).build();
+    }
+
+    @GetMapping("/image")
+    public ResponseEntity<byte[]> image(@RequestParam String artist, @RequestParam String title) {
+        byte[] data = musicService.spotifyMusicAlbum(artist, title);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_TYPE, "image/png");
+        return new ResponseEntity<>(data, headers, HttpStatus.OK);
     }
 }

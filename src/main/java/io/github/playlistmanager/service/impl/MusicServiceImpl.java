@@ -9,28 +9,37 @@ import io.github.playlistmanager.dto.PlaylistDto;
 import io.github.playlistmanager.mapper.MusicMapper;
 import io.github.playlistmanager.service.MusicService;
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.ArrayList;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -40,6 +49,7 @@ public class MusicServiceImpl implements MusicService {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final MusicMapper musicMapper;
     private final ObjectMapper objectMapper;
+    int count = 0;
 
     private String chatChannelId = null;
     private String accessToken = null;
@@ -269,7 +279,6 @@ public class MusicServiceImpl implements MusicService {
                     .build();
 
             save(musicFileDTO);
-            System.out.println(musicFileDTO.getTitle());
             log.info("DB에 음악이 있으므로 검색하지 않고 저장함.");
             return;
         }
@@ -293,7 +302,7 @@ public class MusicServiceImpl implements MusicService {
         log.info("유튜브 영상의 주소: {}", youtubeUrl);
 
         // yt-dlp 프로세스 생성
-        ProcessBuilder ytDlpBuilder = new ProcessBuilder("yt-dlp", "-f", "bestaudio", "--cookies", "/Users/k.kyungmin/Developer/Aws/cookies.txt", "-o", "-", youtubeUrl);
+        ProcessBuilder ytDlpBuilder = new ProcessBuilder("yt-dlp", "-f", "bestaudio", "-o", "-", youtubeUrl);
         Process ytDlpProcess = ytDlpBuilder.start();
         log.info("yt-dlp 프로세스가 시작되었음");
 
@@ -349,25 +358,120 @@ public class MusicServiceImpl implements MusicService {
     @Override
     public void conversionAndDownload(String roomId, String youtubeURL, String artist, String customTitle, String donationUsername, String donationPrice, String donationSubscriber) throws IOException, InterruptedException {
         byte[] mp3Data = mp3Conversion(youtubeURL);
+        String title = customTitle.replace("_", " ");
+        byte[] imageData = spotifyMusicAlbum(artist, title);
 
         // DB에서 Title을 통해 조회하게 되는데 결과가 null인 경우에는 로그만 찍고 아래 로직을 실행하도록하는 검사 작업 -> 데이터가 존재하지 않으면 추가하는게 맞으니까
         if (mp3Data == null) {
             log.info("URL에 대한 데이터가 없음");
         } else {
             // MusicFileDTO 객체 생성
-            MusicFileDto musicFileDTO = MusicFileDto.builder()
-                    .roomId(roomId)
-                    .artist(artist)
-                    .title(customTitle)
-                    .musicFileBytes(Base64.getEncoder().encodeToString(mp3Data))
-                    .donationUsername(donationUsername)
-                    .donationPrice(donationPrice)
-                    .donationSubscriber(donationSubscriber)
-                    .build();
+            MusicFileDto musicFileDTO;
+            if (imageData != null) {
+                musicFileDTO = MusicFileDto.builder()
+                        .roomId(roomId)
+                        .image(Base64.getEncoder().encodeToString(imageData))
+                        .artist(artist)
+                        .title(customTitle)
+                        .musicFileBytes(Base64.getEncoder().encodeToString(mp3Data))
+                        .donationUsername(donationUsername)
+                        .donationPrice(donationPrice)
+                        .donationSubscriber(donationSubscriber)
+                        .build();
 
+            } else {
+                musicFileDTO = MusicFileDto.builder()
+                        .roomId(roomId)
+                        .image("null")
+                        .artist(artist)
+                        .title(customTitle)
+                        .musicFileBytes(Base64.getEncoder().encodeToString(mp3Data))
+                        .donationUsername(donationUsername)
+                        .donationPrice(donationPrice)
+                        .donationSubscriber(donationSubscriber)
+                        .build();
+
+            }
             save(musicFileDTO);
             log.info("DB에 저장 성공!");
         }
+    }
+
+    // Spotify API를 사용해서 음악 앨범 이미지 가져오기
+    @Override
+    public byte[] spotifyMusicAlbum(String artist, String title) {
+        String clientId = "23b4ed445c6c4cf5b417dc0ed3f99e41";
+        String clientSecret = "988fbfb10bb54c2c8ad8109fd969e8e8";
+        String credentials = clientId + ":" + clientSecret;
+        String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
+
+        String responseToken = WebClient.builder().build().post()
+                .uri("https://accounts.spotify.com/api/token")
+                .header("Authorization", "Basic " + encodedCredentials)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .bodyValue("grant_type=client_credentials")
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+        try {
+            JsonNode json = objectMapper.readTree(responseToken);
+            String accessToken = json.get("access_token").asText();
+
+            String response = WebClient.builder().baseUrl("https://api.spotify.com/").build()
+                    .get()
+                    .uri("v1/search?q=track:" + title + " artist:" + artist + "&type=track")
+                    .header("Authorization", "Bearer " + accessToken)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            JsonNode musicJson = objectMapper.readTree(response);
+            JsonNode tracks = musicJson.get("tracks");
+            JsonNode items = tracks.get("items");
+            for (JsonNode item : items) {
+                if (count == 0) {
+                    JsonNode album = item.get("album");
+                    JsonNode images = album.get("images");
+
+                    for (JsonNode image : images) {
+                        if (count == 0) {
+                            String url = image.get("url").asText();
+                            System.out.println("해당 음악의 대한 앨범 URL: " + url);
+                            count++;
+
+                            HttpClient client = HttpClient.newHttpClient();
+                            HttpRequest request = HttpRequest.newBuilder()
+                                    .uri(URI.create(url))
+                                    .GET()
+                                    .build();
+
+                            try {
+                                HttpResponse<InputStream> response1 = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+                                try (InputStream in = response1.body();
+                                     ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                                    byte[] buffer = new byte[8192];
+                                    int bytesRead;
+                                    while ((bytesRead = in.read(buffer)) != -1) {
+                                        out.write(buffer, 0, bytesRead);
+                                    }
+                                    return out.toByteArray();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                return null;
+                            }
+                        }
+                    }
+                }
+            }
+            count = 0;
+
+        } catch (Exception e) {
+            e.fillInStackTrace();
+        }
+
+        return null;
     }
 
 //    @Override

@@ -7,6 +7,7 @@ import io.github.playlistmanager.service.impl.MusicServiceImpl;
 import io.github.playlistmanager.service.impl.UserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Controller;
@@ -81,5 +82,11 @@ public class ViewController {
         model.addAttribute("serverId", connectDto.getServerId());
 
         return "music";
+    }
+
+    @GetMapping("/image")
+    public String image(Model model) {
+        model.addAttribute("image", "");
+        return "image";
     }
 }

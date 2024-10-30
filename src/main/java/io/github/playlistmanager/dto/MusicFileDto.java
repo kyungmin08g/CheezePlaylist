@@ -12,6 +12,7 @@ import lombok.*;
 public class MusicFileDto {
     private String username;
     private String roomId;
+    private String image;
     private String artist;
     private String title;
     private String musicFileBytes;

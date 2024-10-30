@@ -435,7 +435,7 @@
         }
 
         tbody td:nth-child(3) {
-            padding-left: 20px;
+            padding-left: 16px;
         }
 
         thead th:nth-child(4) {
@@ -443,7 +443,7 @@
         }
 
         tbody td:nth-child(4) {
-            padding-left: 26px;
+            padding-left: 34px;
         }
 
         thead th:not(:first-child, :last-child),
@@ -513,7 +513,7 @@
             font-size: 16px;
             color: #22a04e;
             display: block;
-            width: 283px;
+            width: 226px;
             padding-left: 12px;
         }
 
@@ -521,7 +521,7 @@
             font-size: 14px;
             color: #b3b3b3;
             display: block;
-            width: 283px;
+            width: 226px;
             padding-left: 12px;
         }
 
@@ -674,6 +674,34 @@
         #cancel:hover {
             background-color: #525252;
             transform: translateY(-2px);
+        }
+
+        .album {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 38px;
+            height: 38px;
+            margin-left: 14px;
+            border-radius: 5px;
+        }
+
+        .album2 {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 41px;
+            height: 40px;
+            margin-left: 12.5px;
+            border-radius: 5px;
+        }
+
+        .div {
+            display: flex;
+        }
+
+        .div2 {
+            display: block;
         }
     </style>
 </head>
@@ -947,17 +975,35 @@
 
                 // 제목
                 const td2 = document.createElement("td");
+                const div1 = document.createElement("div");
+                div1.className = 'div';
+                const div2 = document.createElement("div");
+                div2.className = 'div2';
                 const songTitle = document.createElement("span");
                 songTitle.className = "song-title";
                 songTitle.textContent = musicData.title;
-                songTitle.onclick = () => playCurrentAudio(currentIndex)
+                songTitle.onclick = () => playCurrentAudio(currentIndex);
+
+                // 앨범 이미지
+                const album = document.createElement("img");
+                if (`${musicData.image}` === 'null') {
+                    console.log("앨범 이미지를 찾지 못함.");
+                    album.className = 'album2';
+                    album.src = 'musicIcon.png';
+                } else {
+                    album.className = 'album';
+                    album.src = `data:image/png;base64,${musicData.image}`;
+                }
 
                 // 아티스트
                 const artist = document.createElement("span");
                 artist.className = "artist";
                 artist.textContent = musicData.artist;
-                td2.appendChild(songTitle);
-                td2.appendChild(artist);
+                div1.appendChild(album);
+                div2.appendChild(songTitle);
+                div2.appendChild(artist);
+                div1.appendChild(div2);
+                td2.appendChild(div1);
 
                 // 시간
                 const td3 = document.createElement("td");
@@ -1029,10 +1075,12 @@
 
                             if (selfIndex === `${index + 1}`) {
                                 if (`${selfIndex - 1}` === `${musicList.length - 1}`) {
+                                    console.log("ddd")
                                     if (reproduction.src === 'http://localhost:8080/stop.png') {
+                                        console.log("ddd2")
                                         index = musicList.length - 1;
                                         audioPlayer.currentTime = audioPlayer.duration;
-                                        console.log(index);
+                                        return;
                                     }
                                     audioPlayer.currentTime = audioPlayer.duration;
                                     index = musicList.length - 1;
@@ -1180,12 +1228,11 @@
             } else {
                 count = 0;
             }
-            if (index === musicList.length - 1) console.log("마지막 곡이었습니다.");
 
             currentIndex = index;
             nowIndex = index;
             if (currentIndex === musicList.length - 1) {
-                console.log("1");
+                console.log("마지막 곡이었습니다.");
                 currentIndex = 0;
                 index = 0;
                 if (repeat.src === 'http://localhost:8080/repeating.png') {
@@ -1332,7 +1379,6 @@
             console.log("Viewport Height: " + document.documentElement.clientHeight);
             console.log("Window Height: " + window.innerHeight);
             table.style.maxHeight = `${window.innerHeight - 262}px`;
-            // table.style.maxHeight = `${window.innerHeight - 332}px`;
         }
 
         document.addEventListener('scroll', checkTablePosition);
