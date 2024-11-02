@@ -9,11 +9,11 @@
     </insert>
 
     <select id="findByMusic" resultType="MusicDto">
-        select * from music where id >= 1 and roomid = #{roomId} and artist ilike #{artist} and title ilike #{title};
+        select * from music where roomid = #{roomId} and artist ilike #{artist} and title ilike #{title} order by id;
     </select>
 
     <select id="findById" parameterType="string" resultType="MusicDto">
-        select * from music where id >= 1 and roomid = #{roomId};
+        select * from music where roomid = #{roomId} order by id;
     </select>
 
     <select id="findByArtistAndTitle" resultType="MusicDto">

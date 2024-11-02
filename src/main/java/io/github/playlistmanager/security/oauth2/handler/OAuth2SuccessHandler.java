@@ -111,7 +111,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
         accessTokenCookie.setMaxAge(Integer.MAX_VALUE);
-        accessTokenCookie.setSecure(true);
+//        accessTokenCookie.setSecure(true);
         accessTokenCookie.setHttpOnly(true);
         accessTokenCookie.setPath("/");
         response.addCookie(accessTokenCookie);

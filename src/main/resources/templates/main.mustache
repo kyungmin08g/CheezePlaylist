@@ -181,7 +181,6 @@
             cardContainer.innerHTML = '';
 
             playlists.forEach(data => {
-                console.log(data)
                 const card = document.createElement('div');
                 datalist = [];
                 datalist = data;
@@ -192,7 +191,7 @@
             <p>후원: ${data.donationPrice}원</p>
             <div class="actions">
                 <button class="edit-btn" onclick="location.href ='/update?playlistId=${data.playlistId}&playlistName=${encodeURIComponent(data.playlistName)}'">수정</button>
-                <button class="delete-btn" onclick="location.href ='/update?playlistId=${data.playlistId}&playlistName=${encodeURIComponent(data.playlistName)}'">삭제</button>
+                <button class="delete-btn" onclick="eliminate('${data.playlistId}', '${data.playlistName}', event)">삭제</button>
             </div>`;
                 card.onclick = () => playlist(data);
 
@@ -200,9 +199,9 @@
             });
         }
 
-        async function eliminate(data, event) {
+        async function eliminate(id, name, event) {
             event.stopPropagation();
-            const response = await fetch(`/api/v1/playlist/delete?playlistId=${data.playlistId}&playlistName=${encodeURIComponent(data.playlistName)}`, { method: 'GET' });
+            const response = await fetch(`/api/v1/playlist/delete?playlistId=${id}&playlistName=${encodeURIComponent(name)}`, { method: 'GET' });
             if (!response.ok) throw new Error('네트워크 응답 예외');
             await getPlaylist();
         }

@@ -20,7 +20,7 @@ public interface MusicService {
     String searchVideo(String query);
     void conversionAndDownload(String roomId, String youtubeUrl, String artist, String customTitle, String donationUsername, String donationPrice, String donationSubscriber) throws IOException, InterruptedException;
     byte[] mp3Conversion(String youtubeUrl) throws InterruptedException, IOException;
-//    ChzzkChannelConnectDto chzzkChannelConnect(PlaylistDto playlistDto);
+    ChzzkChannelConnectDto chzzkChannelConnect(PlaylistDto playlistDto);
     byte[] spotifyMusicAlbum(String artist, String title);
 
     // Mapper 관련

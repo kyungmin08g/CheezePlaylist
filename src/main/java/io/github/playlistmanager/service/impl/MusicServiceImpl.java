@@ -110,7 +110,7 @@ public class MusicServiceImpl implements MusicService {
         String title;
 
         // 테스트 용
-        donationMusicDownloader(roomId, "Gemini", "MIA", donationUsername, donationPrice, donationSubscriber);
+        donationMusicDownloader(roomId, "Gemini", "UFO", donationUsername, donationPrice, donationSubscriber);
 
         if(donationContent.matches("^(.*) - (.*)$")) {
             artist = donationContent.substring(0, donationContent.indexOf("-") - 1);
@@ -440,7 +440,6 @@ public class MusicServiceImpl implements MusicService {
                     for (JsonNode image : images) {
                         if (count == 0) {
                             String url = image.get("url").asText();
-                            System.out.println("해당 음악의 대한 앨범 URL: " + url);
                             count++;
 
                             HttpClient client = HttpClient.newHttpClient();
@@ -461,7 +460,7 @@ public class MusicServiceImpl implements MusicService {
                                     return out.toByteArray();
                                 }
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                e.fillInStackTrace();
                                 return null;
                             }
                         }
@@ -477,25 +476,25 @@ public class MusicServiceImpl implements MusicService {
         return null;
     }
 
-//    @Override
+    @Override
     public ChzzkChannelConnectDto chzzkChannelConnect(PlaylistDto playlistDto) {
         String channelId = playlistDto.getChzzkChannelId();
-//        String channelName = getChannelName(channelId);
-//        String chatChannelId = getChatChannelId(channelId);
-//        String accessToken = getAccessToken(chatChannelId);
-//
-//        int serverId = 0;
-//        for (char i : chatChannelId.toCharArray()) {
-//            serverId += Character.getNumericValue(i);
-//        }
-//        serverId = Math.abs(serverId) % 9 + 1;
-//
-//        log.info("\u001B[32m{}님 채널에 연결하는 로직이 정상적으로 처리되었습니다.\u001B[0m", channelName);
+        String channelName = getChannelName(channelId);
+        String chatChannelId = getChatChannelId(channelId);
+        String accessToken = getAccessToken(chatChannelId);
+
+        int serverId = 0;
+        for (char i : chatChannelId.toCharArray()) {
+            serverId += Character.getNumericValue(i);
+        }
+        serverId = Math.abs(serverId) % 9 + 1;
+
+        log.info("\u001B[32m{}님 채널에 연결하는 로직이 정상적으로 처리되었습니다.\u001B[0m", channelName);
         return ChzzkChannelConnectDto.builder()
                 .playlistId(playlistDto.getPlaylistId())
-                .chatChannelId("")
-                .accessToken("")
-                .serverId("")
+                .chatChannelId(chatChannelId)
+                .accessToken(accessToken)
+                .serverId(String.valueOf(serverId))
                 .build();
     }
 

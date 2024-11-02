@@ -783,6 +783,8 @@
         const table = document.getElementById("musicTable");
         const controls = document.getElementById('controls');
 
+        const serverHost = 'http://localhost:8080';
+
         connect();
         const socket = new WebSocket("wss://kr-ss{{serverId}}.chat.naver.com/chat");
 
@@ -813,7 +815,7 @@
                 }
             };
 
-        // 10초마다 연결 체크 메시지 전송
+            // 10초마다 연결 체크 메시지 전송
             setInterval(function() {
                 socket.send(JSON.stringify({ "ver": "2", "cmd": 0 }));
             }, 1000);
@@ -870,8 +872,8 @@
         const html = document.documentElement;
         const body = document.body;
         const tableHeadCells = document.querySelectorAll('table thead th');
+        const thead = document.querySelector('thead');
         function create() {
-            const thead = document.querySelector('thead');
             const rows = document.querySelectorAll('#musicTable tbody tr');
             rows.forEach((row, number) => {
                 if (number === index) {
@@ -899,13 +901,17 @@
         }
 
         function add() {
-            if (document.getElementById("artist").value === '' && document.getElementById("musicTitle").value === '') console.log("아티스트 이름과 노래 제목을 넣어주세요!");
+            if (document.getElementById("artist").value === '' && document.getElementById("musicTitle").value === '') alert("아티스트와 제목을 입력해주세요");
             else {
                 controls.style.opacity = '0';
                 controls.style.visibility = 'hidden';
                 html.style.background = '#eeeeee';
                 body.style.background = '#eeeeee';
+                thead.style.background = '#eeeeee';
+                thead.style.zIndex = '1';
+                thead.style.position = 'sticky';
 
+                playBackgroundColor();
                 tableHeadCells.forEach((th) => {
                     th.style.backgroundColor = '#eeeeee';
                 });
@@ -919,7 +925,11 @@
             controls.style.visibility = 'hidden';
             html.style.background = '#eeeeee';
             body.style.background = '#eeeeee';
+            thead.style.background = '#eeeeee';
+            thead.style.zIndex = '1';
+            thead.style.position = 'sticky';
 
+            playBackgroundColor();
             tableHeadCells.forEach((th) => {
                 th.style.backgroundColor = '#eeeeee';
             });
@@ -932,17 +942,20 @@
                 playCurrentAudio(0);
                 count = 0;
                 playBackgroundColor();
+            } else if (lastIndex === 1 && count === 1) {
+                index = 0;
+                playCurrentAudio(index);
+                count = 0;
+                lastIndex = 0;
+                console.log('lastIndex: 1, count: 1');
             } else if (count === 0) {
                 reproduction.src = 'stop.png';
                 audioPlayer.pause();
                 isPlaying = false;
                 count++;
-                console.log('count가 0임');
+                console.log('count: 0');
             } else if (count === 1) {
-                if (currentIndex === -1) {
-                    currentIndex++;
-                    playCurrentAudio(currentIndex);
-                }
+                if (currentIndex === -1) currentIndex++
                 reproduction.src = 'play.png';
                 audioPlayer.play();
                 isPlaying = true;
@@ -951,7 +964,7 @@
                 if (title.innerText === '-') playCurrentAudio(0);
 
                 count = 0;
-                console.log('count가 1임');
+                console.log('count: 1');
             } else if (audioPlayer.duration > 0) {
                 reproduction.src = 'play.png';
                 seekSlider.value = (audioPlayer.currentTime / audioPlayer.duration) * 100;
@@ -1061,6 +1074,8 @@
                             this.currentIndex = 0;
                             index = currentIndex;
                             playCurrentAudio(currentIndex);
+                            count = 0;
+                            lastIndex = 0;
                         }
                     });
 
@@ -1075,11 +1090,11 @@
 
                             if (selfIndex === `${index + 1}`) {
                                 if (`${selfIndex - 1}` === `${musicList.length - 1}`) {
-                                    console.log("ddd")
-                                    if (reproduction.src === 'http://localhost:8080/stop.png') {
-                                        console.log("ddd2")
-                                        index = musicList.length - 1;
+                                    if (reproduction.src === `${serverHost}/stop.png`) {
+                                        audioPlayer.play();
+                                        isPlaying = true;
                                         audioPlayer.currentTime = audioPlayer.duration;
+                                        index = musicList.length - 1;
                                         return;
                                     }
                                     audioPlayer.currentTime = audioPlayer.duration;
@@ -1095,7 +1110,7 @@
                                     console.log("들어왔어!");
                                 } else if (index === 0) { // 여기만 제대로 작성해줬다면 문제 없는데 왜 아오 ㅆ
                                     // 대충 설명하자면 처음 곡을 삭제하면 그 다음곡이 재생되고 index를 처음 곡으로 맞추기 위해서 0으로 만듬.
-                                    if (reproduction.src === 'http://localhost:8080/stop.png' && `${selfIndex - 1}` === `${musicList.length - 1}`) {
+                                    if (reproduction.src === `${serverHost}/stop.png` && `${selfIndex - 1}` === `${musicList.length - 1}`) {
                                         console.log("마지막 곡");
                                     } else if (index === musicList.length - 1) {
                                         console.log("더 이상 곡이 없습니다.");
@@ -1124,10 +1139,7 @@
 
         function donationUser(data) {
             const user = data.donationUser;
-            if (user === null) {
-                return '-'
-            }
-
+            if (user === null) return '-'
             return user;
         }
 
@@ -1149,8 +1161,7 @@
                     byteNumbers[i] = byteCharacters.charCodeAt(i);
                 }
                 const blob = new Blob([byteNumbers], { type: 'audio/mpeg' });
-                const url = URL.createObjectURL(blob);
-                audioPlayer.src = url;
+                audioPlayer.src = URL.createObjectURL(blob);
                 audioPlayer.play();
                 isPlaying = true;
                 reproduction.src = "play.png";
@@ -1164,8 +1175,7 @@
                     byteNumbers[i] = byteCharacters.charCodeAt(i);
                 }
                 const blob = new Blob([byteNumbers], { type: 'audio/mpeg' });
-                const url = URL.createObjectURL(blob);
-                audioPlayer.src = url;
+                audioPlayer.src = URL.createObjectURL(blob);
                 audioPlayer.play();
                 isPlaying = true;
                 reproduction.src = "play.png";
@@ -1186,18 +1196,21 @@
             const current = formatTime(audioPlayer.currentTime);
             const duration = formatTime(audioPlayer.duration);
 
-            if (index === 0) {
+            if (index === 0 && audioPlayer.currentTime < 1) {
                 before.src = 'beforeProhibition.png';
                 beforeA.style.cursor = 'not-allowed';
-            } else {
+            } else if (audioPlayer.currentTime < 1) {
                 before.src = 'before.png';
                 beforeA.style.cursor = 'pointer';
             }
 
-            if (index === musicList.length - 1) {
+            if (index === musicList.length - 1 && audioPlayer.currentTime < 1) {
                 next.src = 'nextProhibition.png';
                 nextA.style.cursor = 'not-allowed';
-            } else {
+            } else if (audioPlayer.currentTime < 1) {
+                next.src = 'next.png';
+                nextA.style.cursor = 'pointer';
+            } else if (index < musicList.length - 1 && next.src !== `${serverHost}/next.png`) {
                 next.src = 'next.png';
                 nextA.style.cursor = 'pointer';
             }
@@ -1213,6 +1226,7 @@
 
         // 이놈은 음악이 끝났을때 호출됨
         let nowIndex = 0;
+        let lastIndex = 0;
         audioPlayer.addEventListener("ended", function() {
             seekSlider.style.background = 'rgb(112, 112, 112)'
             currentTime.innerText = '00:00';
@@ -1222,9 +1236,12 @@
             audioPlayer.pause();
             isPlaying = false;
 
-            if (repeat.src === 'http://localhost:8080/repeat.png') {
+            if (repeat.src === `${serverHost}/repeat.png`) {
                 count = 0;
-                if (index === musicList.length - 1) count++;
+                if (index === musicList.length - 1) {
+                    lastIndex++;
+                    count++;
+                }
             } else {
                 count = 0;
             }
@@ -1234,8 +1251,9 @@
             if (currentIndex === musicList.length - 1) {
                 console.log("마지막 곡이었습니다.");
                 currentIndex = 0;
-                index = 0;
-                if (repeat.src === 'http://localhost:8080/repeating.png') {
+                // index = 0;
+                if (repeat.src === `${serverHost}/repeating.png`) {
+                    index = 0;
                     playCurrentAudio(index);
                 } else {
                     currentIndex--;
@@ -1244,12 +1262,9 @@
                             index = musicList.length - 1;
                             currentIndex = nowIndex;
                             playCurrentAudio(index);
+                            clearInterval(timeId);
                         }
                     }, 1000);
-
-                    if (index === musicList.length - 1) {
-                        clearInterval(timeId);
-                    }
                 }
             } else {
                 index++;
@@ -1277,11 +1292,11 @@
         const before = document.getElementById("before");
         const beforeA = document.getElementById('before-a');
         function beforePlay() {
-            list();
-            if (index === 0) {
+            if (index === 0 && beforeA.style.cursor === 'not-allowed') {
                 console.log("이전 곡이 없습니다.");
                 before.src = 'beforeProhibition.png';
             } else {
+                list();
                 before.src = 'before.png';
                 playCurrentAudio(--index);
                 count = 0;
@@ -1292,11 +1307,11 @@
         const next = document.getElementById("next");
         const nextA = document.getElementById('next-a');
         function nextPlay() {
-            list();
-            if (index === musicList.length - 1) {
+            if (index === musicList.length - 1 && nextA.style.cursor === 'not-allowed') {
                 console.log("다음 곡이 없습니다.");
                 next.src = 'nextProhibition.png';
             } else {
+                list();
                 next.src = 'next.png';
                 playCurrentAudio(++index);
                 count = 0;
@@ -1306,7 +1321,7 @@
         const audioSoundA = document.getElementById('audio-a');
         let playSound = volumeControl.value;
         function audioSound() {
-            if (audio.src === 'http://localhost:8080/audio_negative.png') {
+            if (audio.src === `${serverHost}/audio_negative.png`) {
                 playSound = volumeControl.value;
                 audio.src = 'mute.png';
                 audio.style.width = '20px';
@@ -1330,7 +1345,7 @@
         const audio = document.getElementById('audio');
         volumeControl.addEventListener('input', function() {
             const value = (volumeControl.value - volumeControl.min) / (volumeControl.max - volumeControl.min) * 100;
-            if (value > 0 && audio.src === 'http://localhost:8080/mute.png') {
+            if (value < 1 && audio.src === `${serverHost}/mute.png`) {
                 audio.src = 'audio_negative.png'
                 audio.style.width = '26px'
                 audio.style.marginRight = '7px'
@@ -1341,11 +1356,16 @@
                 audio.style.width = '20px'
                 audio.style.marginRight = '13px'
                 volumeControl.style.background = `linear-gradient(to right, rgb(0, 0, 0) ${value}%, rgb(112, 112, 112) ${value}%)`;
-            } else {
+                audioPlayer.muted = true;
+            } else if (value > 0 && audio.src === `${serverHost}/mute.png`) {
                 audio.src = 'audio_negative.png'
                 audio.style.width = '26px'
                 audio.style.marginRight = '7px'
                 volumeControl.style.background = `linear-gradient(to right, rgb(0, 0, 0) ${value}%, rgb(112, 112, 112) ${value}%)`;
+                audioPlayer.muted = false;
+            } else {
+                volumeControl.style.background = `linear-gradient(to right, rgb(0, 0, 0) ${value}%, rgb(112, 112, 112) ${value}%)`;
+                audioPlayer.muted = false;
             }
         });
 
@@ -1378,7 +1398,7 @@
             const table = document.querySelector('table');
             console.log("Viewport Height: " + document.documentElement.clientHeight);
             console.log("Window Height: " + window.innerHeight);
-            table.style.maxHeight = `${window.innerHeight - 262}px`;
+            table.style.maxHeight = `${window.innerHeight - 270}px`;
         }
 
         document.addEventListener('scroll', checkTablePosition);
