@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>회원가입</title>
+    <title>CheezePlaylist - 회원가입</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Gothic+A1:wght@100;200;300;400;500;600;700;800;900&family=Jua&family=Yeon+Sung&display=swap');
 
@@ -140,19 +140,19 @@
             </div>
             <div class="form-group">
                 <label for="password">비밀번호</label>
-                <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" minlength="4">
-                <div class="error-message">비밀번호는 최소 8자 이상이어야 합니다.</div>
+                <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" minlength="6">
+                <div class="error-message">비밀번호는 최소 6자 이상이어야 합니다.</div>
             </div>
             <div class="form-group">
                 <label for="passwordConfirm">비밀번호 확인</label>
-                <input type="password" id="passwordConfirm" placeholder="비밀번호를 다시 입력하세요" minlength="4">
+                <input type="password" id="passwordConfirm" placeholder="비밀번호를 다시 입력하세요" minlength="6">
                 <div class="error-message">비밀번호를 다시 입력하세요.</div>
             </div>
             <button type="submit" class="submit-btn">회원가입</button>
         </form>
 
         <div class="extra-links">
-            <p>계정이 이미 있으신가요? <a href="/logins" id="link">로그인</a></p>
+            <p>계정이 이미 있으신가요? <a href="/login-page" id="link">로그인</a></p>
         </div>
     </div>
 
@@ -186,9 +186,9 @@
             if (nicknameInput.value != null && nicknameInput.value.trim()) {
                 fetch(`/api/v1/identical?username=${nicknameInput.value.trim()}`, { method: 'GET' }).then(response => {
                     if (response.status === 201) {
-                        return response.text()
+                        return response.text();
                     } else {
-                        return response.text()
+                        return response.text();
                     }
                 })
                 .then(data => {

@@ -15,14 +15,12 @@ public class WebConfig implements WebMvcConfigurer {
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/join").setViewName("join");
         registry.addViewController("/join/**").setViewName("exception");
-        registry.addViewController("/logins").setViewName("login");
-        registry.addViewController("/logins/**").setViewName("exception");
-
+        registry.addViewController("/login-page").setViewName("login");
+        registry.addViewController("/login-page/**").setViewName("exception");
         registry.addViewController("/userid").setViewName("user");
         registry.addViewController("/userid/**").setViewName("exception");
         registry.addViewController("/password").setViewName("password");
         registry.addViewController("/password/**").setViewName("exception");
-
         registry.addViewController("/add").setViewName("create");
         registry.addViewController("/add/**").setViewName("exception");
     }

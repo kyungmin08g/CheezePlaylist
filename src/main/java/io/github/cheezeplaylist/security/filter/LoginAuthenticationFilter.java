@@ -45,13 +45,9 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) {
-        log.info("로그인 성공");
         CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
-
         String username = userDetails.getUsername();
         String role = userDetails.getAuthorities().iterator().next().getAuthority();
-        log.info("username: {}, role: {}", username, role);
-
         String accessToken = jwtProvider.createAccessToken(username, role);
 
         if (userService.refreshTokenFindByUsername(username) != null) {
@@ -61,6 +57,8 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
             userService.refreshTokenSave(username, refreshToken);
             sendCookie(response, accessToken);
         }
+
+        log.info("username: {}, role: {}", username, role);
     }
 
     @Override
@@ -73,7 +71,6 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
         Cookie cookie = new Cookie("accessToken", accessToken);
         cookie.setMaxAge(Integer.MAX_VALUE);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
         cookie.setPath("/");
         response.addCookie(cookie);
     }

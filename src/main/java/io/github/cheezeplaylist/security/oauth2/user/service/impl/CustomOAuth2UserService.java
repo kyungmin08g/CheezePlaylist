@@ -50,7 +50,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         attributes.put("role", "ROLE_USER");
 
         OAuth2SuccessHandler.provider = oAuth2Response.getProvider();
-
         return new CustomOAuth2User(attributes);
     }
 

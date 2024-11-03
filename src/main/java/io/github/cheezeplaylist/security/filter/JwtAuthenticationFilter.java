@@ -41,7 +41,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable FilterChain filterChain) throws ServletException, IOException {
         String accessTokenKey = null;
         String accessToken = null;
-
         Cookie[] cookies = Objects.requireNonNull(request).getCookies();
 
         if (cookies == null) {
@@ -123,7 +122,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Cookie cookie = new Cookie("accessToken", accessToken);
         cookie.setMaxAge(Integer.MAX_VALUE);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
         cookie.setPath("/");
         response.addCookie(cookie);
     }

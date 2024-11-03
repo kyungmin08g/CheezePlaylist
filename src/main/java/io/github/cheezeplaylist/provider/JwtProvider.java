@@ -14,21 +14,24 @@ import java.util.Date;
 @Component
 public class JwtProvider {
 
-    @Value("${jwt.access-token-expire-time}")
-    private long access_token_expire_time;
-
-    @Value("${jwt.refresh-token-expire-time}")
-    private long refresh_token_expire_time;
-
+    private final long access_token_expire_time;
+    private final long refresh_token_expire_time;
     private final Key secretKey;
+    private final Claims claims;
 
-    public JwtProvider(@Value("${jwt.secret-key}") String secretKey) {
+    public JwtProvider(
+            @Value("${jwt.secret-key}") String secretKey,
+            @Value("${jwt.refresh-token-expire-time}") String refresh_token_expire_time,
+            @Value("${jwt.access-token-expire-time}") String access_token_expire_time
+    ) {
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8))));
+        this.access_token_expire_time = Long.parseLong(access_token_expire_time);
+        this.refresh_token_expire_time = Long.parseLong(refresh_token_expire_time);
+        this.claims = Jwts.claims();
     }
 
     // 액세스 토큰 생성
     public String createAccessToken(String username, String role) {
-        Claims claims = Jwts.claims();
         claims.put("username", username);
         claims.put("role", role);
 
@@ -44,7 +47,6 @@ public class JwtProvider {
 
     // 리프레쉬 토큰 생성
     public String createRefreshToken(String username, String role) {
-        Claims claims = Jwts.claims();
         claims.put("username", username);
         claims.put("role", role);
 

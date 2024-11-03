@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{playlistName}}</title>
+    <title>CheezePlaylist - {{playlistName}}</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
@@ -22,7 +22,6 @@
             text-align: center;
             color: rgb(35, 35, 35);
             margin-bottom: 30px;
-
             font-family: "Itim", cursive;
             font-weight: 400;
             font-style: normal;
@@ -56,14 +55,8 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .music-card:hover {
@@ -136,47 +129,7 @@
             margin-top: 10px;
         }
 
-        @media (max-width: 768px) {
-            .music-card {
-                flex-direction: column;
-                align-items: flex-start;
-                height: auto;
-            }
-
-            .button-group {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            /*button {*/
-            /*    width: 100%;*/
-            /*}*/
-
-            .music-title {
-                font-size: 1.1em;
-            }
-
-            .music-artist {
-                font-size: 0.8em;
-            }
-        }
-
-        @media (max-width: 480px) {
-            input[type="text"] {
-                width: 150px;
-            }
-
-            h1 {
-                font-size: 1.5em;
-            }
-        }
-        /* ---------------------------------------------------------------------- */
-
         #times {
-            /* position: fixed;
-            bottom: 10%;
-            left: 50%;
-            transform: translateX(-50%); */
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -273,10 +226,6 @@
         }
 
         #audio-icon {
-            /* position: fixed;
-            bottom: 4%;
-            left: 50%;
-            transform: translateX(-50%); */
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -353,7 +302,6 @@
             font-style: normal;
         }
 
-        /* -------------------------------------------------------------------- */
         .custom-audio {
             display: flex;
             flex-direction: column;
@@ -392,7 +340,6 @@
         tbody {
             display: block;
             max-height: 100%;
-            /*overflow-y: auto;*/
             width: 837px;
         }
 
@@ -456,8 +403,6 @@
             padding-top: 7px;
             padding-bottom: 7px;
             padding-left: 16px;
-            /*min-width: 179px;*/
-            /*border: 1px solid black;*/
         }
 
         table::-webkit-scrollbar {
@@ -502,11 +447,11 @@
         }
 
         tbody tr:hover {
-            background-color: #cfcfcf;
+            background-color: #e2e2e2;
         }
 
         tbody tr:hover td {
-            background-color: #e0e0e0;
+            background-color: #e2e2e2;
         }
 
         .song-title {
@@ -523,11 +468,6 @@
             display: block;
             width: 226px;
             padding-left: 12px;
-        }
-
-        .table-time {
-            /*padding-right: 34px;*/
-            /*padding-left: 0;*/
         }
 
         #table-reproduction {
@@ -556,10 +496,19 @@
             text-align: end;
         }
 
-        /* ------------------------------------------------------------------ */
         @keyframes fadeInBackground {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+
+        @keyframes fadeInControls {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes fadeOutControls {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.9); }
         }
 
         #controls {
@@ -586,16 +535,6 @@
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.5s ease-in-out, visibility 0.4s ease-out;
-        }
-
-        @keyframes fadeInControls {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes fadeOutControls {
-            from { opacity: 1; transform: scale(1); }
-            to { opacity: 0; transform: scale(0.9); }
         }
 
         #label {
@@ -696,11 +635,11 @@
             border-radius: 5px;
         }
 
-        .div {
+        .image-div {
             display: flex;
         }
 
-        .div2 {
+        .title-div {
             display: block;
         }
     </style>
@@ -782,14 +721,17 @@
         const controller = document.getElementById("controller");
         const table = document.getElementById("musicTable");
         const controls = document.getElementById('controls');
+        const thead = document.querySelector('thead');
+        const html = document.documentElement;
+        const body = document.body;
+        const tableHeadCells = document.querySelectorAll('table thead th');
 
         const serverHost = 'http://localhost:8080';
-
-        connect();
         const socket = new WebSocket("wss://kr-ss{{serverId}}.chat.naver.com/chat");
+        connect();
 
+        // 치지직 웹소켓 연결
         socket.onopen = function() {
-            console.log("치지직 웹소켓과 연결되었습니다.")
             let initialRequest = {
                 "ver": "2",
                 "cmd": 100,
@@ -805,7 +747,6 @@
             };
 
             socket.send(JSON.stringify(initialRequest));
-
             socket.onmessage = function(event) {
                 let data = JSON.parse(event.data);
                 stompClient.send("/app/api/v1/chat/{{playlistId}}", {}, JSON.stringify(data));
@@ -815,45 +756,43 @@
                 }
             };
 
-            // 10초마다 연결 체크 메시지 전송
             setInterval(function() {
                 socket.send(JSON.stringify({ "ver": "2", "cmd": 0 }));
             }, 1000);
         };
 
+        // STOMP 연결
         function connect() {
             const socket = new SockJS('/wss');
             stompClient = Stomp.over(socket);
-            stompClient.connect({}, function(frame) {
-                console.log('웹소켓에 연결되었습니다: ' + frame);
-                stompClient.subscribe('/sub/message/{{playlistId}}', function (message) {
+            stompClient.connect({}, function() {
+                // 메시지 받기
+                stompClient.subscribe('/sub/message/{{playlistId}}', function(message) {
                     const musicData = JSON.parse(message.body);
                     const exists = musicList.some(music => music.title === musicData.title && music.artist === musicData.artist);
-                    if (!exists) {
-                        list();
-                    }
+                    if (!exists) list();
                 });
             });
         }
 
+        // STOMP에 메시지 보내기
         function sendMessage() {
-            console.log(document.getElementById("musicTitle").value)
             stompClient.send("/app/api/v1/message/{{playlistId}}", {}, JSON.stringify({
                 artist: document.getElementById("artist").value,
                 title: document.getElementById("musicTitle").value
             }));
         }
 
+        // 추가하려고 하는데 input의 값이 아무것도 없을떄
         document.getElementById("send").addEventListener("click", function() {
-            if (document.getElementById("artist").value === '' && document.getElementById("musicTitle").value === '') {
-                console.log("아티스트 이름과 노래 제목을 넣어주세요!");
-            } else {
+            if (!(document.getElementById("artist").value === '' && document.getElementById("musicTitle").value === '')) {
                 sendMessage();
                 document.getElementById("artist").value = '';
                 document.getElementById("musicTitle").value = '';
             }
         });
 
+        // 재생되고 있는 곡을 하이라이트하기 위해
         function playBackgroundColor() {
             const rows = document.querySelectorAll('#musicTable tbody tr');
             rows.forEach((row, number) => {
@@ -869,10 +808,7 @@
             });
         }
 
-        const html = document.documentElement;
-        const body = document.body;
-        const tableHeadCells = document.querySelectorAll('table thead th');
-        const thead = document.querySelector('thead');
+        // 음악 추가 했을떄
         function create() {
             const rows = document.querySelectorAll('#musicTable tbody tr');
             rows.forEach((row, number) => {
@@ -900,6 +836,7 @@
             body.style.background = 'rgb(201,201,202,0.0)';
         }
 
+        // 음악 추가 버튼을 눌렀을떄
         function add() {
             if (document.getElementById("artist").value === '' && document.getElementById("musicTitle").value === '') alert("아티스트와 제목을 입력해주세요");
             else {
@@ -918,6 +855,7 @@
             }
         }
 
+        // 음악 추가 취소 버튼을 눌렀을떄
         function cancel() {
             document.getElementById("artist").value = '';
             document.getElementById("musicTitle").value = '';
@@ -935,6 +873,7 @@
             });
         }
 
+        // Play 버튼을 눌렀을떄
         function play() {
             const title = document.getElementById("title");
             if (title.innerText === '-') {
@@ -947,13 +886,11 @@
                 playCurrentAudio(index);
                 count = 0;
                 lastIndex = 0;
-                console.log('lastIndex: 1, count: 1');
             } else if (count === 0) {
                 reproduction.src = 'stop.png';
                 audioPlayer.pause();
                 isPlaying = false;
                 count++;
-                console.log('count: 0');
             } else if (count === 1) {
                 if (currentIndex === -1) currentIndex++
                 reproduction.src = 'play.png';
@@ -964,17 +901,16 @@
                 if (title.innerText === '-') playCurrentAudio(0);
 
                 count = 0;
-                console.log('count: 1');
             } else if (audioPlayer.duration > 0) {
                 reproduction.src = 'play.png';
                 seekSlider.value = (audioPlayer.currentTime / audioPlayer.duration) * 100;
                 audioPlayer.play();
                 isPlaying = true;
-                console.log('재생 중에 멈춰서 멈춘 부분부터 재생함');
             }
         }
 
         let num = 0;
+        // 테이블 추가
         function addMusicTable() {
             const tbody = document.getElementById('musicTable').querySelector('tbody');
             tbody.innerHTML = '';
@@ -988,10 +924,10 @@
 
                 // 제목
                 const td2 = document.createElement("td");
-                const div1 = document.createElement("div");
-                div1.className = 'div';
-                const div2 = document.createElement("div");
-                div2.className = 'div2';
+                const image = document.createElement("div");
+                image.className = 'image-div';
+                const title = document.createElement("div");
+                title.className = 'title-div';
                 const songTitle = document.createElement("span");
                 songTitle.className = "song-title";
                 songTitle.textContent = musicData.title;
@@ -1000,7 +936,6 @@
                 // 앨범 이미지
                 const album = document.createElement("img");
                 if (`${musicData.image}` === 'null') {
-                    console.log("앨범 이미지를 찾지 못함.");
                     album.className = 'album2';
                     album.src = 'musicIcon.png';
                 } else {
@@ -1012,11 +947,11 @@
                 const artist = document.createElement("span");
                 artist.className = "artist";
                 artist.textContent = musicData.artist;
-                div1.appendChild(album);
-                div2.appendChild(songTitle);
-                div2.appendChild(artist);
-                div1.appendChild(div2);
-                td2.appendChild(div1);
+                image.appendChild(album);
+                title.appendChild(songTitle);
+                title.appendChild(artist);
+                image.appendChild(title);
+                td2.appendChild(image);
 
                 // 시간
                 const td3 = document.createElement("td");
@@ -1105,22 +1040,21 @@
                                 --index;
                             } else {
                                 if (`${index + 1}` === `${selfIndex - 1}`) {
-                                    console.log("처음곡 바로 다음 곡 삭제");
+                                    // console.log("처음곡 바로 다음 곡 삭제");
                                 } if (selfIndex < `${index}` || selfIndex > `${index}`) {
-                                    console.log("들어왔어!");
-                                } else if (index === 0) { // 여기만 제대로 작성해줬다면 문제 없는데 왜 아오 ㅆ
+                                    // console.log("들어왔음");
+                                } else if (index === 0) {
                                     // 대충 설명하자면 처음 곡을 삭제하면 그 다음곡이 재생되고 index를 처음 곡으로 맞추기 위해서 0으로 만듬.
                                     if (reproduction.src === `${serverHost}/stop.png` && `${selfIndex - 1}` === `${musicList.length - 1}`) {
-                                        console.log("마지막 곡");
+                                        // console.log("마지막 곡");
                                     } else if (index === musicList.length - 1) {
-                                        console.log("더 이상 곡이 없습니다.");
+                                        // console.log("더 이상 곡이 없습니다.");
                                         audioPlayer.currentTime = audioPlayer.duration;
                                     } else {
                                         playCurrentAudio(++index);
                                         index = 0;
                                     }
                                 } else if (selfIndex - 1 === musicList.length - 1 && index - 1 === musicList.length - 1) {
-                                    console.log("삭제만 했습니다.");
                                     audioPlayer.currentTime = audioPlayer.duration;
                                     --index;
                                 } else if (index === selfIndex) playCurrentAudio(++index); else {
@@ -1137,12 +1071,14 @@
             });
         }
 
+        // 후원자 이름 여부
         function donationUser(data) {
             const user = data.donationUser;
             if (user === null) return '-'
             return user;
         }
 
+        // Blob으로 변환해서 Play
         function playCurrentAudio(index) {
             const reproduction = document.getElementById("reproduction");
             const title = document.getElementById("title");
@@ -1184,6 +1120,7 @@
             }
         }
 
+        // 음악에 대한 시간
         function formatTime(seconds) {
             if (isNaN(seconds)) return '00:00';
             const minutes = Math.floor(seconds / 60);
@@ -1224,9 +1161,9 @@
             }
         });
 
-        // 이놈은 음악이 끝났을때 호출됨
         let nowIndex = 0;
         let lastIndex = 0;
+        // 이놈은 음악이 끝났을때 호출됨
         audioPlayer.addEventListener("ended", function() {
             seekSlider.style.background = 'rgb(112, 112, 112)'
             currentTime.innerText = '00:00';
@@ -1249,7 +1186,7 @@
             currentIndex = index;
             nowIndex = index;
             if (currentIndex === musicList.length - 1) {
-                console.log("마지막 곡이었습니다.");
+                // console.log("마지막 곡이었습니다.");
                 currentIndex = 0;
                 // index = 0;
                 if (repeat.src === `${serverHost}/repeating.png`) {
@@ -1293,7 +1230,7 @@
         const beforeA = document.getElementById('before-a');
         function beforePlay() {
             if (index === 0 && beforeA.style.cursor === 'not-allowed') {
-                console.log("이전 곡이 없습니다.");
+                // console.log("이전 곡이 없습니다.");
                 before.src = 'beforeProhibition.png';
             } else {
                 list();
@@ -1308,7 +1245,7 @@
         const nextA = document.getElementById('next-a');
         function nextPlay() {
             if (index === musicList.length - 1 && nextA.style.cursor === 'not-allowed') {
-                console.log("다음 곡이 없습니다.");
+                // console.log("다음 곡이 없습니다.");
                 next.src = 'nextProhibition.png';
             } else {
                 list();
@@ -1320,6 +1257,7 @@
 
         const audioSoundA = document.getElementById('audio-a');
         let playSound = volumeControl.value;
+        // 음소거 이미지에 따른 볼륨
         function audioSound() {
             if (audio.src === `${serverHost}/audio_negative.png`) {
                 playSound = volumeControl.value;
@@ -1385,6 +1323,17 @@
             }
         });
 
+        document.addEventListener('scroll', checkTablePosition);
+        window.addEventListener('resize', checkTablePosition);
+        window.addEventListener('load', checkTablePosition);
+        // 뷰 높이에 따른 재생바 위치 변경
+        function checkTablePosition() {
+            const table = document.querySelector('table');
+            console.log("Viewport Height: " + document.documentElement.clientHeight);
+            console.log("Window Height: " + window.innerHeight);
+            table.style.maxHeight = `${window.innerHeight - 270}px`;
+        }
+
         // DB에 저장되어있는 데이터를 불러와 자바스크립트 배열에 추가
         async function list() {
             await fetch("/api/v1/list/{{playlistId}}").then(response => response.json()).then(data => {
@@ -1393,17 +1342,6 @@
             });
         }
         list();
-
-        function checkTablePosition() {
-            const table = document.querySelector('table');
-            console.log("Viewport Height: " + document.documentElement.clientHeight);
-            console.log("Window Height: " + window.innerHeight);
-            table.style.maxHeight = `${window.innerHeight - 270}px`;
-        }
-
-        document.addEventListener('scroll', checkTablePosition);
-        window.addEventListener('resize', checkTablePosition);
-        window.addEventListener('load', checkTablePosition);
     </script>
 </body>
 </html>

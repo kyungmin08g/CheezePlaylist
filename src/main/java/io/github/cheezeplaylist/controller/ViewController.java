@@ -30,18 +30,13 @@ public class ViewController {
     @PostMapping("/signup")
     public void signUp(JoinMemberDto dto, HttpServletResponse response) throws IOException {
         userService.joinUser(dto);
-        response.sendRedirect("/logins");
+        response.sendRedirect("/login-page");
     }
 
     @GetMapping("/logouts")
     public void logout(@RequestParam String username, HttpServletResponse response) throws IOException {
         userService.refreshTokenDeleteByUsername(username);
         response.sendRedirect("/");
-    }
-
-    @GetMapping("/test")
-    public String test() {
-        return "test";
     }
 
     @Secured("ROLE_USER")
@@ -80,11 +75,5 @@ public class ViewController {
         model.addAttribute("serverId", connectDto.getServerId());
 
         return "music";
-    }
-
-    @GetMapping("/image")
-    public String image(Model model) {
-        model.addAttribute("image", "");
-        return "image";
     }
 }

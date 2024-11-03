@@ -62,7 +62,7 @@ public class SecurityConfig {
             auth.requestMatchers("/").authenticated().anyRequest().permitAll();
         }).exceptionHandling(exceptionHandling -> { // 인증 실패 시 예외 처리
             exceptionHandling.authenticationEntryPoint((request, response, authException) -> {
-                response.sendRedirect(host + "/logins");
+                response.sendRedirect(host + "/login-page");
             });
         });
 

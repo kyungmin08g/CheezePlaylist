@@ -22,7 +22,6 @@ public interface MusicService {
     ChzzkChannelConnectDto chzzkChannelConnect(PlaylistDto playlistDto);
     byte[] spotifyMusicAlbum(String artist, String title);
 
-    // Mapper 관련
     // 음악
     void save(MusicFileDto musicFileDTO);
     MusicFileDto findByMusic(String roomId, String artist, String title);

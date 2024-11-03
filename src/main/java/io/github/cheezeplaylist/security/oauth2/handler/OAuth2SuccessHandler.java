@@ -100,7 +100,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private void sendAccessToken(String username, String id, HttpServletResponse response) throws IOException {
         String name = provider + "_" + id + "_" + username;
-
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(name, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
@@ -111,7 +110,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
         accessTokenCookie.setMaxAge(Integer.MAX_VALUE);
-//        accessTokenCookie.setSecure(true);
         accessTokenCookie.setHttpOnly(true);
         accessTokenCookie.setPath("/");
         response.addCookie(accessTokenCookie);
