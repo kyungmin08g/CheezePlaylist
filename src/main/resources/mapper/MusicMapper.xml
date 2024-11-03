@@ -20,6 +20,7 @@
         select artist, title, musicfilebytes from music where id >= 1 and artist ilike #{artist} and title ilike #{title} group by artist, title, musicfilebytes;
     </select>
 
+
     <delete id="delete">
         delete from music where roomid = #{roomId} and artist ilike #{artist} and title ilike #{title};
     </delete>
