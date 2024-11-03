@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="io.github.playlistmanager.mapper.MusicMapper">
+<mapper namespace="io.github.cheezeplaylist.mapper.MusicMapper">
     <!-- 음악 관련 -->
     <insert id="save" parameterType="MusicDto">
         insert into music(roomid, image, artist, title, musicFileBytes, donationusername, donationprice, donationsubscriber) values(#{roomId}, #{image}, #{artist}, #{title}, #{musicFileBytes}, #{donationUsername}, #{donationPrice}, #{donationSubscriber});
@@ -19,7 +19,6 @@
     <select id="findByArtistAndTitle" resultType="MusicDto">
         select artist, title, musicfilebytes from music where id >= 1 and artist ilike #{artist} and title ilike #{title} group by artist, title, musicfilebytes;
     </select>
-
 
     <delete id="delete">
         delete from music where roomid = #{roomId} and artist ilike #{artist} and title ilike #{title};

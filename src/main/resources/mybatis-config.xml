@@ -3,8 +3,8 @@
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
     <typeAliases>
-        <typeAlias type="io.github.playlistmanager.dto.JoinMemberDto" alias="MemberDto"></typeAlias>
-        <typeAlias type="io.github.playlistmanager.dto.MusicFileDto" alias="MusicDto"></typeAlias>
-        <typeAlias type="io.github.playlistmanager.dto.PlaylistDto" alias="PlaylistDto"></typeAlias>
+        <typeAlias type="io.github.cheezeplaylist.dto.JoinMemberDto" alias="MemberDto"></typeAlias>
+        <typeAlias type="io.github.cheezeplaylist.dto.MusicFileDto" alias="MusicDto"></typeAlias>
+        <typeAlias type="io.github.cheezeplaylist.dto.PlaylistDto" alias="PlaylistDto"></typeAlias>
     </typeAliases>
 </configuration>
