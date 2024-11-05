@@ -324,7 +324,7 @@
 
         table {
             position: fixed;
-            top: 8%;
+            top: 14%; /* 8% */
             left: 50%;
             transform: translateX(-50%);
             display: block;
@@ -785,7 +785,7 @@
 
         // 추가하려고 하는데 input의 값이 아무것도 없을떄
         document.getElementById("send").addEventListener("click", function() {
-            if (!(document.getElementById("artist").value === '' && document.getElementById("musicTitle").value === '')) {
+            if (document.getElementById("artist").value !== '' && document.getElementById("musicTitle").value !== '') {
                 sendMessage();
                 document.getElementById("artist").value = '';
                 document.getElementById("musicTitle").value = '';
@@ -834,6 +834,11 @@
             thead.style.zIndex = '0';
             thead.style.position = 'static';
             body.style.background = 'rgb(201,201,202,0.0)';
+
+            let time = setInterval(function() {
+                if (document.getElementById('artist').focus() !== 'undefined') clearInterval(time);
+                if (controls.style.visibility === 'visible') document.getElementById('artist').focus();
+            }, 100);
         }
 
         // 음악 추가 버튼을 눌렀을떄
@@ -1320,6 +1325,16 @@
             const rect = repeatLink.getBoundingClientRect();
             if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) {
                 event.preventDefault();
+            }
+        });
+
+        const musicTitleInput = document.getElementById('musicTitle');
+        musicTitleInput.addEventListener('keydown', function(event) {
+            if (event.keyCode === 13) {
+                if (document.getElementById("artist").value !== '' && document.getElementById("musicTitle").value !== '') {
+                    sendMessage();
+                    cancel();
+                }
             }
         });
 
